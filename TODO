@@ -1,0 +1,44 @@
+1. Add to Q a latlon cache where the coordinates are
+   WGS84 coordinates.
+2. Provide access to it as a const NFmiDataMatrix
+3. Do all contouring using WGS84 coordinates
+4. Add caching of the contours
+5. Add conversion of contours to given spatial reference
+6. Add caching of converted contours
+7. Possibly add optional linear scaling to the converted contours
+   to get pixel coordinates, do not cache the linear scaling.
+
+newbase
+-------
+Luo projektiot käyttäen C++ koodia:
+
+        OGRSpatialReference     oSRS;
+        oSRS.SetProjCS( "UTM 17 (WGS84) in northern hemisphere." );
+        oSRS.SetWellKnownGeogCS( "WGS84" );
+        oSRS.SetUTM( 17, TRUE );
+
+        char    *pszWKT = NULL;
+        oSRS.SetWellKnownGeogCS( "WGS84" );
+        oSRS.exportToWkt( &pszWKT );
+        printf( "%s\n", pszWKT );
+
+Muuta newbase tulostamaan vastaavanlaiset WKT:t
+
+Näyttää siltä, että lähinnä puuttuisi DATUM kentän perästä
+tämännäköinen kenttä
+
+  TOWGS84[0,0,0,0,0,0,0],
+
+jossa määriteltäisiin muunnos pallosta WGS84 projektioon.
+Andris kirjoitti jotain tuohon liittyvää koodia. Siinä
+ratkaistiin optimaaliset Helmert parametrit (nuo 7 kpl),
+jotta virhe minimoituisi projektiokeskipisteessä. Newbase
+voisi tulostaa tuon transformaation vastaavasti.
+
+   macgyver/HelmertTransformation
+
+Erityisesti siis set_fmi_sphere_to_reference_ellipsoid_conv
+laskee Helmert transformaation niin, että virhe minimoituu
+halutussa pisteessä. Yleisesti ottaen tuo voisi olla
+projektion keskipiste, jonka takia muistaakseni lisäsinkin
+kyseisen metodin newbaseen Andriksen pyynnöstä.

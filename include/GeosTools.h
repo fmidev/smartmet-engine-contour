@@ -1,0 +1,26 @@
+// ======================================================================
+/*!
+ * \brief Various GEOS related tools
+ */
+// ======================================================================
+
+#pragma once
+
+#include <geos/geom/Geometry.h>
+#include <string>
+
+namespace geos
+{
+namespace geom
+{
+class Geometry;
+}
+}
+
+namespace SmartMet
+{
+namespace GeosTools
+{
+std::string getSVG(const geos::geom::Geometry& theGeom, int thePrecision = -1);
+}
+}
