@@ -130,8 +130,7 @@ release: all
 profile: all
 
 configtest:
-	@echo Validating test/cnf/contour.conf
-	@cfgvalidate -v test/cnf/contour.conf
+	@if [ -x "$$(command -v cfgvalidate)" ]; then cfgvalidate -v test/cnf/contour.conf; fi
 
 $(LIBFILE): $(OBJS)
 	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
