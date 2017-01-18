@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.1.4
+Version: 17.1.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -14,19 +14,19 @@ BuildRequires: boost-devel
 BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 17.1.4
-BuildRequires: smartmet-library-newbase-devel >= 16.12.19
-BuildRequires: smartmet-library-macgyver-devel >= 16.12.20
-BuildRequires: smartmet-library-tron >= 17.1.4
-BuildRequires: smartmet-library-gis-devel >= 16.12.20
+BuildRequires: smartmet-library-spine-devel >= 17.1.12
+BuildRequires: smartmet-library-newbase-devel >= 17.1.17
+BuildRequires: smartmet-library-macgyver-devel >= 17.1.18
+BuildRequires: smartmet-library-tron >= 17.1.18
+BuildRequires: smartmet-library-gis-devel >= 17.1.18
 BuildRequires: sparsehash-devel
-Requires: smartmet-library-gis >= 16.12.20
+Requires: smartmet-library-gis >= 17.1.18
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 16.12.19
-Requires: smartmet-library-macgyver >= 16.12.20
-Requires: smartmet-library-spine >= 17.1.4
+Requires: smartmet-library-newbase >= 17.1.17
+Requires: smartmet-library-macgyver >= 17.1.18
+Requires: smartmet-library-spine >= 17.1.12
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Jan 18 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.18-1.fmi
+- Bug fix to Tron in handling self touching isolines
+
 * Wed Jan  4 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.4-1.fmi
 - Changed to use renamed SmartMet base libraries
 
