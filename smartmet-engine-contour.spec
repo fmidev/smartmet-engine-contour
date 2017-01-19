@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.1.18
+Version: 17.1.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -17,7 +17,7 @@ BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 17.1.12
 BuildRequires: smartmet-library-newbase-devel >= 17.1.17
 BuildRequires: smartmet-library-macgyver-devel >= 17.1.18
-BuildRequires: smartmet-library-tron >= 17.1.18
+BuildRequires: smartmet-library-tron >= 17.1.19-2
 BuildRequires: smartmet-library-gis-devel >= 17.1.18
 BuildRequires: sparsehash-devel
 Requires: smartmet-library-gis >= 17.1.18
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Jan 19 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.19-1.fmi
+- Recompiled with more robost isoline calculations
+
 * Wed Jan 18 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.18-1.fmi
 - Bug fix to Tron in handling self touching isolines
 
