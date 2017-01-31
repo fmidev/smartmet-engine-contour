@@ -17,7 +17,7 @@ BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 17.1.24
 BuildRequires: smartmet-library-newbase-devel >= 17.1.26
 BuildRequires: smartmet-library-macgyver-devel >= 17.1.18
-BuildRequires: smartmet-library-tron >= 17.1.30
+BuildRequires: smartmet-library-tron >= 17.1.31
 BuildRequires: smartmet-library-gis-devel >= 17.1.18
 BuildRequires: sparsehash-devel
 Requires: smartmet-library-gis >= 17.1.18
