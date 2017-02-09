@@ -14,7 +14,7 @@ CC = g++
 CFLAGS = -DUNIX -O0 -g $(MAINFLAGS) -Wno-write-strings
 
 INCLUDES = \
-	-I ../include \
+	-I ../contour \
 	-I /usr/include/smartmet \
 	-I /usr/include/smartmet/newbase \
 	`pkg-config --cflags libconfig++`
