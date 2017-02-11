@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.2.7
+Version: 17.2.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,7 +15,7 @@ BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 17.2.3
-BuildRequires: smartmet-library-newbase-devel >= 17.2.2
+BuildRequires: smartmet-library-newbase-devel >= 17.2.10
 BuildRequires: smartmet-library-macgyver-devel >= 17.1.18
 BuildRequires: smartmet-library-tron >= 17.2.7
 BuildRequires: smartmet-library-gis-devel >= 17.1.18
@@ -24,7 +24,7 @@ Requires: smartmet-library-gis >= 17.1.18
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 17.2.2
+Requires: smartmet-library-newbase >= 17.2.10
 Requires: smartmet-library-macgyver >= 17.1.18
 Requires: smartmet-library-spine >= 17.2.3
 %if 0%{rhel} >= 7
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Sat Feb 11 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.11-1.fmi
+- Recpackaged due to newbase API change in function CreateNewArea
+
 * Tue Feb  7 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.7-1.fmi
 - Tron fixes to isoline building algorithm
 
