@@ -33,11 +33,11 @@ Interpolation parseInterpolation(const std::string& theName)
     else if (theName == "Discrete")
       return Discrete;
 
-    throw SmartMet::Spine::Exception(BCP, "Unknown interpolation method '" + theName + "'");
+    throw Spine::Exception(BCP, "Unknown interpolation method '" + theName + "'");
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

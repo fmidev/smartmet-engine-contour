@@ -31,7 +31,7 @@ struct CacheReportingStruct
   int contour_cache_size;
 };
 
-class Engine : public SmartMet::Spine::SmartMetEngine
+class Engine : public Spine::SmartMetEngine
 {
  private:
   Engine();
@@ -69,7 +69,7 @@ class Engine : public SmartMet::Spine::SmartMetEngine
 
   // Produce a cross section contour with given parameter for Z-values
   std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
-                                          const SmartMet::Spine::Parameter& theZParameter,
+                                          const Spine::Parameter& theZParameter,
                                           const Options& theOptions,
                                           double theLon1,
                                           double theLat1,

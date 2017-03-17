@@ -39,11 +39,11 @@ struct Options
   Options();
 
  public:
-  Options(const SmartMet::Spine::Parameter& theParam,
+  Options(const Spine::Parameter& theParam,
           const boost::posix_time::ptime& theTime,
           const std::vector<double>& theIsoValues);
 
-  Options(const SmartMet::Spine::Parameter& theParam,
+  Options(const Spine::Parameter& theParam,
           const boost::posix_time::ptime& theTime,
           const std::vector<Range>& theLimits);
 
@@ -56,7 +56,7 @@ struct Options
   bool hasTransformation() const;
 
   Interpolation interpolation;
-  SmartMet::Spine::Parameter parameter;
+  Spine::Parameter parameter;
   boost::posix_time::ptime time;
   boost::optional<double> level;
 

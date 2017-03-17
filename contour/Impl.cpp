@@ -26,6 +26,35 @@
 #include <gdal/ogr_spatialref.h>
 #include <cmath>
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Hash for OGR spatial reference
+ *
+ * Compiler lookup issues prevented placing this into spine.
+ * Placing this into the above anonymous namespace or into the
+ * Contour namespace below did not work either.
+ */
+// ----------------------------------------------------------------------
+
+std::size_t hash_value(const OGRSpatialReference &theSR)
+{
+  try
+  {
+    char *wkt;
+    theSR.exportToWkt(&wkt);
+    std::string tmp(wkt);
+    OGRFree(wkt);
+    boost::hash<std::string> hasher;
+    return hasher(tmp);
+  }
+  catch (...)
+  {
+    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+namespace SmartMet
+{
 namespace
 {
 // ----------------------------------------------------------------------
@@ -41,17 +70,15 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   {
     // Sanity checks
     if (lon1 == lon2 && lat1 == lat2)
-      throw SmartMet::Spine::Exception(BCP,
-                                       "Ill-defined isocircle: start and end points are equal");
+      throw Spine::Exception(BCP, "Ill-defined isocircle: start and end points are equal");
 
     if (std::abs(lon1 - lon2) == 180 && std::abs(lat1 - (90 - lat2)) == 90)
-      throw SmartMet::Spine::Exception(
-          BCP, "Ill-defined isocircle: points at opposing ends of the earth");
+      throw Spine::Exception(BCP, "Ill-defined isocircle: points at opposing ends of the earth");
 
     if (steps < 1 || steps > 10000)
-      throw SmartMet::Spine::Exception(BCP,
-                                       "Number of points on isocircle must be 1-10000, not " +
-                                           boost::lexical_cast<std::string>(steps));
+      throw Spine::Exception(BCP,
+                             "Number of points on isocircle must be 1-10000, not " +
+                                 boost::lexical_cast<std::string>(steps));
 
     // Calculate bearing and distance to be travelled
 
@@ -83,40 +110,11 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-}  // namespace
+}  // namespace anonymous
 
-// ----------------------------------------------------------------------
-/*!
- * \brief Hash for OGR spatial reference
- *
- * Compiler lookup issues prevented placing this into spine.
- * Placing this into the above anonymous namespace or into the
- * Contour namespace below did not work either.
- */
-// ----------------------------------------------------------------------
-
-std::size_t hash_value(const OGRSpatialReference &theSR)
-{
-  try
-  {
-    char *wkt;
-    theSR.exportToWkt(&wkt);
-    std::string tmp(wkt);
-    OGRFree(wkt);
-    boost::hash<std::string> hasher;
-    return hasher(tmp);
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
-  }
-}
-
-namespace SmartMet
-{
 namespace Engine
 {
 namespace Contour
@@ -142,7 +140,7 @@ std::size_t contour_hash(std::size_t theQhash,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -177,7 +175,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
     {
       // we assume createFromWkb does not destroy the spatial reference on failure
       delete theSR;
-      throw SmartMet::Spine::Exception(BCP, "Failed to convert contoured WKB to OGRGeometry");
+      throw Spine::Exception(BCP, "Failed to convert contoured WKB to OGRGeometry");
     }
 
     if (theSR != NULL)
@@ -190,7 +188,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -207,7 +205,7 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -324,7 +322,7 @@ void Engine::Impl::init()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -350,7 +348,7 @@ GeometryPtr Engine::Impl::geosContour(std::size_t theQhash,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -481,7 +479,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 
   return retval;
@@ -496,7 +494,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
     const Options &theOptions,
-    const boost::optional<SmartMet::Spine::Parameter> &theZParameter,
+    const boost::optional<Spine::Parameter> &theZParameter,
     double theLon1,
     double theLat1,
     double theLon2,
@@ -509,14 +507,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // Trivial option checks
 
     if (theOptions.level)
-      throw SmartMet::Spine::Exception(BCP,
-                                       "Using the level option is meaningless for cross-sections");
+      throw Spine::Exception(BCP, "Using the level option is meaningless for cross-sections");
     if (theOptions.filter_size)
-      throw SmartMet::Spine::Exception(
-          BCP, "Using the filter_size option is meaningless for cross-sections");
+      throw Spine::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
     if (theOptions.filter_degree)
-      throw SmartMet::Spine::Exception(
-          BCP, "Using the filter_degree option is meaningless for cross-sections");
+      throw Spine::Exception(BCP,
+                             "Using the filter_degree option is meaningless for cross-sections");
 
     // Verify height parameter is available
 
@@ -643,7 +639,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

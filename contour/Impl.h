@@ -62,15 +62,14 @@ class Engine::Impl
                                       OGRSpatialReference *theSR);
 
   // Produce an OGR crossection for the given data
-  std::vector<OGRGeometryPtr> crossection(
-      boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
-      const Options &theOptions,
-      const boost::optional<SmartMet::Spine::Parameter> &theZParameter,
-      double theLon1,
-      double theLat1,
-      double theLon2,
-      double theLat2,
-      std::size_t theSteps);
+  std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+                                          const Options &theOptions,
+                                          const boost::optional<Spine::Parameter> &theZParameter,
+                                          double theLon1,
+                                          double theLat1,
+                                          double theLon2,
+                                          double theLat2,
+                                          std::size_t theSteps);
 
   CacheReportingStruct getCacheSizes();
 

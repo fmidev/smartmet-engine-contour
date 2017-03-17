@@ -21,7 +21,7 @@ namespace Contour
  */
 // ----------------------------------------------------------------------
 
-Options::Options(const SmartMet::Spine::Parameter& theParam,
+Options::Options(const Spine::Parameter& theParam,
                  const boost::posix_time::ptime& theTime,
                  const std::vector<double>& theIsoValues)
     : interpolation(Linear),
@@ -43,7 +43,7 @@ Options::Options(const SmartMet::Spine::Parameter& theParam,
  */
 // ----------------------------------------------------------------------
 
-Options::Options(const SmartMet::Spine::Parameter& theParam,
+Options::Options(const Spine::Parameter& theParam,
                  const boost::posix_time::ptime& theTime,
                  const std::vector<Range>& theLimits)
     : interpolation(Linear),
@@ -74,7 +74,7 @@ void Options::transformation(double theMultiplier, double theOffset)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -146,7 +146,7 @@ std::size_t Options::data_hash_value() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -179,7 +179,7 @@ std::size_t Options::filtered_data_hash_value() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

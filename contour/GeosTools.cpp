@@ -23,6 +23,8 @@
 
 using namespace geos::geom;
 
+namespace SmartMet
+{
 namespace
 {
 void writeSVG(const Geometry* geom, std::ostream& out);
@@ -77,7 +79,7 @@ void writeLinearRingSVG(const LinearRing* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -116,7 +118,7 @@ void writeLineStringSVG(const LineString* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -141,7 +143,7 @@ void writePolygonSVG(const Polygon* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -166,7 +168,7 @@ void writeMultiPointSVG(const MultiPoint* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -187,7 +189,7 @@ void writeMultiLineStringSVG(const MultiLineString* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -208,7 +210,7 @@ void writeMultiPolygonSVG(const MultiPolygon* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -229,7 +231,7 @@ void writeGeometryCollectionSVG(const GeometryCollection* geom, std::ostream& ou
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -263,17 +265,15 @@ void writeSVG(const Geometry* geom, std::ostream& out)
     else if (const GeometryCollection* g = dynamic_cast<const GeometryCollection*>(geom))
       writeGeometryCollectionSVG(g, out);
     else
-      throw SmartMet::Spine::Exception(BCP, "Encountered an unsupported GEOS geometry component");
+      throw Spine::Exception(BCP, "Encountered an unsupported GEOS geometry component");
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-}
+}  // namespace anonymous
 
-namespace SmartMet
-{
 namespace GeosTools
 {
 // ----------------------------------------------------------------------
@@ -301,7 +301,7 @@ std::string getSVG(const Geometry& theGeom, int thePrecision)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

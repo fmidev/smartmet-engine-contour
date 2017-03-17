@@ -43,7 +43,7 @@ void Engine::init()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -55,7 +55,7 @@ CacheReportingStruct Engine::getCacheSizes() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -87,7 +87,7 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theQhash,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -107,13 +107,13 @@ std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryI
 {
   try
   {
-    boost::optional<SmartMet::Spine::Parameter> zparam;
+    boost::optional<Spine::Parameter> zparam;
     return itsImpl->crossection(
         theQInfo, theOptions, zparam, theLon1, theLat1, theLon2, theLat2, theSteps);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -124,7 +124,7 @@ std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryI
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
-                                                const SmartMet::Spine::Parameter& theZParameter,
+                                                const Spine::Parameter& theZParameter,
                                                 const Options& theOptions,
                                                 double theLon1,
                                                 double theLat1,
@@ -134,13 +134,13 @@ std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryI
 {
   try
   {
-    boost::optional<SmartMet::Spine::Parameter> zparam(theZParameter);
+    boost::optional<Spine::Parameter> zparam(theZParameter);
     return itsImpl->crossection(
         theQInfo, theOptions, zparam, theLon1, theLat1, theLon2, theLat2, theSteps);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
