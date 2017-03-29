@@ -1,12 +1,14 @@
-#include <regression/tframe.h>
-#include "Engine.h"
-#include <gis/OGR.h>
-#include <gis/Box.h>
+#include <prettyprint.hpp>
 
+#include "Engine.h"
+#include <gis/Box.h>
+#include <gis/OGR.h>
+#include <regression/tframe.h>
+
+#include <engines/querydata/Engine.h>
 #include <spine/Options.h>
 #include <spine/ParameterFactory.h>
 #include <spine/Reactor.h>
-#include <engines/querydata/Engine.h>
 
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/lexical_cast.hpp>
@@ -33,6 +35,7 @@ void lines()
   auto q = qengine->get("pal_skandinavia");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2008-08-06 12:00");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // Full data area
   auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
@@ -153,6 +156,7 @@ void fills()
   auto q = qengine->get("pal_skandinavia");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2008-08-06 12:00");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // Full data area
 
@@ -274,6 +278,7 @@ void crossection()
   auto q = qengine->get("hbm");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2014-07-28 02:00");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("TemperatureSea");
+  q->param(temperature.number());
 
   // Full data area
 
@@ -334,6 +339,7 @@ void speed()
   auto q = qengine->get("ecmwf_maailma_pinta");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // Full data area
 
@@ -383,6 +389,7 @@ void speed_all_at_once()
   auto q = qengine->get("ecmwf_maailma_pinta");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // Full data area
 
@@ -429,6 +436,7 @@ void pressure()
   auto q = qengine->get("ecmwf_pressure");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2016-04-25 09:00");
   Spine::Parameter pressure = Spine::ParameterFactory::instance().parse("Pressure");
+  q->param(pressure.number());
 
   // Full data area
 
@@ -476,6 +484,7 @@ void pressure_all_at_once()
   auto q = qengine->get("ecmwf_pressure");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2016-04-25 09:00");
   Spine::Parameter pressure = Spine::ParameterFactory::instance().parse("Pressure");
+  q->param(pressure.number());
 
   // Full data area
 
@@ -519,6 +528,7 @@ void fillvalidation()
 
   auto q = qengine->get("ecmwf_temperature");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // Full data area
 
@@ -574,6 +584,7 @@ void linevalidation()
 
   auto q = qengine->get("ecmwf_temperature");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // Full data area
 
@@ -629,6 +640,7 @@ void globalykj()
   auto q = qengine->get("ecmwf_maailma_pinta");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
   Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
 
   // YKJ spatial reference
 
@@ -681,6 +693,60 @@ void globalykj()
   TEST_PASSED();
 }
 
+// ----------------------------------------------------------------------
+
+void worldwrap()
+{
+  using namespace SmartMet;
+  using Fmi::Box;
+
+  auto q = qengine->get("gfs");
+  q->firstTime();
+  boost::posix_time::ptime t = q->validTime();
+  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
+
+  // Full data area
+
+  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
+  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
+  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
+  std::size_t qhash = Engine::Querydata::hash_value(q);
+  std::string wkt = q->area().WKT();
+
+  OGRSpatialReference *sr = nullptr;
+
+  // This contour spans the world horizontally
+  double lolimit = 0;
+  double hilimit = 2;
+
+  std::vector<Engine::Contour::Range> limits;
+  limits.push_back(Engine::Contour::Range(lolimit, hilimit));
+  Engine::Contour::Options opt(temperature, t, limits);
+
+  auto valueshash = qhash;
+  boost::hash_combine(valueshash, opt.data_hash_value());
+  if (opt.level)
+    q->selectLevel(*opt.level);
+
+  auto matrix = qengine->getValues(q, valueshash, opt.time);
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
+
+  auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, sr);
+
+  if (geoms.empty())
+    TEST_FAILED("Failed to contour GFS data interval 0-2");
+
+  OGREnvelope envelope;
+  geoms[0]->getEnvelope(&envelope);
+  if (envelope.MinX != 0)
+    TEST_FAILED("Contour 0-2 minimum x value should be 0");
+  if (envelope.MaxX != 360)
+    TEST_FAILED("Contour 0-2 maximum x value should be 360");
+
+  TEST_PASSED();
+}
+
 // Test driver
 class tests : public tframe::tests
 {
@@ -689,6 +755,7 @@ class tests : public tframe::tests
   // Main test suite
   void test()
   {
+#if 1
     TEST(lines);
     TEST(fills);
     TEST(crossection);
@@ -696,9 +763,13 @@ class tests : public tframe::tests
     TEST(speed_all_at_once);
     TEST(pressure);
     TEST(pressure_all_at_once);
-    // TEST(fillvalidation);
-    // TEST(linevalidation);
-    // TEST(globalykj);
+    TEST(worldwrap);
+#else
+    // these have been used only to make sure everything validates. Too slow for other testing
+    TEST(fillvalidation);
+    TEST(linevalidation);
+    TEST(globalykj);
+#endif
   }
 
 };  // class tests

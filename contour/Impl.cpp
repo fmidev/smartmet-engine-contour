@@ -1,29 +1,19 @@
 // ======================================================================
 /*!
  * \brief Implementation details for the Contour engine
- *
- * TODO: Add support for metaparameters
- * TODO: Cache data requests to Q
- * TODO: Cache coordinate requests to Q
- * TODO: Cache hints to data
- * TODO: Add level handling
- * TODO: Add world data support
- * TODO: Add a factory for generating and caching GeometryFactory objects
- * TODO: QEngine should provide tools for selecting the level
- *
  */
 // ======================================================================
 
 #include "Impl.h"
 #include "Options.h"
-#include <spine/Exception.h>
-#include <tron/SavitzkyGolay2D.h>
 #include <boost/functional/hash.hpp>
 #include <gdal/ogr_core.h>
 #include <gdal/ogr_geometry.h>
+#include <gdal/ogr_spatialref.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
-#include <gdal/ogr_spatialref.h>
+#include <spine/Exception.h>
+#include <tron/SavitzkyGolay2D.h>
 #include <cmath>
 
 // ----------------------------------------------------------------------
@@ -113,7 +103,49 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-}  // namespace anonymous
+
+// ----------------------------------------------------------------------.
+/*!
+ * \brief Return true if the data seems to be global but needs wrapping around
+ */
+// ----------------------------------------------------------------------
+
+bool is_data_global(const CoordinatesPtr &theCoordinates)
+{
+  // Handle irrelegular cases
+
+  if (!theCoordinates || theCoordinates->NY() == 0)
+    return false;
+
+  // We test the central latitude since the first and last rows may
+  // contain special cases if poles are present.
+
+  const auto &coords = *theCoordinates;
+  const auto j = coords.NY() / 2;
+
+  const auto x1 = coords[0][j].X();
+  const auto x2 = coords[coords.NX() - 1][j].X();
+  const auto nx = coords.NX();
+
+  if (x1 == kFloatMissing || x2 == kFloatMissing)
+    return false;
+
+  /*
+   * GFS example:
+   * bottom left lonlat= 0,-90
+   * top right lonlat= 359.75,90
+   * xnumber= 1440
+   *
+   * ==> (x1-x1)*1441/1440 = 360  ==> we need to generate an extra cell by wrapping around
+   */
+
+  auto test_width = (x2 - x1) * (nx + 1) / nx;
+
+  // In the GFS case the rounding error is about 1e-4
+  return (std::abs(test_width - 360) < 1e-3);
+}
+
+}  // namespace
 
 namespace Engine
 {
@@ -221,12 +253,9 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
 GeometryPtr Engine::Impl::internal_contour(std::size_t datahash,
                                            const Options &options,
                                            const DataMatrixAdapter &data,
-                                           const MyHints &hints)
+                                           const MyHints &hints,
+                                           bool worldwrap)
 {
-  // Not supported yet
-  // TODO: Enable global data contouring
-  const bool worlddata = false;
-
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(itsGeomFactory);
 
@@ -239,12 +268,12 @@ GeometryPtr Engine::Impl::internal_contour(std::size_t datahash,
     {
       case Linear:
       {
-        MyLinearContourer::line(builder, data, isovalue, worlddata, hints);
+        MyLinearContourer::line(builder, data, isovalue, worldwrap, hints);
         break;
       }
       case LogLinear:
       {
-        MyLogLinearContourer::line(builder, data, isovalue, worlddata, hints);
+        MyLogLinearContourer::line(builder, data, isovalue, worldwrap, hints);
         break;
       }
       case Nearest:
@@ -272,22 +301,22 @@ GeometryPtr Engine::Impl::internal_contour(std::size_t datahash,
     {
       case Linear:
       {
-        MyLinearContourer::fill(builder, data, lo, hi, worlddata, hints);
+        MyLinearContourer::fill(builder, data, lo, hi, worldwrap, hints);
         break;
       }
       case LogLinear:
       {
-        MyLogLinearContourer::fill(builder, data, lo, hi, worlddata, hints);
+        MyLogLinearContourer::fill(builder, data, lo, hi, worldwrap, hints);
         break;
       }
       case Nearest:
       {
-        MyNearestContourer::fill(builder, data, lo, hi, worlddata, hints);
+        MyNearestContourer::fill(builder, data, lo, hi, worldwrap, hints);
         break;
       }
       case Discrete:
       {
-        MyDiscreteContourer::fill(builder, data, lo, hi, worlddata, hints);
+        MyDiscreteContourer::fill(builder, data, lo, hi, worldwrap, hints);
         break;
       }
     }
@@ -335,7 +364,8 @@ void Engine::Impl::init()
 GeometryPtr Engine::Impl::geosContour(std::size_t theQhash,
                                       const Options &theOptions,
                                       const DataMatrixAdapter &theData,
-                                      const MyHints &theHints)
+                                      const MyHints &theHints,
+                                      bool worldwrap)
 {
   try
   {
@@ -344,7 +374,7 @@ GeometryPtr Engine::Impl::geosContour(std::size_t theQhash,
     auto datahash = theQhash;
     boost::hash_combine(datahash, theOptions.filtered_data_hash_value());
 
-    return internal_contour(datahash, theOptions, theData, theHints);
+    return internal_contour(datahash, theOptions, theData, theHints, worldwrap);
   }
   catch (...)
   {
@@ -377,6 +407,10 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     std::unique_ptr<DataMatrixAdapter> data;
     std::unique_ptr<MyHints> hints;
     NFmiDataMatrix<float> values = theMatrix;
+
+    // Does the grid cover the entire world and should we generate an extra cell by wrapping the
+    // data around?
+    bool worldwrap = is_data_global(theCoordinates);
 
     for (unsigned int i = 0; i < vectorSize; i++)
     {
@@ -442,7 +476,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
       }
 
       // Do the contouring
-      auto geom = geosContour(theQhash, options, *data, *hints);
+      auto geom = geosContour(theQhash, options, *data, *hints, worldwrap);
 
       if (!geom)
       {
@@ -630,7 +664,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
         options.limits.push_back(theOptions.limits[i]);
       }
 
-      GeometryPtr geom = internal_contour(0, options, data, hints);
+      const bool worldwrap = false;  // until we encounter testable global data
+      GeometryPtr geom = internal_contour(0, options, data, hints, worldwrap);
       OGRSpatialReference *sr = NULL;
       ret.push_back(geos_to_ogr(geom, sr));
     }

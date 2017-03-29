@@ -12,12 +12,12 @@
 #include "DataMatrixAdapter.h"
 #include "Engine.h"
 
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <geos/geom/Geometry.h>
+#include <macgyver/Cache.h>
 #include <tron/FmiBuilder.h>
 #include <tron/Tron.h>
-#include <macgyver/Cache.h>
-#include <geos/geom/Geometry.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 
 typedef boost::shared_ptr<geos::geom::Geometry> GeometryPtr;
 
@@ -31,10 +31,9 @@ typedef Tron::Contourer<DataMatrixAdapter, Tron::FmiBuilder, MyTraits, Tron::Lin
 typedef Tron::Contourer<DataMatrixAdapter, Tron::FmiBuilder, MyTraits, Tron::LogLinearInterpolation>
     MyLogLinearContourer;
 
-typedef Tron::Contourer<DataMatrixAdapter,
-                        Tron::FmiBuilder,
-                        MyTraits,
-                        Tron::NearestNeighbourInterpolation> MyNearestContourer;
+typedef Tron::
+    Contourer<DataMatrixAdapter, Tron::FmiBuilder, MyTraits, Tron::NearestNeighbourInterpolation>
+        MyNearestContourer;
 
 typedef Tron::Contourer<DataMatrixAdapter, Tron::FmiBuilder, MyTraits, Tron::DiscreteInterpolation>
     MyDiscreteContourer;
@@ -85,7 +84,8 @@ class Engine::Impl
   GeometryPtr internal_contour(std::size_t datahash,
                                const Options &options,
                                const DataMatrixAdapter &data,
-                               const MyHints &hints);
+                               const MyHints &hints,
+                               bool worldwrap);
   // Cached contours
 
   typedef Fmi::Cache::Cache<std::size_t, OGRGeometryPtr> GeometryCache;
@@ -94,7 +94,8 @@ class Engine::Impl
   GeometryPtr geosContour(std::size_t theQhash,
                           const Options &theOptions,
                           const DataMatrixAdapter &theData,
-                          const MyHints &theHints);
+                          const MyHints &theHints,
+                          bool worldwrap);
 };
 
 }  // namespace Contour
