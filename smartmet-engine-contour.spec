@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.3.15
+Version: 17.4.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -14,9 +14,9 @@ BuildRequires: boost-devel
 BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 17.3.15
-BuildRequires: smartmet-library-newbase-devel >= 17.3.9
-BuildRequires: smartmet-library-macgyver-devel >= 17.3.14
+BuildRequires: smartmet-library-spine-devel >= 17.4.8
+BuildRequires: smartmet-library-newbase-devel >= 17.4.4
+BuildRequires: smartmet-library-macgyver-devel >= 17.3.16
 BuildRequires: smartmet-library-tron >= 17.2.7
 BuildRequires: smartmet-library-gis-devel >= 17.3.14
 BuildRequires: sparsehash-devel
@@ -24,9 +24,9 @@ Requires: smartmet-library-gis >= 17.3.14
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 17.3.9
-Requires: smartmet-library-macgyver >= 17.3.14
-Requires: smartmet-library-spine >= 17.3.15
+Requires: smartmet-library-newbase >= 17.4.4
+Requires: smartmet-library-macgyver >= 17.3.16
+Requires: smartmet-library-spine >= 17.4.8
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
@@ -74,8 +74,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Upcoming
-- Added recognition of data that needs to be wrapped around the world (such as GFS)
+* Mon Apr 10 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.10-1.fmi
+- Added boolean to the API which indicates whether the data needs to be wrapped around to cover the globe
 
 * Wed Mar 15 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.15-1.fmi
 - Recompiled since Spine::Exception changed

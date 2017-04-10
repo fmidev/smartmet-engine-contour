@@ -104,47 +104,6 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   }
 }
 
-// ----------------------------------------------------------------------.
-/*!
- * \brief Return true if the data seems to be global but needs wrapping around
- */
-// ----------------------------------------------------------------------
-
-bool is_data_global(const CoordinatesPtr &theCoordinates)
-{
-  // Handle irrelegular cases
-
-  if (!theCoordinates || theCoordinates->NY() == 0)
-    return false;
-
-  // We test the central latitude since the first and last rows may
-  // contain special cases if poles are present.
-
-  const auto &coords = *theCoordinates;
-  const auto j = coords.NY() / 2;
-
-  const auto x1 = coords[0][j].X();
-  const auto x2 = coords[coords.NX() - 1][j].X();
-  const auto nx = coords.NX();
-
-  if (x1 == kFloatMissing || x2 == kFloatMissing)
-    return false;
-
-  /*
-   * GFS example:
-   * bottom left lonlat= 0,-90
-   * top right lonlat= 359.75,90
-   * xnumber= 1440
-   *
-   * ==> (x1-x1)*1441/1440 = 360  ==> we need to generate an extra cell by wrapping around
-   */
-
-  auto test_width = (x2 - x1) * (nx + 1) / nx;
-
-  // In the GFS case the rounding error is about 1e-4
-  return (std::abs(test_width - 360) < 1e-3);
-}
-
 }  // namespace
 
 namespace Engine
@@ -393,6 +352,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const CoordinatesPtr theCoordinates,
                                                   const Options &theOptions,
+                                                  bool worldwrap,
                                                   OGRSpatialReference *theSR)
 {
   std::vector<OGRGeometryPtr> retval;
@@ -407,10 +367,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     std::unique_ptr<DataMatrixAdapter> data;
     std::unique_ptr<MyHints> hints;
     NFmiDataMatrix<float> values = theMatrix;
-
-    // Does the grid cover the entire world and should we generate an extra cell by wrapping the
-    // data around?
-    bool worldwrap = is_data_global(theCoordinates);
 
     for (unsigned int i = 0; i < vectorSize; i++)
     {

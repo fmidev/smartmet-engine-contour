@@ -5,8 +5,8 @@
 // ======================================================================
 
 #include "Engine.h"
-#include "Impl.h"
 #include "GeosTools.h"
+#include "Impl.h"
 #include <spine/Exception.h>
 
 #include <gdal/cpl_conv.h>  // For configuring GDAL
@@ -79,11 +79,13 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theQhash,
                                             const NFmiDataMatrix<float>& theMatrix,
                                             const CoordinatesPtr theCoordinates,
                                             const Options& theOptions,
+                                            bool worldwrap,
                                             OGRSpatialReference* theSR) const
 {
   try
   {
-    return itsImpl->contour(theQhash, theQAreaWKT, theMatrix, theCoordinates, theOptions, theSR);
+    return itsImpl->contour(
+        theQhash, theQAreaWKT, theMatrix, theCoordinates, theOptions, worldwrap, theSR);
   }
   catch (...)
   {

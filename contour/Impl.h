@@ -58,6 +58,7 @@ class Engine::Impl
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const CoordinatesPtr theCoordinates,
                                       const Options &theOptions,
+                                      bool worldwrap,
                                       OGRSpatialReference *theSR);
 
   // Produce an OGR crossection for the given data

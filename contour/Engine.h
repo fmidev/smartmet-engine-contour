@@ -6,14 +6,14 @@
 
 #pragma once
 
-#include "Types.h"
 #include "Options.h"
-#include <spine/SmartMetEngine.h>
+#include "Types.h"
+#include <boost/shared_ptr.hpp>
 #include <gdal/ogr_geometry.h>
 #include <gdal/ogr_spatialref.h>
-#include <boost/shared_ptr.hpp>
-#include <newbase/NFmiParameterName.h>
 #include <newbase/NFmiFastQueryInfo.h>
+#include <newbase/NFmiParameterName.h>
+#include <spine/SmartMetEngine.h>
 #include <string>
 
 typedef NFmiDataMatrix<NFmiPoint> Coordinates;
@@ -56,6 +56,7 @@ class Engine : public Spine::SmartMetEngine
                                       const NFmiDataMatrix<float>& theMatrix,
                                       const CoordinatesPtr theCoordinates,
                                       const Options& theOptions,
+                                      bool worldwrap,
                                       OGRSpatialReference* theSR = 0) const;
 
   // Produce a cross section contour
