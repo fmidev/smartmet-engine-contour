@@ -47,6 +47,12 @@ void Engine::init()
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get cache usage report
+ */
+// ----------------------------------------------------------------------
+
 CacheReportingStruct Engine::getCacheSizes() const
 {
   try
@@ -58,6 +64,18 @@ CacheReportingStruct Engine::getCacheSizes() const
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Empty the caches. Mostly used while testing.
+ */
+// ----------------------------------------------------------------------
+
+void Engine::clearCache() const
+{
+  itsImpl->clearCache();
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Shutdown the engine

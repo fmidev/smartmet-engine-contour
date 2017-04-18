@@ -79,6 +79,7 @@ class Engine : public Spine::SmartMetEngine
                                           std::size_t theSteps) const;
 
   CacheReportingStruct getCacheSizes() const;
+  void clearCache() const;
 
 };  // class Engine
 

@@ -72,6 +72,7 @@ class Engine::Impl
                                           std::size_t theSteps);
 
   CacheReportingStruct getCacheSizes();
+  void clearCache();
 
  private:
   // Private parts

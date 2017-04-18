@@ -183,6 +183,12 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get cache usage report
+ */
+// ----------------------------------------------------------------------
+
 CacheReportingStruct Engine::Impl::getCacheSizes()
 {
   try
@@ -198,6 +204,17 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
   {
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Empty the cache
+ */
+// ----------------------------------------------------------------------
+
+void Engine::Impl::clearCache()
+{
+  itsContourCache.clear();
 }
 
 // ----------------------------------------------------------------------
