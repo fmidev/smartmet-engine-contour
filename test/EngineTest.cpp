@@ -766,13 +766,21 @@ class tests : public tframe::tests
   {
 #if 1
     TEST(lines);
+    contour->clearCache();
     TEST(fills);
+    contour->clearCache();
     TEST(crossection);
+    contour->clearCache();
     TEST(speed);
+    contour->clearCache();
     TEST(speed_all_at_once);
+    contour->clearCache();
     TEST(pressure);
+    contour->clearCache();
     TEST(pressure_all_at_once);
+    contour->clearCache();
     TEST(worldwrap);
+    contour->clearCache();
 #else
     // these have been used only to make sure everything validates. Too slow for other testing
     TEST(fillvalidation);
