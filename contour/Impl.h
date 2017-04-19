@@ -50,11 +50,13 @@ class Engine::Impl
 {
  public:
   Impl(const std::string &theFileName);
+  Impl() = delete;
+
   void init();
 
   // Produce vector of OGR contours for the given spatial reference
   std::vector<OGRGeometryPtr> contour(std::size_t theQhash,
-                                      const std::string theQAreaWKT,
+                                      const std::string &theQAreaWKT,
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const CoordinatesPtr theCoordinates,
                                       const Options &theOptions,
@@ -75,29 +77,28 @@ class Engine::Impl
   void clearCache();
 
  private:
-  // Private parts
-
-  Impl();
   std::string itsConfigFile;
   std::unique_ptr<Config> itsConfig;  // ptr for delayed initialization
 
   boost::shared_ptr<geos::geom::GeometryFactory> itsGeomFactory;
 
-  GeometryPtr internal_contour(std::size_t datahash,
-                               const Options &options,
-                               const DataMatrixAdapter &data,
-                               const MyHints &hints,
-                               bool worldwrap);
   // Cached contours
 
   typedef Fmi::Cache::Cache<std::size_t, OGRGeometryPtr> GeometryCache;
   mutable GeometryCache itsContourCache;
 
-  GeometryPtr geosContour(std::size_t theQhash,
-                          const Options &theOptions,
-                          const DataMatrixAdapter &theData,
-                          const MyHints &theHints,
-                          bool worldwrap);
+  GeometryPtr internal_isoline(const DataMatrixAdapter &data,
+                               const MyHints &hints,
+                               bool worldwrap,
+                               double isovalue,
+                               Interpolation interpolation);
+
+  GeometryPtr internal_isoband(const DataMatrixAdapter &data,
+                               const MyHints &hints,
+                               bool worldwrap,
+                               const boost::optional<double> &lolimit,
+                               const boost::optional<double> &hilimit,
+                               Interpolation interpolation);
 };
 
 }  // namespace Contour
