@@ -335,6 +335,17 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 {
   try
   {
+    // Safety check, the result will be completely empty. Returning empty
+    // OGRGeometryPtr values is not what for example the WFS plugin expects,
+    // it expects empty geometries instead. It can however handle an empty
+    // vector as the return value.
+
+    std::size_t nx = theMatrix.NX();
+    std::size_t ny = theMatrix.NY();
+
+    if (nx == 0 || ny == 0)
+      return {};
+
     // The hash for the result
     auto common_hash = theQhash;
     boost::hash_combine(common_hash, theOptions.filtered_data_hash_value());
@@ -346,13 +357,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 
     // The results
     std::vector<OGRGeometryPtr> retval(nresults);
-
-    // Safety check, the result will be of correct size but empty
-    std::size_t nx = theMatrix.NX();
-    std::size_t ny = theMatrix.NY();
-
-    if (nx == 0 || ny == 0)
-      return retval;
 
     // Make a copy of input data to enable filtering.
     // TODO: Use lazy initialization as in data and hints
