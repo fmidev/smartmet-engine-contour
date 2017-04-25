@@ -386,50 +386,59 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 
     const auto contourer =
         [&retval, this, &theOptions, &theSR, &querydata_sr, &worldwrap, &data, &hints](Args &args) {
-          // Calculate GEOS geometry result
-          GeometryPtr geom;
-          if (args.i < theOptions.isovalues.size())
+          try
           {
-            geom = internal_isoline(
-                *data, *hints, worldwrap, theOptions.isovalues[args.i], theOptions.interpolation);
-          }
-          else
-          {
-            auto iband = args.i - theOptions.isovalues.size();
-            geom = internal_isoband(*data,
-                                    *hints,
-                                    worldwrap,
-                                    theOptions.limits[iband].lolimit,
-                                    theOptions.limits[iband].hilimit,
-                                    theOptions.interpolation);
-          }
+            // Calculate GEOS geometry result
+            GeometryPtr geom;
+            if (args.i < theOptions.isovalues.size())
+            {
+              geom = internal_isoline(
+                  *data, *hints, worldwrap, theOptions.isovalues[args.i], theOptions.interpolation);
+            }
+            else
+            {
+              auto iband = args.i - theOptions.isovalues.size();
+              geom = internal_isoband(*data,
+                                      *hints,
+                                      worldwrap,
+                                      theOptions.limits[iband].lolimit,
+                                      theOptions.limits[iband].hilimit,
+                                      theOptions.interpolation);
+            }
 
-          // Cache as OGRGeometry
+            // Cache as OGRGeometry
 
-          if (!geom)
-          {
-            // We want to cache empty results too to save speed!
-            auto ret = OGRGeometryPtr();
-            itsContourCache.insert(args.hash, ret);
+            if (!geom)
+            {
+              // We want to cache empty results too to save speed!
+              auto ret = OGRGeometryPtr();
+              itsContourCache.insert(args.hash, ret);
+              retval[args.i] = ret;
+              return;
+            }
+
+            // Generate spatial reference. This needs to be done with new,
+            // createFromWkb will take ownership of the pointer passed to it.
+
+            OGRSpatialReference *sr = nullptr;
+            if (theSR != nullptr)
+              sr = theSR->Clone();
+            else
+              sr = querydata_sr->Clone();
+
+            // Convert to OGR object and cache the result
+
+            auto ret = geos_to_ogr(geom, sr);
             retval[args.i] = ret;
-            return;
+            itsContourCache.insert(args.hash, ret);
           }
-
-          // Generate spatial reference. This needs to be done with new,
-          // createFromWkb will take ownership of the pointer passed to it.
-
-          OGRSpatialReference *sr = nullptr;
-          if (theSR != nullptr)
-            sr = theSR->Clone();
-          else
-            sr = querydata_sr->Clone();
-
-          // Convert to OGR object and cache the result
-
-          auto ret = geos_to_ogr(geom, sr);
-          retval[args.i] = ret;
-          itsContourCache.insert(args.hash, ret);
-
+          catch (...)
+          {
+            // Cannot let an exception cause termination. We'll let the user get an empty result
+            // instead.
+            Spine::Exception ex(BCP, "Contouring failed");
+            ex.printError();
+          }
         };
 
     Fmi::WorkQueue<Args> workqueue(contourer);
