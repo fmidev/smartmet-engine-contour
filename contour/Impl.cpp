@@ -445,7 +445,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
           }
         };
 
-    Fmi::WorkQueue<Args> workqueue(contourer);
+    // Do not use all cores until better balancing & locking is implemented
+    const auto max_concurrency = std::thread::hardware_concurrency();
+    const auto concurrency = std::max(1u, max_concurrency / 4);
+
+    Fmi::WorkQueue<Args> workqueue(contourer, concurrency);
 
     for (auto icontour = 0ul; icontour < nresults; icontour++)
     {

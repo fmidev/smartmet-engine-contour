@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.4.25
-Release: 2%{?dist}.fmi
+Version: 17.5.30
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue May 30 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.5.30-1.fmi
+- Do not use maximal concurrency for conturing until better load balancing is implemented
+
 * Tue Apr 25 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.25-2.fmi
 - Bug fix: return empty vector if the input data is zero size, not a vector of empty shared pointers
 
