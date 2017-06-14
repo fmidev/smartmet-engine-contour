@@ -618,6 +618,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     NFmiDataMatrix<float> values(nx, ny, kFloatMissing);
     NFmiDataMatrix<NFmiPoint> coords(nx, ny, NFmiPoint());
 
+    bool has_some_valid_levelvalues = false;
+
     std::size_t j = 0;
     for (theQInfo->ResetLevel(); theQInfo->NextLevel(); ++j)
     {
@@ -634,9 +636,19 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
           theQInfo->ParamIndex(param);
           // TODO: Handle missing values (how??)
         }
+
+        if (levelvalue == kFloatMissing)
+          levelvalue = std::numeric_limits<float>::quiet_NaN();
+
+        if (!std::isnan(levelvalue))
+          has_some_valid_levelvalues = true;
+
         coords[i][j] = NFmiPoint(distances[i], levelvalue);
       }
     }
+
+    if (!has_some_valid_levelvalues)
+      throw std::runtime_error("The heights for the cross-section are missing");
 
     // Make sure the y-coordinate is increasing, it may be decreasing for pressure
     // level or model level data.

@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Upcoming
+. Detect when missing level values when calculating cross-sections
+
 * Tue May 30 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.5.30-1.fmi
 - Do not use maximal concurrency for conturing until better load balancing is implemented
 
