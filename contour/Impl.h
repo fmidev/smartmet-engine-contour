@@ -87,6 +87,14 @@ class Engine::Impl
   typedef Fmi::Cache::Cache<std::size_t, OGRGeometryPtr> GeometryCache;
   mutable GeometryCache itsContourCache;
 
+  // Cached information on the handedness of grids
+  typedef Fmi::Cache::Cache<std::size_t, bool> HandednessCache;
+  mutable HandednessCache itsHandednessCache;
+
+  bool needs_flipping(const Coordinates &coords,
+                      std::size_t datahash,
+                      OGRSpatialReference *srs) const;
+
   GeometryPtr internal_isoline(const DataMatrixAdapter &data,
                                const MyHints &hints,
                                bool worldwrap,

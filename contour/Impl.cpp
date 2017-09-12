@@ -18,6 +18,68 @@
 #include <tron/SavitzkyGolay2D.h>
 #include <cmath>
 
+#include <gis/OGR.h>
+
+namespace
+{
+// ----------------------------------------------------------------------
+/*!
+ * A polygon is convex if all cross products of adjacent edges are of the same sign,
+ * and the sign itself says whether the polygon is clockwise or not.
+ * Ref: http://www.easywms.com/node/3602
+ * We must disallow non-convex cells such as V-shaped ones, since the intersections
+ * formulas may then produce values outside the cell.
+ *
+ * Note that we permit colinear adjacent edges, since for example in latlon grids
+ * the poles are represented by multiple grid points. This test thus passes the
+ * redundant case of a rectangle with no area, but the rest of the code can handle it.
+ */
+// ----------------------------------------------------------------------
+
+bool convex_and_clockwise(
+    double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+{
+  return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) <= 0 &&
+          (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) <= 0 &&
+          (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) <= 0 &&
+          (x1 - x4) * (y2 - y1) - (y1 - y4) * (x2 - x1) <= 0);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Calculate the dominant handedness of the grid
+ *
+ * See also convex_and_clockwise method in tron LinearInterpolation.h
+ */
+// ----------------------------------------------------------------------
+
+bool calculate_handedness(const Coordinates &coords)
+{
+  std::size_t ok = 0;
+  std::size_t wrong = 0;
+
+  const auto nx = coords.NX();
+  const auto ny = coords.NY();
+
+  for (std::size_t i = 0; i < nx - 1; i++)
+    for (std::size_t j = 0; j < ny - 1; j++)
+    {
+      if (convex_and_clockwise(coords[i][j].X(),
+                               coords[i][j].Y(),
+                               coords[i][j + 1].X(),
+                               coords[i][j + 1].Y(),
+                               coords[i + 1][j + 1].X(),
+                               coords[i + 1][j + 1].Y(),
+                               coords[i + 1][j].X(),
+                               coords[i + 1][j].Y()))
+        ++ok;
+      else
+        ++wrong;
+    }
+
+  return (wrong > ok);
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Hash for OGR spatial reference
@@ -44,6 +106,7 @@ std::size_t hash_value(const OGRSpatialReference &theSR)
     throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
+}  // anonymous namespace
 
 namespace SmartMet
 {
@@ -183,6 +246,9 @@ void Engine::Impl::init()
   {
     itsConfig.reset(new Config(itsConfigFile));
     itsContourCache.resize(itsConfig->getMaxContourCacheSize());
+
+    // 10,000 booleans doesn't take much space
+    itsHandednessCache.resize(10000);
   }
   catch (...)
   {
@@ -321,6 +387,37 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Returns true if the handedness of the data is incorrect
+ */
+// ----------------------------------------------------------------------
+
+bool Engine::Impl::needs_flipping(const Coordinates &coords,
+                                  std::size_t datahash,
+                                  OGRSpatialReference *srs) const
+{
+  // Combined hash value includes data details and output projection
+  std::size_t hash = datahash;
+  if (srs != nullptr)
+    boost::hash_combine(hash, boost::hash_value(Fmi::OGR::exportToWkt(*srs)));
+
+  // See if the result has already been cached
+
+  auto cached = itsHandednessCache.find(hash);
+  if (cached)
+    return *cached;
+
+  // Calculate handedness
+
+  bool handedness = calculate_handedness(coords);
+
+  // Cache the result
+
+  itsHandednessCache.insert(hash, handedness);
+  return handedness;
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Contour producing vector of OGR geometries
  */
 // ----------------------------------------------------------------------
@@ -350,7 +447,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     auto common_hash = theQhash;
     boost::hash_combine(common_hash, theOptions.filtered_data_hash_value());
     if (theSR != nullptr)
-      boost::hash_combine(common_hash, *theSR);
+      boost::hash_combine(common_hash, boost::hash_value(Fmi::OGR::exportToWkt(*theSR)));
 
     // results first include isolines, then isobands
     auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
@@ -362,6 +459,29 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     // TODO: Use lazy initialization as in data and hints
 
     NFmiDataMatrix<float> values = theMatrix;
+    CoordinatesPtr coords = theCoordinates;
+
+    if (needs_flipping(*coords, theQhash, theSR))
+    {
+      for (std::size_t j1 = 0; j1 < ny / 2; j1++)
+      {
+        std::size_t j2 = ny - j1 - 1;
+
+        for (std::size_t i = 0; i < nx; i++)
+          std::swap(values[i][j1], values[i][j2]);
+      }
+
+      // we copy the coordinates only when we have to flip them
+      coords.reset(new Coordinates(*coords));
+
+      for (std::size_t j1 = 0; j1 < ny / 2; j1++)
+      {
+        std::size_t j2 = ny - j1 - 1;
+
+        for (std::size_t i = 0; i < nx; i++)
+          std::swap((*coords)[i][j1], (*coords)[i][j2]);
+      }
+    }
 
     // We generate helper data only if needed
 
@@ -506,7 +626,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
         }
 
         // Adapter for contouring
-        data.reset(new DataMatrixAdapter(values, *theCoordinates));
+        data.reset(new DataMatrixAdapter(values, *coords));
 
         if (theOptions.filter_size || theOptions.filter_degree)
         {

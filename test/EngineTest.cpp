@@ -1,5 +1,3 @@
-#include <prettyprint.hpp>
-
 #include "Engine.h"
 #include <gis/Box.h>
 #include <gis/OGR.h>

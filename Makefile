@@ -82,6 +82,7 @@ LIBS = -L$(libdir) \
 	-lsmartmet-newbase \
 	-lsmartmet-macgyver \
 	-lsmartmet-tron \
+	-lsmartmet-gis \
 	-lgeos \
 	-lgdal \
 	-lboost_date_time \

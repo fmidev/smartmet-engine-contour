@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.8.28
+Version: 17.9.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,19 +16,19 @@ BuildRequires: boost-devel
 BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 17.8.28
-BuildRequires: smartmet-library-newbase-devel >= 17.8.28
+BuildRequires: smartmet-library-spine-devel >= 17.9.8
+BuildRequires: smartmet-library-newbase-devel >= 17.9.11
 BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
-BuildRequires: smartmet-library-tron >= 17.8.28
-BuildRequires: smartmet-library-gis-devel >= 17.8.28
+BuildRequires: smartmet-library-tron >= 17.9.12
+BuildRequires: smartmet-library-gis-devel >= 17.9.12
 BuildRequires: sparsehash-devel
-Requires: smartmet-library-gis >= 17.8.28
+Requires: smartmet-library-gis >= 17.9.12
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 17.8.28
+Requires: smartmet-library-newbase >= 17.9.11
 Requires: smartmet-library-macgyver >= 17.8.28
-Requires: smartmet-library-spine >= 17.8.28
+Requires: smartmet-library-spine >= 17.9.8
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
@@ -76,6 +76,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Sep 12 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.12-1.fmi
+- Added automatic detection of inverted grids to enforce geometry winding rules
+
 * Sun Aug 27 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.8.28-1.fmi
 - Upgrade to boost 1.65
 - Detect when missing level values when calculating cross-sections
