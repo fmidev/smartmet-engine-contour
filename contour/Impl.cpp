@@ -58,14 +58,19 @@ boost::optional<bool> convex_and_clockwise(
 /*!
  * \brief Calculate the dominant handedness of the grid
  *
- * See also convex_and_clockwise method in tron LinearInterpolation.h
+ * See also convex_and_clockwise method in tron LinearInterpolation.h.
+ * Note that the numbers may be quite close if we project world data
+ * to a limited area, since the areas on the other side of the world
+ * may also be counted. We hence require wrong handedness to dominate
+ * significantly before flipping the grid.
  */
 // ----------------------------------------------------------------------
 
-bool calculate_handedness(const Coordinates &coords)
+bool is_handedness_wrong(const Coordinates &coords)
 {
   std::size_t ok = 0;
   std::size_t wrong = 0;
+  std::size_t invalid = 0;
 
   const auto nx = coords.NX();
   const auto ny = coords.NY();
@@ -81,16 +86,15 @@ bool calculate_handedness(const Coordinates &coords)
                                          coords[i + 1][j + 1].Y(),
                                          coords[i + 1][j].X(),
                                          coords[i + 1][j].Y());
-      if (result)  // optional<bool>
-      {
-        if (*result)
-          ++ok;
-        else
-          ++wrong;
-      }
+      if (!result)
+        ++invalid;
+      else if (*result)
+        ++ok;
+      else
+        ++wrong;
     }
 
-  return (wrong > ok);
+  return (wrong > 2 * ok);
 }
 
 // ----------------------------------------------------------------------
@@ -365,8 +369,8 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(itsGeomFactory);
 
-  double lo = std::numeric_limits<double>::quiet_NaN();
-  double hi = lo;
+  double lo = -std::numeric_limits<double>::infinity();
+  double hi = +std::numeric_limits<double>::infinity();
 
   if (lolimit)
     lo = *lolimit;
@@ -423,7 +427,7 @@ bool Engine::Impl::needs_flipping(const Coordinates &coords,
 
   // Calculate handedness
 
-  bool handedness = calculate_handedness(coords);
+  bool handedness = is_handedness_wrong(coords);
 
   // Cache the result
 

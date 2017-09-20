@@ -23,7 +23,7 @@ typedef boost::shared_ptr<geos::geom::Geometry> GeometryPtr;
 
 // Contourers
 
-typedef Tron::Traits<double, double, Tron::NanMissing> MyTraits;
+typedef Tron::Traits<double, double, Tron::InfMissing> MyTraits;
 
 typedef Tron::Contourer<DataMatrixAdapter, Tron::FmiBuilder, MyTraits, Tron::LinearInterpolation>
     MyLinearContourer;

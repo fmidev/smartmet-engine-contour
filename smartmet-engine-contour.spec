@@ -19,7 +19,7 @@ BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 17.9.13
 BuildRequires: smartmet-library-newbase-devel >= 17.9.14
 BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
-BuildRequires: smartmet-library-tron >= 17.9.12
+BuildRequires: smartmet-library-tron >= 17.9.20
 BuildRequires: smartmet-library-gis-devel >= 17.9.12
 BuildRequires: sparsehash-devel
 Requires: smartmet-library-gis >= 17.9.12
@@ -77,7 +77,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Sep 20 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.20-1.fmi
-- Conturing now uses NaN instead of kFloatMissing to keep smoothing fast
+- Conturing now uses -Inf and Inf to represent open intervals
+- Disabled -Ofast
 
 * Tue Sep 12 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.12-1.fmi
 - Added automatic detection of inverted grids to enforce geometry winding rules
