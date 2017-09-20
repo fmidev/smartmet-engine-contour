@@ -17,6 +17,7 @@
 #include <spine/Exception.h>
 #include <tron/SavitzkyGolay2D.h>
 #include <cmath>
+#include <limits>
 
 #include <gis/OGR.h>
 
@@ -33,12 +34,20 @@ namespace
  * Note that we permit colinear adjacent edges, since for example in latlon grids
  * the poles are represented by multiple grid points. This test thus passes the
  * redundant case of a rectangle with no area, but the rest of the code can handle it.
+ *
+ * Note: We must be able to detect invalid grid cells too! We shall return an
+ * empty boolean for such grid cells.
  */
 // ----------------------------------------------------------------------
 
-bool convex_and_clockwise(
+boost::optional<bool> convex_and_clockwise(
     double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
 {
+  if (std::isnan(x1) || std::isnan(y1) || std::isnan(x2) || std::isnan(y2) || std::isnan(x3) ||
+      std::isnan(y3) || std::isnan(x4) || std::isnan(y4))
+    return {};
+
+  // This requires all coordinates to be already checked
   return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) <= 0 &&
           (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) <= 0 &&
           (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) <= 0 &&
@@ -64,17 +73,21 @@ bool calculate_handedness(const Coordinates &coords)
   for (std::size_t i = 0; i < nx - 1; i++)
     for (std::size_t j = 0; j < ny - 1; j++)
     {
-      if (convex_and_clockwise(coords[i][j].X(),
-                               coords[i][j].Y(),
-                               coords[i][j + 1].X(),
-                               coords[i][j + 1].Y(),
-                               coords[i + 1][j + 1].X(),
-                               coords[i + 1][j + 1].Y(),
-                               coords[i + 1][j].X(),
-                               coords[i + 1][j].Y()))
-        ++ok;
-      else
-        ++wrong;
+      auto result = convex_and_clockwise(coords[i][j].X(),
+                                         coords[i][j].Y(),
+                                         coords[i][j + 1].X(),
+                                         coords[i][j + 1].Y(),
+                                         coords[i + 1][j + 1].X(),
+                                         coords[i + 1][j + 1].Y(),
+                                         coords[i + 1][j].X(),
+                                         coords[i + 1][j].Y());
+      if (result)  // optional<bool>
+      {
+        if (*result)
+          ++ok;
+        else
+          ++wrong;
+      }
     }
 
   return (wrong > ok);
@@ -352,7 +365,9 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(itsGeomFactory);
 
-  double lo = kFloatMissing, hi = kFloatMissing;
+  double lo = std::numeric_limits<double>::quiet_NaN();
+  double hi = lo;
+
   if (lolimit)
     lo = *lolimit;
   if (hilimit)
@@ -418,6 +433,29 @@ bool Engine::Impl::needs_flipping(const Coordinates &coords,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Change all kFloatMissing values to NaN
+ */
+// ----------------------------------------------------------------------
+
+void set_missing_to_nan(NFmiDataMatrix<float> &theValues)
+{
+  std::size_t nx = theValues.NX();
+  std::size_t ny = theValues.NY();
+  if (nx == 0 || ny == 0)
+    return;
+
+  auto nan = std::numeric_limits<float>::quiet_NaN();
+
+  for (std::size_t j = 0; j < ny; j++)
+    for (std::size_t i = 0; i < nx; i++)
+    {
+      if (theValues[i][j] == kFloatMissing)
+        theValues[i][j] = nan;
+    }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Contour producing vector of OGR geometries
  */
 // ----------------------------------------------------------------------
@@ -460,6 +498,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 
     NFmiDataMatrix<float> values = theMatrix;
     CoordinatesPtr coords = theCoordinates;
+
+    // Make sure the values are NaN instead of kFloatMissing
+    set_missing_to_nan(values);
 
     if (needs_flipping(*coords, theQhash, theSR))
     {
@@ -621,8 +662,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 
           for (std::size_t j = 0; j < ny; j++)
             for (std::size_t i = 0; i < nx; i++)
-              if (values[i][j] != kFloatMissing)
-                values[i][j] = a * values[i][j] + b;
+              values[i][j] = a * values[i][j] + b;
         }
 
         // Adapter for contouring
@@ -735,7 +775,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     std::size_t nx = coordinates.size();
     std::size_t ny = theQInfo->SizeLevels();
 
-    NFmiDataMatrix<float> values(nx, ny, kFloatMissing);
+    NFmiDataMatrix<float> values(nx, ny, std::numeric_limits<float>::quiet_NaN());
     NFmiDataMatrix<NFmiPoint> coords(nx, ny, NFmiPoint());
 
     bool has_some_valid_levelvalues = false;
@@ -788,6 +828,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
         }
       }
     }
+
+    // Make sure the values are NaN instead of kFloatMissing
+    set_missing_to_nan(values);
 
     DataMatrixAdapter data(values, coords);
     MyHints hints(data);
