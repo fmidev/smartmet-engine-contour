@@ -22,6 +22,8 @@ BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 BuildRequires: smartmet-library-tron >= 17.9.20
 BuildRequires: smartmet-library-gis-devel >= 17.9.12
 BuildRequires: sparsehash-devel
+BuildRequires: bzip2-devel
+BuildRequires: zlib-devel
 Requires: smartmet-library-gis >= 17.9.12
 Requires: geos
 Requires: gdal
