@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 17.9.20
+Version: 17.11.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,21 +16,21 @@ BuildRequires: boost-devel
 BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 17.9.13
-BuildRequires: smartmet-library-newbase-devel >= 17.9.14
+BuildRequires: smartmet-library-spine-devel >= 17.11.1
+BuildRequires: smartmet-library-newbase-devel >= 17.10.29
 BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 BuildRequires: smartmet-library-tron >= 17.9.20
-BuildRequires: smartmet-library-gis-devel >= 17.9.12
+BuildRequires: smartmet-library-gis-devel >= 17.10.31
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
-Requires: smartmet-library-gis >= 17.9.12
+Requires: smartmet-library-gis >= 17.10.31
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 17.9.14
+Requires: smartmet-library-newbase >= 17.10.29
 Requires: smartmet-library-macgyver >= 17.8.28
-Requires: smartmet-library-spine >= 17.9.13
+Requires: smartmet-library-spine >= 17.11.1
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
@@ -78,6 +78,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Nov  1 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.11.1-1.fmi
+- Rebuilt due to GIS-library API change
+
 * Wed Sep 20 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.20-1.fmi
 - Conturing now uses -Inf and Inf to represent open intervals
 - Disabled -Ofast
