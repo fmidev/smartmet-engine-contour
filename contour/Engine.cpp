@@ -23,9 +23,7 @@ namespace Contour
  */
 // ----------------------------------------------------------------------
 
-Engine::Engine(const std::string& theFileName) : itsImpl(new Impl(theFileName))
-{
-}
+Engine::Engine(const std::string& theFileName) : itsImpl(new Impl(theFileName)) {}
 // ----------------------------------------------------------------------
 /*!
  * \brief Initialize the engine

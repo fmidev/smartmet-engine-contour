@@ -1,7 +1,7 @@
 #pragma once
 
-#include <libconfig.h++>
 #include <boost/utility.hpp>
+#include <libconfig.h++>
 
 namespace SmartMet
 {
@@ -16,6 +16,7 @@ class Config : private boost::noncopyable
   Config(const std::string& theFilename);
 
   int getMaxContourCacheSize() const { return itsMaxContourCacheSize; }
+
  private:
   libconfig::Config itsConfig;
   int itsMaxContourCacheSize;

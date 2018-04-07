@@ -5,21 +5,21 @@
 // ======================================================================
 
 #include "GeosTools.h"
-#include <spine/Exception.h>
-#include <geos/geom/Coordinate.h>
-#include <geos/geom/Point.h>
-#include <geos/geom/LinearRing.h>
-#include <geos/geom/LineString.h>
-#include <geos/geom/Polygon.h>
-#include <geos/geom/MultiPoint.h>
-#include <geos/geom/MultiLineString.h>
-#include <geos/geom/MultiPolygon.h>
-#include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/PrecisionModel.h>
 #include <boost/numeric/conversion/cast.hpp>
+#include <geos/geom/Coordinate.h>
+#include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/LineString.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/MultiLineString.h>
+#include <geos/geom/MultiPoint.h>
+#include <geos/geom/MultiPolygon.h>
+#include <geos/geom/Point.h>
+#include <geos/geom/Polygon.h>
+#include <geos/geom/PrecisionModel.h>
+#include <spine/Exception.h>
+#include <iomanip>
 #include <sstream>
 #include <stdexcept>
-#include <iomanip>
 
 using namespace geos::geom;
 
@@ -272,7 +272,7 @@ void writeSVG(const Geometry* geom, std::ostream& out)
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-}  // namespace anonymous
+}  // namespace
 
 namespace GeosTools
 {
@@ -305,5 +305,5 @@ std::string getSVG(const Geometry& theGeom, int thePrecision)
   }
 }
 
-}  // namespace GeoTools
+}  // namespace GeosTools
 }  // namespace SmartMet

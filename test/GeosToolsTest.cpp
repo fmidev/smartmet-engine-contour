@@ -1,6 +1,6 @@
-#include <regression/tframe.h>
 #include "GeosTools.h"
 #include <geos/io/WKTReader.h>
+#include <regression/tframe.h>
 
 #include <boost/shared_ptr.hpp>
 

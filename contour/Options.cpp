@@ -5,9 +5,9 @@
 // ======================================================================
 
 #include "Options.h"
+#include <boost/functional/hash.hpp>
 #include <spine/Exception.h>
 #include <spine/Hash.h>
-#include <boost/functional/hash.hpp>
 
 namespace SmartMet
 {

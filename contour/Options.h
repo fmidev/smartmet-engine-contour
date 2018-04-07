@@ -14,9 +14,9 @@
 #pragma once
 
 #include "Interpolation.h"
-#include <spine/Parameter.h>
-#include <boost/optional.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/optional.hpp>
+#include <spine/Parameter.h>
 
 namespace SmartMet
 {
