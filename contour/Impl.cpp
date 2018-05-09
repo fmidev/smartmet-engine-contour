@@ -443,19 +443,25 @@ bool Engine::Impl::needs_flipping(const Coordinates &coords,
 
 void set_missing_to_nan(NFmiDataMatrix<float> &theValues)
 {
-  std::size_t nx = theValues.NX();
-  std::size_t ny = theValues.NY();
+  const std::size_t nx = theValues.NX();
+  const std::size_t ny = theValues.NY();
   if (nx == 0 || ny == 0)
     return;
 
-  auto nan = std::numeric_limits<float>::quiet_NaN();
+  const auto nan = std::numeric_limits<float>::quiet_NaN();
 
-  for (std::size_t j = 0; j < ny; j++)
-    for (std::size_t i = 0; i < nx; i++)
+  // Unfortunately NFmiDataMatrix is a vector of vectors, memory
+  // access patterns are not optimal
+
+  for (std::size_t i = 0; i < nx; i++)
+  {
+    auto &tmp = theValues[i];
+    for (std::size_t j = 0; j < ny; j++)
     {
-      if (theValues[i][j] == kFloatMissing)
-        theValues[i][j] = nan;
+      if (tmp[j] == kFloatMissing)
+        tmp[j] = nan;
     }
+  }
 }
 
 // ----------------------------------------------------------------------
