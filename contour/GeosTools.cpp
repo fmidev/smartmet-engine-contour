@@ -48,7 +48,7 @@ void writeCoordinateSVG(const Coordinate& geom, std::ostream& out)
 
 void writePointSVG(const Coordinate* geom, std::ostream& out)
 {
-  if (geom != NULL)
+  if (geom != nullptr)
     out << 'M' << geom->x << ' ' << geom->y;
 }
 
@@ -62,7 +62,7 @@ void writeLinearRingSVG(const LinearRing* geom, std::ostream& out)
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
     // Bizarre: n is unsigned long but getting coordinate uses int
     for (unsigned long i = 0, n = geom->getNumPoints(); i < n - 1; ++i)
@@ -79,7 +79,7 @@ void writeLinearRingSVG(const LinearRing* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -93,7 +93,7 @@ void writeLineStringSVG(const LineString* geom, std::ostream& out)
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
 
     unsigned long n = geom->getNumPoints();
@@ -118,7 +118,7 @@ void writeLineStringSVG(const LineString* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -132,7 +132,7 @@ void writePolygonSVG(const Polygon* geom, std::ostream& out)
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
 
     writeLineStringSVG(geom->getExteriorRing(), out);
@@ -143,7 +143,7 @@ void writePolygonSVG(const Polygon* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -157,7 +157,7 @@ void writeMultiPointSVG(const MultiPoint* geom, std::ostream& out)
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
 
     for (size_t i = 0, n = geom->getNumGeometries(); i < n; ++i)
@@ -168,7 +168,7 @@ void writeMultiPointSVG(const MultiPoint* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -182,14 +182,14 @@ void writeMultiLineStringSVG(const MultiLineString* geom, std::ostream& out)
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
     for (size_t i = 0, n = geom->getNumGeometries(); i < n; ++i)
       writeLineStringSVG(dynamic_cast<const LineString*>(geom->getGeometryN(i)), out);
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -203,14 +203,14 @@ void writeMultiPolygonSVG(const MultiPolygon* geom, std::ostream& out)
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
     for (size_t i = 0, n = geom->getNumGeometries(); i < n; ++i)
       writePolygonSVG(dynamic_cast<const Polygon*>(geom->getGeometryN(i)), out);
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -224,14 +224,14 @@ void writeGeometryCollectionSVG(const GeometryCollection* geom, std::ostream& ou
 {
   try
   {
-    if (geom == NULL || geom->isEmpty())
+    if (geom == nullptr || geom->isEmpty())
       return;
     for (size_t i = 0, n = geom->getNumGeometries(); i < n; ++i)
       writeSVG(geom->getGeometryN(i), out);
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -269,7 +269,7 @@ void writeSVG(const Geometry* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 }  // namespace
@@ -301,7 +301,7 @@ std::string getSVG(const Geometry& theGeom, int thePrecision)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

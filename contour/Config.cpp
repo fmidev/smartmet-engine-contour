@@ -29,7 +29,7 @@ Config::Config(const std::string& theFileName) : itsConfig()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

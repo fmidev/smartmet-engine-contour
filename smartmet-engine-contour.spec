@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 18.6.29
+Version: 18.7.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -17,21 +17,21 @@ BuildRequires: boost-devel
 BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 18.4.7
-BuildRequires: smartmet-library-newbase-devel >= 18.4.7
-BuildRequires: smartmet-library-macgyver-devel >= 18.4.7
+BuildRequires: smartmet-library-spine-devel >= 18.7.23
+BuildRequires: smartmet-library-newbase-devel >= 18.7.23
+BuildRequires: smartmet-library-macgyver-devel >= 18.7.25
 BuildRequires: smartmet-library-tron >= 17.9.20
-BuildRequires: smartmet-library-gis-devel >= 18.4.7
+BuildRequires: smartmet-library-gis-devel >= 18.7.23
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
-Requires: smartmet-library-gis >= 18.4.7
+Requires: smartmet-library-gis >= 18.7.23
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 18.4.7
-Requires: smartmet-library-macgyver >= 18.4.7
-Requires: smartmet-library-spine >= 18.4.7
+Requires: smartmet-library-newbase >= 18.7.23
+Requires: smartmet-library-macgyver >= 18.7.25
+Requires: smartmet-library-spine >= 18.7.23
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
@@ -79,6 +79,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Jul 25 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.25-1.fmi
+- Prefer nullptr over NULL
+
 * Fri Jun 29 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.29-1.fmi
 - Use less threads for contouring to avoid high CPU load peaks
 

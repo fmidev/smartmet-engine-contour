@@ -37,7 +37,7 @@ Interpolation parseInterpolation(const std::string& theName)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

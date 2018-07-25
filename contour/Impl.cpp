@@ -120,7 +120,7 @@ std::size_t hash_value(const OGRSpatialReference &theSR)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 }  // anonymous namespace
@@ -182,7 +182,7 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -226,7 +226,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
       throw Spine::Exception(BCP, "Failed to convert contoured WKB to OGRGeometry");
     }
 
-    if (theSR != NULL)
+    if (theSR != nullptr)
       theSR->Dereference();  // Spatial references are reference counted, we must relinquish the
                              // local
                              // copy here, otherwise this leaks
@@ -236,7 +236,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -269,7 +269,7 @@ void Engine::Impl::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -292,7 +292,7 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -700,7 +700,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -876,7 +876,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
                                 theOptions.interpolation);
       }
 
-      OGRSpatialReference *sr = NULL;
+      OGRSpatialReference *sr = nullptr;
       retval[icontour] = geos_to_ogr(geom, sr);
     }
 
@@ -884,7 +884,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
