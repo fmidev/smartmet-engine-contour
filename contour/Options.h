@@ -17,6 +17,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
 #include <spine/Parameter.h>
+#include <vector>
 
 namespace SmartMet
 {
