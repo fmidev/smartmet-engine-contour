@@ -57,6 +57,7 @@ struct Options
   bool hasTransformation() const;
 
   Interpolation interpolation;
+  int extrapolation = 0;
   Spine::Parameter parameter;
   boost::posix_time::ptime time;
   boost::optional<double> level;

@@ -92,7 +92,8 @@ LIBS = -L$(libdir) \
 	-lboost_iostreams \
 	-lboost_regex \
 	-lboost_system \
-	-lbz2 -lz
+	-lbz2 -lz \
+	-lpthread
 
 # What to install
 

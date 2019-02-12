@@ -24,16 +24,7 @@ namespace Contour
 Options::Options(const Spine::Parameter& theParam,
                  const boost::posix_time::ptime& theTime,
                  const std::vector<double>& theIsoValues)
-    : interpolation(Linear),
-      parameter(theParam),
-      time(theTime),
-      level(),
-      isovalues(theIsoValues),
-      limits(),
-      multiplier(),
-      offset(),
-      filter_size(),
-      filter_degree()
+    : interpolation(Linear), parameter(theParam), time(theTime), isovalues(theIsoValues)
 {
 }
 
@@ -46,16 +37,7 @@ Options::Options(const Spine::Parameter& theParam,
 Options::Options(const Spine::Parameter& theParam,
                  const boost::posix_time::ptime& theTime,
                  const std::vector<Range>& theLimits)
-    : interpolation(Linear),
-      parameter(theParam),
-      time(theTime),
-      level(),
-      isovalues(),
-      limits(theLimits),
-      multiplier(),
-      offset(),
-      filter_size(),
-      filter_degree()
+    : interpolation(Linear), parameter(theParam), time(theTime), limits(theLimits)
 {
 }
 
@@ -98,6 +80,7 @@ std::size_t hash_value(const Options& theOptions)
 {
   std::size_t seed = 0;
   boost::hash_combine(seed, theOptions.interpolation);
+  boost::hash_combine(seed, theOptions.extrapolation);
   boost::hash_combine(seed, theOptions.parameter);
   boost::hash_combine(seed, theOptions.time);
   boost::hash_combine(seed, theOptions.level);
@@ -132,6 +115,7 @@ std::size_t Options::data_hash_value() const
   {
     std::size_t seed = 0;
     // NO: boost::hash_combine(seed, interpolation);
+    // NO: boost::hash_combine(seed, extrapolation);
     boost::hash_combine(seed, parameter);
     boost::hash_combine(seed, time);
     boost::hash_combine(seed, level);
@@ -165,6 +149,7 @@ std::size_t Options::filtered_data_hash_value() const
   {
     std::size_t seed = 0;
     // NO: boost::hash_combine(seed, interpolation);
+    boost::hash_combine(seed, extrapolation);
     boost::hash_combine(seed, parameter);
     boost::hash_combine(seed, time);
     boost::hash_combine(seed, level);

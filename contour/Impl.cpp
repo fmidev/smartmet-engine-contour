@@ -123,6 +123,75 @@ std::size_t hash_value(const OGRSpatialReference &theSR)
     throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Utility function for extrapolation
+ */
+// ----------------------------------------------------------------------
+
+class Extrapolation
+{
+ public:
+  bool ok() { return count > 0; }
+  float result() const { return sum / count; }
+  void operator()(float value)
+  {
+    if (!std::isnan(value))
+    {
+      sum += value;
+      ++count;
+    }
+  }
+
+ private:
+  float sum = 0;
+  int count = 0;
+};
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Extrapolate data.
+ *
+ * This is typically used to expand the data a bit when it covers for example
+ * only land areas, but visualization would leave gaps between the data and the
+ * shoreline.
+ /*/
+
+void extrapolate(NFmiDataMatrix<float> &theValues, int theAmount)
+{
+  if (theAmount <= 0)
+    return;
+
+  auto tmp = theValues;
+  for (int i = 0; i < theAmount; i++)
+  {
+    for (unsigned int j = 0; j < theValues.NY(); j++)
+      for (unsigned int i = 0; i < theValues.NX(); i++)
+      {
+        if (std::isnan(tmp[i][j]))
+        {
+          Extrapolation ext;
+          ext(theValues.At(i - 1, j, std::numeric_limits<float>::quiet_NaN()));
+          ext(theValues.At(i + 1, j, std::numeric_limits<float>::quiet_NaN()));
+          ext(theValues.At(i, j - 1, std::numeric_limits<float>::quiet_NaN()));
+          ext(theValues.At(i, j + 1, std::numeric_limits<float>::quiet_NaN()));
+          if (!ext.ok())
+          {
+            ext(theValues.At(i - 1, j - 1, std::numeric_limits<float>::quiet_NaN()));
+            ext(theValues.At(i - 1, j + 1, std::numeric_limits<float>::quiet_NaN()));
+            ext(theValues.At(i + 1, j - 1, std::numeric_limits<float>::quiet_NaN()));
+            ext(theValues.At(i + 1, j + 1, std::numeric_limits<float>::quiet_NaN()));
+          }
+          if (ext.ok())
+            tmp[i][j] = ext.result();
+        }
+      }
+
+    std::swap(tmp, theValues);
+  }
+}
+
 }  // anonymous namespace
 
 namespace SmartMet
@@ -674,6 +743,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
             for (std::size_t i = 0; i < nx; i++)
               values[i][j] = a * values[i][j] + b;
         }
+
+        // Extrapolate if requested
+        extrapolate(values, theOptions.extrapolation);
 
         // Adapter for contouring
         data.reset(new DataMatrixAdapter(values, *coords));
