@@ -12,6 +12,7 @@
 #include <gdal/ogr_spatialref.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
+#include <gis/OGR.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/WorkQueue.h>
 #include <spine/Exception.h>
@@ -673,6 +674,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
             // Convert to OGR object and cache the result
 
             auto ret = geos_to_ogr(geom, sr);
+
+            // Despeckle even closed isolines (pressure curves)
+            if (theOptions.minarea)
+              ret.reset(Fmi::OGR::despeckle(*ret, *theOptions.minarea));
+
             retval[args.i] = ret;
             itsContourCache.insert(args.hash, ret);
           }

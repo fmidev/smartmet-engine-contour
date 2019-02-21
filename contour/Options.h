@@ -72,6 +72,8 @@ struct Options
   boost::optional<std::size_t> filter_size;  // 2D Savitzky-Golay smoother
   boost::optional<std::size_t> filter_degree;
 
+  boost::optional<double> minarea;  // km^2
+
 };  // class Options
 
 }  // namespace Contour

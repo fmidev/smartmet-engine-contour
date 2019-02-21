@@ -97,6 +97,7 @@ std::size_t hash_value(const Options& theOptions)
   boost::hash_combine(seed, theOptions.offset);
   boost::hash_combine(seed, theOptions.filter_size);
   boost::hash_combine(seed, theOptions.filter_degree);
+  boost::hash_combine(seed, theOptions.minarea);
   return seed;
 }
 
@@ -126,6 +127,7 @@ std::size_t Options::data_hash_value() const
     // NO: boost::hash_combine(seed, offset);
     // NO: boost::hash_combine(seed, filter_size);
     // NO: boost::hash_combine(seed, filter_degree);
+    // NO: boost::hash_combine(seed, minarea);
     return seed;
   }
   catch (...)
@@ -160,6 +162,7 @@ std::size_t Options::filtered_data_hash_value() const
     boost::hash_combine(seed, offset);
     boost::hash_combine(seed, filter_size);
     boost::hash_combine(seed, filter_degree);
+    // NO: boost::hash_combine(seed, minarea);
     return seed;
   }
   catch (...)
