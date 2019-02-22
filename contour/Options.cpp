@@ -150,7 +150,7 @@ std::size_t Options::filtered_data_hash_value() const
   try
   {
     std::size_t seed = 0;
-    // NO: boost::hash_combine(seed, interpolation);
+    boost::hash_combine(seed, interpolation);
     boost::hash_combine(seed, extrapolation);
     boost::hash_combine(seed, parameter);
     boost::hash_combine(seed, time);
@@ -162,7 +162,7 @@ std::size_t Options::filtered_data_hash_value() const
     boost::hash_combine(seed, offset);
     boost::hash_combine(seed, filter_size);
     boost::hash_combine(seed, filter_degree);
-    // NO: boost::hash_combine(seed, minarea);
+    boost::hash_combine(seed, minarea);
     return seed;
   }
   catch (...)

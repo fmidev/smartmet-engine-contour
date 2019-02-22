@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 19.2.21
+Version: 19.2.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -79,6 +79,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Feb 22 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.22-1.fmi
+- Fixed contour cache hash value to include the minarea setting
+
 * Thu Feb 21 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.21-1.fmi
 - Added optional minarea setting for closed contours
 
