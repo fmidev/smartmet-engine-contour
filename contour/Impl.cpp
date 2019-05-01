@@ -239,9 +239,8 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     for (std::size_t i = 1; i < steps; i++)
     {
       // Should this be fixed? Probably not - the coordinates should behave the same
-      const bool pacific_view = false;
       double dist = i * distance / steps;
-      auto loc = startpoint.GetLocation(bearing, dist, pacific_view);
+      auto loc = startpoint.GetLocation(bearing, dist);
       coordinates.push_back(loc.GetLocation());
       distances.push_back(dist / 1000.0);
     }
