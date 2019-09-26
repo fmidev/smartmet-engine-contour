@@ -28,6 +28,9 @@ objdir = obj
 
 DEFINES = -DUNIX -D_REENTRANT
 
+-include $(HOME)/.smartmet.mk
+GCC_DIAG_COLOR ?= always
+
 ifeq ($(CXX), clang++)
 
  FLAGS = \
@@ -44,7 +47,7 @@ ifeq ($(CXX), clang++)
 
 else
 
- FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -fno-omit-frame-pointer -fdiagnostics-color=always
+ FLAGS = -std=c++11 -fPIC -MD -Wall -W -Wno-unused-parameter -fno-omit-frame-pointer -fdiagnostics-color=$(GCC_DIAG_COLOR)
 
  FLAGS_DEBUG = \
 	-Wcast-align \
@@ -65,6 +68,15 @@ else
 	-I$(includedir)/smartmet
 
 endif
+
+
+ifeq ($(TSAN), yes)
+  FLAGS += -fsanitize=thread
+endif
+ifeq ($(ASAN), yes)
+  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
+endif
+
 
 # Compile options in detault, debug and profile modes
 # Note: Must not use -Ofast, we need infinities
@@ -90,7 +102,6 @@ LIBS = -L$(libdir) \
 	-lboost_thread \
 	-lboost_filesystem \
 	-lboost_iostreams \
-	-lboost_regex \
 	-lboost_system \
 	-lbz2 -lz \
 	-lpthread

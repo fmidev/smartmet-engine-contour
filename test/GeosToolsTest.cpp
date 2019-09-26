@@ -1,12 +1,22 @@
 #include "GeosTools.h"
 #include <geos/io/WKTReader.h>
 #include <regression/tframe.h>
-
+#include <geos/version.h>
 #include <boost/shared_ptr.hpp>
 
 using namespace std;
 
-geos::geom::GeometryFactory factory;
+#if GEOS_VERSION_MAJOR == 3
+#if GEOS_VERSION_MINOR < 7  
+geos::geom::GeometryFactory * factory = new geos::geom::GeometryFactory();
+#else
+auto factoryptr = geos::geom::GeometryFactory::create();
+auto * factory = factoryptr.get();
+#endif
+#else
+#pragma message(Cannot handle current GEOS version correctly)
+#endif 
+
 
 namespace Tests
 {
@@ -17,7 +27,7 @@ void wiki_examples()
   using namespace SmartMet;
   using GeosTools::getSVG;
 
-  geos::io::WKTReader reader(&factory);
+  geos::io::WKTReader reader(factory);
 
   // Ref: http://en.wikipedia.org/wiki/Well-known_text
 
@@ -107,7 +117,7 @@ void closing_paths()
   using namespace SmartMet;
   using GeosTools::getSVG;
 
-  geos::io::WKTReader reader(&factory);
+  geos::io::WKTReader reader(factory);
 
   // Ref: http://en.wikipedia.org/wiki/Well-known_text
 
