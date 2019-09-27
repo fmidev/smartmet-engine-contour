@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 19.2.22
+Version: 19.9.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -17,26 +17,25 @@ BuildRequires: boost-devel
 BuildRequires: geos-devel
 BuildRequires: gdal-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 18.12.13
-BuildRequires: smartmet-library-newbase-devel >= 19.2.14
-BuildRequires: smartmet-library-macgyver-devel >= 18.11.24
-BuildRequires: smartmet-library-tron >= 17.9.20
-BuildRequires: smartmet-library-gis-devel >= 19.2.21
+BuildRequires: smartmet-library-spine-devel >= 19.9.26
+BuildRequires: smartmet-library-newbase-devel >= 19.9.26
+BuildRequires: smartmet-library-macgyver-devel >= 19.9.26
+BuildRequires: smartmet-library-tron >= 19.9.26
+BuildRequires: smartmet-library-gis-devel >= 19.9.26
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
-Requires: smartmet-library-gis >= 19.2.21
+Requires: smartmet-library-gis >= 19.9.26
 Requires: geos
 Requires: gdal
 Requires: libconfig
-Requires: smartmet-library-newbase >= 19.2.14
-Requires: smartmet-library-macgyver >= 18.11.24
-Requires: smartmet-library-spine >= 18.12.13
+Requires: smartmet-library-newbase >= 19.9.26
+Requires: smartmet-library-macgyver >= 19.9.26
+Requires: smartmet-library-spine >= 19.9.26
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
 Requires: boost-iostreams
-Requires: boost-regex
 Requires: boost-system
 Requires: boost-thread
 %endif
@@ -79,6 +78,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Sep 26 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.9.26-1.fmi
+- Added support for GEOS 3
+
 * Fri Feb 22 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.22-1.fmi
 - Fixed contour cache hash value to include the minarea setting
 

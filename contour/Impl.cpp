@@ -316,7 +316,16 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
 // ----------------------------------------------------------------------
 
 Engine::Impl::Impl(const std::string &theFileName)
+#if GEOS_VERSION_MAJOR == 3
+#if GEOS_VERSION_MINOR < 7  
     : itsConfigFile(theFileName), itsGeomFactory(new geos::geom::GeometryFactory())
+#else
+    : itsConfigFile(theFileName), itsGeomFactory(geos::geom::GeometryFactory::create())
+#endif
+#else
+#pragma message(Cannot handle current GEOS version correctly)
+#endif  
+  
 {
 }
 

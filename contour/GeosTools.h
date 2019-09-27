@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <geos/geom/Geometry.h>
 #include <string>
 
 namespace geos

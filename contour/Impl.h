@@ -11,10 +11,10 @@
 #include "Config.h"
 #include "DataMatrixAdapter.h"
 #include "Engine.h"
-
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <geos/geom/Geometry.h>
+#include <geos/version.h>
 #include <macgyver/Cache.h>
 #include <tron/FmiBuilder.h>
 #include <tron/Tron.h>
@@ -80,7 +80,15 @@ class Engine::Impl
   std::string itsConfigFile;
   std::unique_ptr<Config> itsConfig;  // ptr for delayed initialization
 
+#if GEOS_VERSION_MAJOR == 3
+#if GEOS_VERSION_MINOR < 7  
   boost::shared_ptr<geos::geom::GeometryFactory> itsGeomFactory;
+#else
+  geos::geom::GeometryFactory::Ptr itsGeomFactory;
+#endif
+#else
+#pragma message(Cannot handle current GEOS version correctly)
+#endif  
 
   // Cached contours
 
