@@ -13,7 +13,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/SmartMetEngine.h>
-#include <shared_ptr>
+#include <memory>
 #include <string>
 
 using Coordinates = NFmiDataMatrix<NFmiPoint>;

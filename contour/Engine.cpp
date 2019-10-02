@@ -115,7 +115,7 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theQhash,
  */
 // ----------------------------------------------------------------------
 
-std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+std::vector<OGRGeometryPtr> Engine::crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
                                                 const Options& theOptions,
                                                 double theLon1,
                                                 double theLat1,
@@ -141,7 +141,7 @@ std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryI
  */
 // ----------------------------------------------------------------------
 
-std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+std::vector<OGRGeometryPtr> Engine::crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
                                                 const Spine::Parameter& theZParameter,
                                                 const Options& theOptions,
                                                 double theLon1,

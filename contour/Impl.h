@@ -11,13 +11,12 @@
 #include "Config.h"
 #include "DataMatrixAdapter.h"
 #include "Engine.h"
-#include <boost/make_shared.hpp>
 #include <geos/geom/Geometry.h>
 #include <geos/version.h>
 #include <macgyver/Cache.h>
 #include <tron/FmiBuilder.h>
 #include <tron/Tron.h>
-#include <shared_ptr>
+#include <memory>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 

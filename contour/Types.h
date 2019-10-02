@@ -6,7 +6,7 @@
 
 #pragma once
 #include <gdal/ogr_geometry.h>
-#include <shared_ptr>
+#include <memory>
 
 namespace SmartMet
 {
