@@ -797,7 +797,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::Impl::crossection(
-    std::shared_ptr<NFmiFastQueryInfo> theQInfo,
+    NFmiFastQueryInfo &theQInfo,
     const Options &theOptions,
     const boost::optional<Spine::Parameter> &theZParameter,
     double theLon1,
@@ -824,19 +824,19 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
 
     if (theZParameter)
     {
-      if (!theQInfo->Param(theZParameter->number()))
+      if (!theQInfo.Param(theZParameter->number()))
       {
         std::cerr << "CSection: ZParameter " << theZParameter->name() << " is not available"
                   << std::endl;
         // TODO: Give good error message
         return {};
       }
-      zparam = theQInfo->ParamIndex();
+      zparam = theQInfo.ParamIndex();
     }
 
     // Select the data
 
-    if (!theQInfo->Param(theOptions.parameter.number()))
+    if (!theQInfo.Param(theOptions.parameter.number()))
     {
       std::cerr << "CSection: Parameter " << theOptions.parameter.name() << " is not available"
                 << std::endl;
@@ -844,7 +844,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       return {};
     }
 
-    unsigned long param = theQInfo->ParamIndex();
+    unsigned long param = theQInfo.ParamIndex();
 
     // Calculate the isocircle points
 
@@ -856,20 +856,20 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
 
     // TODO: Q API MUST BE CLEANED UP!
 
-    if (!theQInfo->IsInside(theOptions.time))
+    if (!theQInfo.IsInside(theOptions.time))
     {
       // TODO: Give good error message
       return {};
     }
 
-    if (theQInfo->SizeLevels() == 1)
+    if (theQInfo.SizeLevels() == 1)
     {
       // TODO: Give good error message
       return {};
     }
 
     std::size_t nx = coordinates.size();
-    std::size_t ny = theQInfo->SizeLevels();
+    std::size_t ny = theQInfo.SizeLevels();
 
     NFmiDataMatrix<float> values(nx, ny, std::numeric_limits<float>::quiet_NaN());
     NFmiDataMatrix<NFmiPoint> coords(nx, ny, NFmiPoint());
@@ -877,19 +877,19 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     bool has_some_valid_levelvalues = false;
 
     std::size_t j = 0;
-    for (theQInfo->ResetLevel(); theQInfo->NextLevel(); ++j)
+    for (theQInfo.ResetLevel(); theQInfo.NextLevel(); ++j)
     {
-      float levelvalue = theQInfo->Level()->LevelValue();
+      float levelvalue = theQInfo.Level()->LevelValue();
       for (std::size_t i = 0; i < coordinates.size(); i++)
       {
         const int max_minutes = 360;
-        values[i][j] = theQInfo->InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
+        values[i][j] = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
 
         if (theZParameter)
         {
-          theQInfo->ParamIndex(zparam);
-          levelvalue = theQInfo->InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
-          theQInfo->ParamIndex(param);
+          theQInfo.ParamIndex(zparam);
+          levelvalue = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
+          theQInfo.ParamIndex(param);
           // TODO: Handle missing values (how??)
         }
 

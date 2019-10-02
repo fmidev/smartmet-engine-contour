@@ -60,7 +60,7 @@ class Engine : public Spine::SmartMetEngine
                                       OGRSpatialReference* theSR = 0) const;
 
   // Produce a cross section contour
-  std::vector<OGRGeometryPtr> crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo& theQInfo,
                                           const Options& theOptions,
                                           double theLon1,
                                           double theLat1,
@@ -69,7 +69,7 @@ class Engine : public Spine::SmartMetEngine
                                           std::size_t theSteps) const;
 
   // Produce a cross section contour with given parameter for Z-values
-  std::vector<OGRGeometryPtr> crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo& theQInfo,
                                           const Spine::Parameter& theZParameter,
                                           const Options& theOptions,
                                           double theLon1,

@@ -63,7 +63,7 @@ class Engine::Impl
                                       OGRSpatialReference *theSR);
 
   // Produce an OGR crossection for the given data
-  std::vector<OGRGeometryPtr> crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo &theQInfo,
                                           const Options &theOptions,
                                           const boost::optional<Spine::Parameter> &theZParameter,
                                           double theLon1,
