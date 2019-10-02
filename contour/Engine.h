@@ -8,16 +8,16 @@
 
 #include "Options.h"
 #include "Types.h"
-#include <boost/shared_ptr.hpp>
 #include <gdal/ogr_geometry.h>
 #include <gdal/ogr_spatialref.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/SmartMetEngine.h>
+#include <shared_ptr>
 #include <string>
 
-typedef NFmiDataMatrix<NFmiPoint> Coordinates;
-typedef boost::shared_ptr<Coordinates> CoordinatesPtr;
+using Coordinates = NFmiDataMatrix<NFmiPoint>;
+using CoordinatesPtr = std::shared_ptr<Coordinates>;
 
 namespace SmartMet
 {
@@ -38,7 +38,7 @@ class Engine : public Spine::SmartMetEngine
 
   // Hide caches etc behind an implementation
   class Impl;
-  boost::shared_ptr<Impl> itsImpl;
+  std::shared_ptr<Impl> itsImpl;
 
  protected:
   virtual void init();
@@ -60,7 +60,7 @@ class Engine : public Spine::SmartMetEngine
                                       OGRSpatialReference* theSR = 0) const;
 
   // Produce a cross section contour
-  std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
                                           const Options& theOptions,
                                           double theLon1,
                                           double theLat1,
@@ -69,7 +69,7 @@ class Engine : public Spine::SmartMetEngine
                                           std::size_t theSteps) const;
 
   // Produce a cross section contour with given parameter for Z-values
-  std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
                                           const Spine::Parameter& theZParameter,
                                           const Options& theOptions,
                                           double theLon1,

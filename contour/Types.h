@@ -5,10 +5,10 @@
 // ======================================================================
 
 #pragma once
-#include <boost/shared_ptr.hpp>
 #include <gdal/ogr_geometry.h>
+#include <shared_ptr>
 
 namespace SmartMet
 {
-typedef boost::shared_ptr<OGRGeometry> OGRGeometryPtr;
+typedef std::shared_ptr<OGRGeometry> OGRGeometryPtr;
 }

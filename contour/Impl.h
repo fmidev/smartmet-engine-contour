@@ -12,14 +12,14 @@
 #include "DataMatrixAdapter.h"
 #include "Engine.h"
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <geos/geom/Geometry.h>
 #include <geos/version.h>
 #include <macgyver/Cache.h>
 #include <tron/FmiBuilder.h>
 #include <tron/Tron.h>
+#include <shared_ptr>
 
-typedef boost::shared_ptr<geos::geom::Geometry> GeometryPtr;
+using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
 // Contourers
 
@@ -64,7 +64,7 @@ class Engine::Impl
                                       OGRSpatialReference *theSR);
 
   // Produce an OGR crossection for the given data
-  std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(std::shared_ptr<NFmiFastQueryInfo> theQInfo,
                                           const Options &theOptions,
                                           const boost::optional<Spine::Parameter> &theZParameter,
                                           double theLon1,
@@ -81,14 +81,14 @@ class Engine::Impl
   std::unique_ptr<Config> itsConfig;  // ptr for delayed initialization
 
 #if GEOS_VERSION_MAJOR == 3
-#if GEOS_VERSION_MINOR < 7  
-  boost::shared_ptr<geos::geom::GeometryFactory> itsGeomFactory;
+#if GEOS_VERSION_MINOR < 7
+  std::shared_ptr<geos::geom::GeometryFactory> itsGeomFactory;
 #else
   geos::geom::GeometryFactory::Ptr itsGeomFactory;
 #endif
 #else
 #pragma message(Cannot handle current GEOS version correctly)
-#endif  
+#endif
 
   // Cached contours
 
