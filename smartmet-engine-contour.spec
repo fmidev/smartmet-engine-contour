@@ -4,7 +4,7 @@
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
 Version: 19.10.31
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -20,7 +20,7 @@ BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 19.10.31
 BuildRequires: smartmet-library-newbase-devel >= 19.10.31
 BuildRequires: smartmet-library-macgyver-devel >= 19.9.26
-BuildRequires: smartmet-library-tron >= 19.9.26
+BuildRequires: smartmet-library-tron >= 19.10.31
 BuildRequires: smartmet-library-gis-devel >= 19.9.26
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
@@ -78,6 +78,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Oct 31 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.10.31-2.fmi
+- Rebuild due to Tron API changes (shared_ptr)
+
 * Thu Oct 31 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.10.31-1.fmi
 - Rebuilt due to newbase API/ABI changes
 
