@@ -205,7 +205,7 @@ namespace
  */
 // ----------------------------------------------------------------------
 
-std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
+std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     double lon1, double lat1, double lon2, double lat2, std::size_t steps)
 {
   try
@@ -230,7 +230,7 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     double bearing = startpoint.Direction(endpoint);
     double distance = startpoint.Distance(endpoint);
 
-    checkedVector<NFmiPoint> coordinates;
+    std::vector<NFmiPoint> coordinates;
     coordinates.push_back(startpoint.GetLocation());
 
     std::vector<double> distances;
@@ -318,15 +318,15 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
 
 Engine::Impl::Impl(const std::string &theFileName)
 #if GEOS_VERSION_MAJOR == 3
-#if GEOS_VERSION_MINOR < 7  
+#if GEOS_VERSION_MINOR < 7
     : itsConfigFile(theFileName), itsGeomFactory(new geos::geom::GeometryFactory())
 #else
     : itsConfigFile(theFileName), itsGeomFactory(geos::geom::GeometryFactory::create())
 #endif
 #else
 #pragma message(Cannot handle current GEOS version correctly)
-#endif  
-  
+#endif
+
 {
 }
 
