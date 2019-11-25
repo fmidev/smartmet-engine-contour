@@ -1,6 +1,7 @@
 #pragma once
 
 #include <newbase/NFmiDataMatrix.h>
+#include <newbase/NFmiPoint.h>
 
 class DataMatrixAdapter
 {

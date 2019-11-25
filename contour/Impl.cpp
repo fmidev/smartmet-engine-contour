@@ -205,7 +205,7 @@ namespace
  */
 // ----------------------------------------------------------------------
 
-std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
+std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     double lon1, double lat1, double lon2, double lat2, std::size_t steps)
 {
   try
@@ -230,7 +230,7 @@ std::pair<checkedVector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     double bearing = startpoint.Direction(endpoint);
     double distance = startpoint.Distance(endpoint);
 
-    checkedVector<NFmiPoint> coordinates;
+    std::vector<NFmiPoint> coordinates;
     coordinates.push_back(startpoint.GetLocation());
 
     std::vector<double> distances;
