@@ -7,9 +7,6 @@
 #include "Impl.h"
 #include "Options.h"
 #include <boost/functional/hash.hpp>
-#include <gdal/ogr_core.h>
-#include <gdal/ogr_geometry.h>
-#include <gdal/ogr_spatialref.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
 #include <gis/OGR.h>
@@ -19,6 +16,9 @@
 #include <tron/SavitzkyGolay2D.h>
 #include <cmath>
 #include <limits>
+#include <ogr_core.h>
+#include <ogr_geometry.h>
+#include <ogr_spatialref.h>
 
 #include <gis/OGR.h>
 
@@ -115,7 +115,7 @@ std::size_t hash_value(const OGRSpatialReference &theSR)
     char *wkt;
     theSR.exportToWkt(&wkt);
     std::string tmp(wkt);
-    OGRFree(wkt);
+    CPLFree(wkt);
     boost::hash<std::string> hasher;
     return hasher(tmp);
   }
@@ -401,7 +401,7 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
                                            Interpolation interpolation)
 {
   // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(itsGeomFactory);
+  Tron::FmiBuilder builder(*itsGeomFactory);
 
   // isoline
   switch (interpolation)
@@ -445,7 +445,7 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
                                            Interpolation interpolation)
 {
   // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(itsGeomFactory);
+  Tron::FmiBuilder builder(*itsGeomFactory);
 
   double lo = -std::numeric_limits<double>::infinity();
   double hi = +std::numeric_limits<double>::infinity();

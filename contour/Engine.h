@@ -8,8 +8,8 @@
 
 #include "Options.h"
 #include "Types.h"
-#include <gdal/ogr_geometry.h>
-#include <gdal/ogr_spatialref.h>
+#include <ogr_geometry.h>
+#include <ogr_spatialref.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/SmartMetEngine.h>

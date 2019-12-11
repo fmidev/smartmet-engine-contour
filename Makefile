@@ -26,7 +26,7 @@ objdir = obj
 
 # Compiler options
 
-DEFINES = -DUNIX -DWGS84 -D_REENTRANT
+DEFINES = -DUNIX -DWGS84 -D_REENTRANT -DUSE_UNSTABLE_GEOS_CPP_API
 
 -include $(HOME)/.smartmet.mk
 GCC_DIAG_COLOR ?= always
@@ -43,7 +43,9 @@ ifeq ($(CXX), clang++)
 
  INCLUDES = \
 	-isystem $(includedir) \
-	-isystem $(includedir)/smartmet
+	-isystem $(includedir)/smartmet \
+	-isystem $(PREFIX)/gdal30/include \
+	-isystem $(PREFIX)/geos38/include
 
 else
 
@@ -65,7 +67,9 @@ else
 
  INCLUDES = \
 	-I$(includedir) \
-	-I$(includedir)/smartmet
+	-I$(includedir)/smartmet \
+	-I$(PREFIX)/gdal30/include \
+	-I$(PREFIX)/geos38/include
 
 endif
 
@@ -96,8 +100,8 @@ LIBS = -L$(libdir) \
 	-lsmartmet-macgyver \
 	-lsmartmet-tron \
 	-lsmartmet-gis \
-	-lgeos \
-	-lgdal \
+	-L$(PREFIX)/gdal30/lib `pkg-config --libs gdal30` \
+	-L$(PREFIX)/geos38/lib64 -lgeos \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_filesystem \

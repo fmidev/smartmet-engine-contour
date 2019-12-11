@@ -1,6 +1,6 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
-FLAGS = -std=c++11 -Wall -W -Wno-unused-parameter
+FLAGS = -std=c++11 -Wall -W -Wno-unused-parameter -DUSE_UNSTABLE_GEOS_CPP_API
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 	-Wcast-align -Wconversion -Winline \
@@ -22,9 +22,11 @@ CC = g++
 CFLAGS = -DUNIX -O0 -g $(FLAGS) -Wno-write-strings
 
 INCLUDES = \
-	-I ../contour \
-	-I /usr/include/smartmet \
-	-I /usr/include/smartmet/newbase \
+	-I../contour \
+	-I/usr/include/smartmet \
+	-I/usr/include/smartmet/newbase \
+	-I/usr/gdal30/include \
+	-I/usr/geos38/include \
 	`pkg-config --cflags libconfig++`
 
 LIBS = \
@@ -33,8 +35,8 @@ LIBS = \
 	-lsmartmet-spine \
 	-lsmartmet-gis \
 	-lsmartmet-newbase \
-	-lgeos \
-	-lgdal \
+	-L/usr/gdal30/lib -lgdal \
+	-L/usr/geos38/lib64 -lgeos \
 	-lboost_date_time \
 	-lboost_iostreams \
 	-lboost_filesystem \

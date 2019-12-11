@@ -308,7 +308,7 @@ void crossection()
 
     boost::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
 
-    auto geom = *(contour->crossection(qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
+    auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
@@ -325,7 +325,7 @@ void crossection()
     Engine::Contour::Options opt(temperature, t, limits);
     boost::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
 
-    auto geom = *(contour->crossection(qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
+    auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok = "M54.5 25 59.8 30 59.8 25 74.7 22.5 59.8 20.3 55.5 24.3Z";
@@ -747,9 +747,9 @@ void worldwrap()
   OGREnvelope envelope;
   geoms[0]->getEnvelope(&envelope);
   if (envelope.MinX != 0)
-    TEST_FAILED("Contour 0-2 minimum x value should be 0");
+    TEST_FAILED("Contour 0-2 minimum x value should be 0, not " + std::to_string(envelope.MinX));
   if (envelope.MaxX != 360)
-    TEST_FAILED("Contour 0-2 maximum x value should be 360");
+    TEST_FAILED("Contour 0-2 maximum x value should be 360, not " + std::to_string(envelope.MaxX));
 
   TEST_PASSED();
 }

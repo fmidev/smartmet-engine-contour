@@ -5,7 +5,7 @@
 // ======================================================================
 
 #pragma once
-#include <gdal/ogr_geometry.h>
+#include <ogr_geometry.h>
 #include <memory>
 
 namespace SmartMet

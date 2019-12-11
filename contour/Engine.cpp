@@ -9,7 +9,7 @@
 #include "Impl.h"
 #include <spine/Exception.h>
 
-#include <gdal/cpl_conv.h>  // For configuring GDAL
+#include <cpl_conv.h>  // For configuring GDAL
 
 namespace SmartMet
 {
