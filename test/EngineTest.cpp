@@ -1,18 +1,17 @@
 #include "Engine.h"
-#include <gis/Box.h>
-#include <gis/OGR.h>
-#include <regression/tframe.h>
-
-#include <engines/querydata/Engine.h>
-#include <spine/Options.h>
-#include <spine/ParameterFactory.h>
-#include <spine/Reactor.h>
-
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/timer/timer.hpp>
-
+#include <engines/querydata/Engine.h>
+#include <gis/Box.h>
+#include <gis/OGR.h>
+#include <regression/tframe.h>
+#include <spine/Options.h>
+#include <spine/ParameterFactory.h>
+#include <spine/Reactor.h>
 #include <libconfig.h++>
+#include <ogr_geometry.h>
+#include <ogr_spatialref.h>
 
 using namespace std;
 
