@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 20.2.13
+Version: 20.3.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -17,21 +17,21 @@ BuildRequires: boost-devel
 BuildRequires: geos38-devel
 BuildRequires: gdal30-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 20.2.7
-BuildRequires: smartmet-library-newbase-devel >= 20.2.13
-BuildRequires: smartmet-library-macgyver-devel >= 20.2.5
-BuildRequires: smartmet-library-tron >= 20.2.12
-BuildRequires: smartmet-library-gis-devel >= 20.2.13
+BuildRequires: smartmet-library-spine-devel >= 20.3.9
+BuildRequires: smartmet-library-newbase-devel >= 20.3.30
+BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
+BuildRequires: smartmet-library-tron >= 20.3.26
+BuildRequires: smartmet-library-gis-devel >= 20.3.26
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
-Requires: smartmet-library-gis >= 20.2.13
+Requires: smartmet-library-gis >= 20.3.26
 Requires: geos38
 Requires: gdal30-libs
 Requires: libconfig
-Requires: smartmet-library-newbase >= 20.2.13
-Requires: smartmet-library-macgyver >= 20.2.5
-Requires: smartmet-library-spine >= 20.2.7
+Requires: smartmet-library-newbase >= 20.3.30
+Requires: smartmet-library-macgyver >= 20.3.5
+Requires: smartmet-library-spine >= 20.3.9
 %if 0%{rhel} >= 7
 Requires: boost-date-time
 Requires: boost-filesystem
@@ -78,6 +78,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Mar 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.30-1.fmi
+- Full repackaging of the server
+
 * Thu Feb 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.13-1.fmi
 - Use GDAL forward declarations in Engine API to avoid dependency escalation
 
