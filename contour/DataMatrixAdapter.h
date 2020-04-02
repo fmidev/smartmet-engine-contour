@@ -1,5 +1,6 @@
 #pragma once
 
+#include <newbase/NFmiCoordinateMatrix.h>
 #include <newbase/NFmiDataMatrix.h>
 #include <newbase/NFmiPoint.h>
 
@@ -11,7 +12,7 @@ class DataMatrixAdapter
 
   typedef NFmiDataMatrix<float>::size_type size_type;
 
-  DataMatrixAdapter(NFmiDataMatrix<float>& theMatrix, const NFmiDataMatrix<NFmiPoint>& theCoords)
+  DataMatrixAdapter(NFmiDataMatrix<float>& theMatrix, const NFmiCoordinateMatrix& theCoords)
       : itsCoords(theCoords),
         itsMatrix(theMatrix),
         itsWidth(theMatrix.NX()),
@@ -32,13 +33,13 @@ class DataMatrixAdapter
   coord_type x(size_type i, size_type j) const
   {
     if (i < itsWidth)
-      return itsCoords[i][j].X();
+      return itsCoords.X(i, j);
     else
       return 360;  // TODO: Could be 180 too for some data
   }
 
   // For latitude wrap-around value should be OK or the data is not OK
-  coord_type y(size_type i, size_type j) const { return itsCoords[i % itsWidth][j].Y(); }
+  coord_type y(size_type i, size_type j) const { return itsCoords.Y(i % itsWidth, j); }
   size_type width() const { return itsWidth; }
   size_type height() const { return itsHeight; }
   void swap(DataMatrixAdapter& theOther)
@@ -50,7 +51,7 @@ class DataMatrixAdapter
 
  private:
   DataMatrixAdapter();
-  const NFmiDataMatrix<NFmiPoint>& itsCoords;
+  const NFmiCoordinateMatrix& itsCoords;
   NFmiDataMatrix<float>& itsMatrix;
   size_type itsWidth;
   size_type itsHeight;

@@ -20,8 +20,6 @@
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
 
-#include <gis/OGR.h>
-
 namespace
 {
 // ----------------------------------------------------------------------
@@ -73,20 +71,20 @@ bool is_handedness_wrong(const Coordinates &coords)
   std::size_t wrong = 0;
   std::size_t invalid = 0;
 
-  const auto nx = coords.NX();
-  const auto ny = coords.NY();
+  const auto nx = coords.Width();
+  const auto ny = coords.Height();
 
   for (std::size_t i = 0; i < nx - 1; i++)
     for (std::size_t j = 0; j < ny - 1; j++)
     {
-      auto result = convex_and_clockwise(coords[i][j].X(),
-                                         coords[i][j].Y(),
-                                         coords[i][j + 1].X(),
-                                         coords[i][j + 1].Y(),
-                                         coords[i + 1][j + 1].X(),
-                                         coords[i + 1][j + 1].Y(),
-                                         coords[i + 1][j].X(),
-                                         coords[i + 1][j].Y());
+      auto result = convex_and_clockwise(coords.X(i, j),
+                                         coords.Y(i, j),
+                                         coords.X(i, j + 1),
+                                         coords.Y(i, j + 1),
+                                         coords.X(i + 1, j + 1),
+                                         coords.Y(i + 1, j + 1),
+                                         coords.X(i + 1, j),
+                                         coords.Y(i + 1, j));
       if (!result)
         ++invalid;
       else if (*result)
@@ -608,7 +606,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
         std::size_t j2 = ny - j1 - 1;
 
         for (std::size_t i = 0; i < nx; i++)
-          std::swap((*coords)[i][j1], (*coords)[i][j2]);
+        {
+          auto pt1 = (*coords)(i, j1);
+          auto pt2 = (*coords)(i, j2);
+          coords->Set(i, j1, pt2);
+          coords->Set(i, j2, pt1);
+        }
       }
     }
 
@@ -872,7 +875,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     std::size_t ny = theQInfo.SizeLevels();
 
     NFmiDataMatrix<float> values(nx, ny, std::numeric_limits<float>::quiet_NaN());
-    NFmiDataMatrix<NFmiPoint> coords(nx, ny, NFmiPoint());
+    NFmiCoordinateMatrix coords(nx, ny);
 
     bool has_some_valid_levelvalues = false;
 
@@ -899,7 +902,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
         if (!std::isnan(levelvalue))
           has_some_valid_levelvalues = true;
 
-        coords[i][j] = NFmiPoint(distances[i], levelvalue);
+        coords.Set(i, j, distances[i], levelvalue);
       }
     }
 
@@ -909,7 +912,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // Make sure the y-coordinate is increasing, it may be decreasing for pressure
     // level or model level data.
 
-    if (coords[0][1] < coords[0][0])
+    if (coords(0, 1) < coords(0, 0))
     {
       for (std::size_t i = 0; i < nx; i++)
       {
@@ -918,7 +921,10 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
         while (j1 < j2)
         {
           std::swap(values[i][j1], values[i][j2]);
-          std::swap(coords[i][j1], coords[i][j2]);
+          auto pt1 = coords(i, j1);
+          auto pt2 = coords(i, j2);
+          coords.Set(i, j1, pt2);
+          coords.Set(i, j2, pt1);
           ++j1;
           --j2;
         }

@@ -16,7 +16,7 @@
 class OGRGeometry;
 class OGRSpatialReference;
 
-using Coordinates = NFmiDataMatrix<NFmiPoint>;
+using Coordinates = NFmiCoordinateMatrix;
 using CoordinatesPtr = std::shared_ptr<Coordinates>;
 using OGRGeometryPtr = std::shared_ptr<OGRGeometry>;
 
