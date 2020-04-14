@@ -1,19 +1,22 @@
 #pragma once
 
-#include <newbase/NFmiCoordinateMatrix.h>
+#include <gis/BoolMatrix.h>
+#include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiDataMatrix.h>
 #include <newbase/NFmiPoint.h>
 
 class DataMatrixAdapter
 {
  public:
-  typedef float value_type;
-  typedef double coord_type;
+  using value_type = float;
+  using coord_type = double;
+  using size_type = NFmiDataMatrix<float>::size_type;
 
-  typedef NFmiDataMatrix<float>::size_type size_type;
-
-  DataMatrixAdapter(NFmiDataMatrix<float>& theMatrix, const NFmiCoordinateMatrix& theCoords)
+  DataMatrixAdapter(NFmiDataMatrix<float>& theMatrix,
+                    const Fmi::CoordinateMatrix& theCoords,
+                    const Fmi::BoolMatrix& theValidCells)
       : itsCoords(theCoords),
+        itsValidCells(theValidCells),
         itsMatrix(theMatrix),
         itsWidth(theMatrix.NX()),
         itsHeight(theMatrix.NY())
@@ -33,27 +36,25 @@ class DataMatrixAdapter
   coord_type x(size_type i, size_type j) const
   {
     if (i < itsWidth)
-      return itsCoords.X(i, j);
+      return itsCoords.x(i, j);
     else
       return 360;  // TODO: Could be 180 too for some data
   }
 
   // For latitude wrap-around value should be OK or the data is not OK
-  coord_type y(size_type i, size_type j) const { return itsCoords.Y(i % itsWidth, j); }
+  coord_type y(size_type i, size_type j) const { return itsCoords.y(i % itsWidth, j); }
+
+  bool valid(size_type i, size_type j) const { return itsValidCells(i, j); }
+
   size_type width() const { return itsWidth; }
   size_type height() const { return itsHeight; }
-  void swap(DataMatrixAdapter& theOther)
-  {
-    std::swap(itsMatrix, theOther.itsMatrix);
-    std::swap(itsWidth, theOther.itsWidth);
-    std::swap(itsHeight, theOther.itsHeight);
-  }
 
  private:
   DataMatrixAdapter();
-  const NFmiCoordinateMatrix& itsCoords;
+  const Fmi::CoordinateMatrix& itsCoords;
+  const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
-  size_type itsWidth;
-  size_type itsHeight;
+  const size_type itsWidth;
+  const size_type itsHeight;
 
 };  // class DataMatrixAdapter

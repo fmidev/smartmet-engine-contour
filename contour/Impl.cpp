@@ -9,6 +9,7 @@
 #include <boost/functional/hash.hpp>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
+#include <gis/CoordinateMatrixAnalysis.h>
 #include <gis/OGR.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/WorkQueue.h>
@@ -22,80 +23,6 @@
 
 namespace
 {
-// ----------------------------------------------------------------------
-/*!
- * A polygon is convex if all cross products of adjacent edges are of the same sign,
- * and the sign itself says whether the polygon is clockwise or not.
- * Ref: http://www.easywms.com/node/3602
- * We must disallow non-convex cells such as V-shaped ones, since the intersections
- * formulas may then produce values outside the cell.
- *
- * Note that we permit colinear adjacent edges, since for example in latlon grids
- * the poles are represented by multiple grid points. This test thus passes the
- * redundant case of a rectangle with no area, but the rest of the code can handle it.
- *
- * Note: We must be able to detect invalid grid cells too! We shall return an
- * empty boolean for such grid cells.
- */
-// ----------------------------------------------------------------------
-
-boost::optional<bool> convex_and_clockwise(
-    double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
-{
-  if (std::isnan(x1) || std::isnan(y1) || std::isnan(x2) || std::isnan(y2) || std::isnan(x3) ||
-      std::isnan(y3) || std::isnan(x4) || std::isnan(y4))
-    return {};
-
-  // This requires all coordinates to be already checked
-  return ((x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) <= 0 &&
-          (x3 - x2) * (y4 - y3) - (y3 - y2) * (x4 - x3) <= 0 &&
-          (x4 - x3) * (y1 - y4) - (y4 - y3) * (x1 - x4) <= 0 &&
-          (x1 - x4) * (y2 - y1) - (y1 - y4) * (x2 - x1) <= 0);
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Calculate the dominant handedness of the grid
- *
- * See also convex_and_clockwise method in tron LinearInterpolation.h.
- * Note that the numbers may be quite close if we project world data
- * to a limited area, since the areas on the other side of the world
- * may also be counted. We hence require wrong handedness to dominate
- * significantly before flipping the grid.
- */
-// ----------------------------------------------------------------------
-
-bool is_handedness_wrong(const Coordinates &coords)
-{
-  std::size_t ok = 0;
-  std::size_t wrong = 0;
-  std::size_t invalid = 0;
-
-  const auto nx = coords.Width();
-  const auto ny = coords.Height();
-
-  for (std::size_t i = 0; i < nx - 1; i++)
-    for (std::size_t j = 0; j < ny - 1; j++)
-    {
-      auto result = convex_and_clockwise(coords.X(i, j),
-                                         coords.Y(i, j),
-                                         coords.X(i, j + 1),
-                                         coords.Y(i, j + 1),
-                                         coords.X(i + 1, j + 1),
-                                         coords.Y(i + 1, j + 1),
-                                         coords.X(i + 1, j),
-                                         coords.Y(i + 1, j));
-      if (!result)
-        ++invalid;
-      else if (*result)
-        ++ok;
-      else
-        ++wrong;
-    }
-
-  return (wrong > 2 * ok);
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Hash for OGR spatial reference
@@ -486,7 +413,7 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
  */
 // ----------------------------------------------------------------------
 
-bool Engine::Impl::needs_flipping(const Coordinates &coords,
+bool Engine::Impl::needs_flipping(const Fmi::CoordinateMatrix &coords,
                                   std::size_t datahash,
                                   OGRSpatialReference *srs) const
 {
@@ -503,7 +430,7 @@ bool Engine::Impl::needs_flipping(const Coordinates &coords,
 
   // Calculate handedness
 
-  bool handedness = is_handedness_wrong(coords);
+  bool handedness = false;
 
   // Cache the result
 
@@ -599,7 +526,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
       }
 
       // we copy the coordinates only when we have to flip them
-      coords.reset(new Coordinates(*coords));
+      coords.reset(new Fmi::CoordinateMatrix(*coords));
 
       for (std::size_t j1 = 0; j1 < ny / 2; j1++)
       {
@@ -607,10 +534,10 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 
         for (std::size_t i = 0; i < nx; i++)
         {
-          auto pt1 = (*coords)(i, j1);
-          auto pt2 = (*coords)(i, j2);
-          coords->Set(i, j1, pt2);
-          coords->Set(i, j2, pt1);
+          NFmiPoint pt1 = (*coords)(i, j1);
+          NFmiPoint pt2 = (*coords)(i, j2);
+          coords->set(i, j1, pt2);
+          coords->set(i, j2, pt1);
         }
       }
     }
@@ -765,7 +692,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
         extrapolate(values, theOptions.extrapolation);
 
         // Adapter for contouring
-        data.reset(new DataMatrixAdapter(values, *coords));
+        data.reset(
+            new DataMatrixAdapter(values, *coords, Fmi::analysis(*coords).m_invalid));  // SHIT
 
         if (theOptions.filter_size || theOptions.filter_degree)
         {
@@ -875,7 +803,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     std::size_t ny = theQInfo.SizeLevels();
 
     NFmiDataMatrix<float> values(nx, ny, std::numeric_limits<float>::quiet_NaN());
-    NFmiCoordinateMatrix coords(nx, ny);
+    Fmi::CoordinateMatrix coords(nx, ny);
 
     bool has_some_valid_levelvalues = false;
 
@@ -902,7 +830,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
         if (!std::isnan(levelvalue))
           has_some_valid_levelvalues = true;
 
-        coords.Set(i, j, distances[i], levelvalue);
+        coords.set(i, j, distances[i], levelvalue);
       }
     }
 
@@ -923,8 +851,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
           std::swap(values[i][j1], values[i][j2]);
           auto pt1 = coords(i, j1);
           auto pt2 = coords(i, j2);
-          coords.Set(i, j1, pt2);
-          coords.Set(i, j2, pt1);
+          coords.set(i, j1, pt2.first, pt2.second);
+          coords.set(i, j2, pt1.first, pt2.second);
           ++j1;
           --j2;
         }
@@ -934,7 +862,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // Make sure the values are NaN instead of kFloatMissing
     set_missing_to_nan(values);
 
-    DataMatrixAdapter data(values, coords);
+    // Don't bother analyzing the grid for cross sections, the Z coordinates
+    // should always be fine.
+
+    Fmi::BoolMatrix grid_is_fine(coords.width(), coords.height(), true);
+    DataMatrixAdapter data(values, coords, grid_is_fine);
     MyHints hints(data);
 
     // results first include isolines, then isobands

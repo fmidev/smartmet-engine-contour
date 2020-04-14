@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 20.4.2
+Version: 20.4.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -18,18 +18,18 @@ BuildRequires: geos38-devel
 BuildRequires: gdal30-devel
 BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 20.3.9
-BuildRequires: smartmet-library-newbase-devel >= 20.3.31
+BuildRequires: smartmet-library-newbase-devel >= 20.4.6
 BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
-BuildRequires: smartmet-library-tron >= 20.3.26
-BuildRequires: smartmet-library-gis-devel >= 20.3.26
+BuildRequires: smartmet-library-tron >= 20.4.9
+BuildRequires: smartmet-library-gis-devel >= 20.4.8
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
-Requires: smartmet-library-gis >= 20.3.26
+Requires: smartmet-library-gis >= 20.4.8
 Requires: geos38
 Requires: gdal30-libs
 Requires: libconfig
-Requires: smartmet-library-newbase >= 20.3.31
+Requires: smartmet-library-newbase >= 20.4.6
 Requires: smartmet-library-macgyver >= 20.3.5
 Requires: smartmet-library-spine >= 20.3.9
 %if 0%{rhel} >= 7
@@ -78,6 +78,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Apr  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.9-1.fmi
+- Repackaged since code inlines from Tron changed
+
 * Thu Apr  2 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.2-1.fmi
 - Use NFmiCoordinateMatrix instead of NFmiDataMatrix<NFmiPoint>
 

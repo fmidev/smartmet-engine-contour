@@ -98,7 +98,7 @@ class Engine::Impl
   typedef Fmi::Cache::Cache<std::size_t, bool> HandednessCache;
   mutable HandednessCache itsHandednessCache;
 
-  bool needs_flipping(const Coordinates &coords,
+  bool needs_flipping(const Fmi::CoordinateMatrix &coords,
                       std::size_t datahash,
                       OGRSpatialReference *srs) const;
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Options.h"
+#include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/SmartMetEngine.h>
@@ -16,8 +17,7 @@
 class OGRGeometry;
 class OGRSpatialReference;
 
-using Coordinates = NFmiCoordinateMatrix;
-using CoordinatesPtr = std::shared_ptr<Coordinates>;
+using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 using OGRGeometryPtr = std::shared_ptr<OGRGeometry>;
 
 namespace SmartMet
