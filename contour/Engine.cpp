@@ -567,6 +567,60 @@ void set_missing_to_nan(NFmiDataMatrix<float> &theValues)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Calculate cache keys for the contours to be calculated
+ */
+// ----------------------------------------------------------------------
+
+std::vector<std::size_t> contour_cache_keys(std::size_t theQhash,
+                                            const Fmi::SpatialReference &theOutputCRS,
+                                            const Options &theOptions)
+{
+  // The hash for the result
+  auto common_hash = theQhash;
+  boost::hash_combine(common_hash, theOptions.filtered_data_hash_value());
+  boost::hash_combine(common_hash, theOutputCRS.hashValue());
+
+  // results first include isolines, then isobands
+  const auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
+
+  std::vector<std::size_t> hash_values(nresults, 0);
+
+  const auto isoline_hash = boost::hash_value("isoline");
+  const auto isoband_hash = boost::hash_value("isoband");
+
+  for (auto icontour = 0ul; icontour < nresults; icontour++)
+  {
+    auto hash = common_hash;
+    if (icontour < theOptions.isovalues.size())
+    {
+      boost::hash_combine(hash, isoline_hash);
+      boost::hash_combine(hash, boost::hash_value(theOptions.isovalues[icontour]));
+    }
+    else
+    {
+      boost::hash_combine(hash, isoband_hash);
+
+      auto i = icontour - theOptions.isovalues.size();
+
+      // TODO: Use generic code as in wms/Hash.h
+      if (theOptions.limits[i].lolimit)
+        boost::hash_combine(hash, boost::hash_value(*theOptions.limits[i].lolimit));
+      else
+        boost::hash_combine(hash, boost::hash_value(false));
+
+      if (theOptions.limits[i].hilimit)
+        boost::hash_combine(hash, boost::hash_value(*theOptions.limits[i].hilimit));
+      else
+        boost::hash_combine(hash, boost::hash_value(false));
+    }
+
+    hash_values[icontour] = hash;
+  }
+  return hash_values;
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Contour producing vector of OGR geometries
  */
 // ----------------------------------------------------------------------
@@ -592,16 +646,16 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     if (nx == 0 || ny == 0)
       return {};
 
-    // The hash for the result
-    auto common_hash = theQhash;
-    boost::hash_combine(common_hash, theOptions.filtered_data_hash_value());
-    boost::hash_combine(common_hash, theOutputCRS.hashValue());
-
     // results first include isolines, then isobands
     auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
 
-    // The results
     std::vector<OGRGeometryPtr> retval(nresults);
+
+    // Calculate the cache keys for all the contours. This enables us to test
+    // if everything is cached already without doing any data processing.
+
+    std::vector<std::size_t> contour_hash_values =
+        contour_cache_keys(theQhash, theOutputCRS, theOptions);
 
     // Make a copy of input data to enable filtering.
     // TODO: Use lazy initialization as in data and hints
@@ -715,28 +769,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     for (auto icontour = 0ul; icontour < nresults; icontour++)
     {
       // Establish cache hash
-      auto hash = common_hash;
-      if (icontour < theOptions.isovalues.size())
-      {
-        boost::hash_combine(hash, boost::hash_value("isoline"));
-        boost::hash_combine(hash, boost::hash_value(theOptions.isovalues[icontour]));
-      }
-      else
-      {
-        auto i = icontour - theOptions.isovalues.size();
-        boost::hash_combine(hash, boost::hash_value("isoband"));
-
-        // TODO: Use generic code as in wms/Hash.h
-        if (theOptions.limits[i].lolimit)
-          boost::hash_combine(hash, boost::hash_value(*theOptions.limits[i].lolimit));
-        else
-          boost::hash_combine(hash, boost::hash_value(false));
-
-        if (theOptions.limits[i].hilimit)
-          boost::hash_combine(hash, boost::hash_value(*theOptions.limits[i].hilimit));
-        else
-          boost::hash_combine(hash, boost::hash_value(false));
-      }
+      auto hash = contour_hash_values[icontour];
 
       auto opt_geom = itsContourCache.find(hash);
       if (opt_geom)
