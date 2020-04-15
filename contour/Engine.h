@@ -8,6 +8,7 @@
 
 #include "Options.h"
 #include <gis/CoordinateMatrix.h>
+#include <gis/SpatialReference.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/SmartMetEngine.h>
@@ -50,15 +51,15 @@ class Engine : public Spine::SmartMetEngine
 
   Engine(const std::string& theFileName);
 
-  // Produce vector of OGR geometries in world XY coordinates
+  // Produce vector of OGR geometries in output spatial reference
 
   std::vector<OGRGeometryPtr> contour(std::size_t theQhash,
-                                      const std::string theQAreaWKT,
+                                      const Fmi::SpatialReference& theDataCRS,
+                                      const Fmi::SpatialReference& theOutputCRS,
                                       const NFmiDataMatrix<float>& theMatrix,
                                       const CoordinatesPtr theCoordinates,
                                       const Options& theOptions,
-                                      bool worldwrap,
-                                      OGRSpatialReference* theSR = 0) const;
+                                      bool worldwrap) const;
 
   // Produce a cross section contour
   std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo& theQInfo,

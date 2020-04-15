@@ -41,7 +41,6 @@ void lines()
 
   std::size_t qhash = Engine::Querydata::hash_value(q);
   std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
 
   // Temperature for 200808061200 UTC:
   // Min:6.01 Mean:14.84 Max:25.95
@@ -58,7 +57,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
+    CoordinatesPtr coords = qengine->getWorldCoordinates(q);
     auto geom =
         *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
 
