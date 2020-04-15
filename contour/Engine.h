@@ -18,7 +18,6 @@
 class OGRGeometry;
 class OGRSpatialReference;
 
-using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 using OGRGeometryPtr = std::shared_ptr<OGRGeometry>;
 
 namespace SmartMet
@@ -53,11 +52,11 @@ class Engine : public Spine::SmartMetEngine
 
   // Produce vector of OGR geometries in output spatial reference
 
-  std::vector<OGRGeometryPtr> contour(std::size_t theQhash,
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
                                       const Fmi::SpatialReference& theDataCRS,
                                       const Fmi::SpatialReference& theOutputCRS,
                                       const NFmiDataMatrix<float>& theMatrix,
-                                      const CoordinatesPtr theCoordinates,
+                                      const Fmi::CoordinateMatrix& theCoordinates,
                                       const Options& theOptions,
                                       bool worldwrap) const;
 

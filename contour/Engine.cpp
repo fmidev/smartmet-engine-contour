@@ -68,11 +68,11 @@ class Engine::Impl
 
   // Produce vector of OGR contours for the given spatial reference
 
-  std::vector<OGRGeometryPtr> contour(std::size_t theQhash,
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
                                       const Fmi::SpatialReference &theDataCRS,
                                       const Fmi::SpatialReference &theOutputCRS,
                                       const NFmiDataMatrix<float> &theMatrix,
-                                      const CoordinatesPtr theCoordinates,
+                                      const Fmi::CoordinateMatrix &theCoordinates,
                                       const Options &theOptions,
                                       bool worldwrap) const;
 
@@ -189,12 +189,15 @@ class Extrapolation
  * This is typically used to expand the data a bit when it covers for example
  * only land areas, but visualization would leave gaps between the data and the
  * shoreline.
- /*/
+ */
+// ----------------------------------------------------------------------
 
 void extrapolate(NFmiDataMatrix<float> &theValues, int theAmount)
 {
   if (theAmount <= 0)
     return;
+
+  const auto nan = std::numeric_limits<float>::quiet_NaN();
 
   auto tmp = theValues;
   for (int i = 0; i < theAmount; i++)
@@ -205,16 +208,16 @@ void extrapolate(NFmiDataMatrix<float> &theValues, int theAmount)
         if (std::isnan(tmp[i][j]))
         {
           Extrapolation ext;
-          ext(theValues.At(i - 1, j, std::numeric_limits<float>::quiet_NaN()));
-          ext(theValues.At(i + 1, j, std::numeric_limits<float>::quiet_NaN()));
-          ext(theValues.At(i, j - 1, std::numeric_limits<float>::quiet_NaN()));
-          ext(theValues.At(i, j + 1, std::numeric_limits<float>::quiet_NaN()));
+          ext(theValues.At(i - 1, j, nan));
+          ext(theValues.At(i + 1, j, nan));
+          ext(theValues.At(i, j - 1, nan));
+          ext(theValues.At(i, j + 1, nan));
           if (!ext.ok())
           {
-            ext(theValues.At(i - 1, j - 1, std::numeric_limits<float>::quiet_NaN()));
-            ext(theValues.At(i - 1, j + 1, std::numeric_limits<float>::quiet_NaN()));
-            ext(theValues.At(i + 1, j - 1, std::numeric_limits<float>::quiet_NaN()));
-            ext(theValues.At(i + 1, j + 1, std::numeric_limits<float>::quiet_NaN()));
+            ext(theValues.At(i - 1, j - 1, nan));
+            ext(theValues.At(i - 1, j + 1, nan));
+            ext(theValues.At(i + 1, j - 1, nan));
+            ext(theValues.At(i + 1, j + 1, nan));
           }
           if (ext.ok())
             tmp[i][j] = ext.result();
@@ -222,6 +225,51 @@ void extrapolate(NFmiDataMatrix<float> &theValues, int theAmount)
       }
 
     std::swap(tmp, theValues);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Flip values
+ */
+// ----------------------------------------------------------------------
+
+void flip(NFmiDataMatrix<float> &values)
+{
+  const auto nx = values.NX();
+  const auto ny = values.NY();
+
+  for (std::size_t j1 = 0; j1 < ny / 2; j1++)
+  {
+    std::size_t j2 = ny - j1 - 1;
+
+    for (std::size_t i = 0; i < nx; i++)
+      std::swap(values[i][j1], values[i][j2]);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Flip coordinates
+ */
+// ----------------------------------------------------------------------
+
+void flip(Fmi::CoordinateMatrix &coords)
+{
+  const auto nx = coords.width();
+  const auto ny = coords.height();
+
+  for (std::size_t j1 = 0; j1 < ny / 2; j1++)
+  {
+    std::size_t j2 = ny - j1 - 1;
+
+    for (std::size_t i = 0; i < nx; i++)
+    {
+      NFmiPoint pt1 = coords(i, j1);
+      NFmiPoint pt2 = coords(i, j2);
+      coords.set(i, j1, pt2);
+      coords.set(i, j2, pt1);
+    }
   }
 }
 
@@ -542,10 +590,10 @@ bool Engine::Impl::needs_flipping(const Fmi::CoordinateMatrix &coords,
  */
 // ----------------------------------------------------------------------
 
-void set_missing_to_nan(NFmiDataMatrix<float> &theValues)
+void set_missing_to_nan(NFmiDataMatrix<float> &values)
 {
-  const std::size_t nx = theValues.NX();
-  const std::size_t ny = theValues.NY();
+  const std::size_t nx = values.NX();
+  const std::size_t ny = values.NY();
   if (nx == 0 || ny == 0)
     return;
 
@@ -556,7 +604,7 @@ void set_missing_to_nan(NFmiDataMatrix<float> &theValues)
 
   for (std::size_t i = 0; i < nx; i++)
   {
-    auto &tmp = theValues[i];
+    auto &tmp = values[i];
     for (std::size_t j = 0; j < ny; j++)
     {
       if (tmp[j] == kFloatMissing)
@@ -571,12 +619,12 @@ void set_missing_to_nan(NFmiDataMatrix<float> &theValues)
  */
 // ----------------------------------------------------------------------
 
-std::vector<std::size_t> contour_cache_keys(std::size_t theQhash,
-                                            const Fmi::SpatialReference &theOutputCRS,
-                                            const Options &theOptions)
+std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
+                                                const Fmi::SpatialReference &theOutputCRS,
+                                                const Options &theOptions)
 {
   // The hash for the result
-  auto common_hash = theQhash;
+  auto common_hash = theDataHash;
   boost::hash_combine(common_hash, theOptions.filtered_data_hash_value());
   boost::hash_combine(common_hash, theOutputCRS.hashValue());
 
@@ -625,11 +673,11 @@ std::vector<std::size_t> contour_cache_keys(std::size_t theQhash,
  */
 // ----------------------------------------------------------------------
 
-std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
+std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::SpatialReference &theDataCRS,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
-                                                  const CoordinatesPtr theCoordinates,
+                                                  const Fmi::CoordinateMatrix &theCoordinates,
                                                   const Options &theOptions,
                                                   bool worldwrap) const
 {
@@ -646,57 +694,112 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
     if (nx == 0 || ny == 0)
       return {};
 
-    // results first include isolines, then isobands
-    auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
-
-    std::vector<OGRGeometryPtr> retval(nresults);
-
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
 
-    std::vector<std::size_t> contour_hash_values =
-        contour_cache_keys(theQhash, theOutputCRS, theOptions);
+    std::vector<std::size_t> contour_cache_keys =
+        get_contour_cache_keys(theDataHash, theOutputCRS, theOptions);
 
-    // Make a copy of input data to enable filtering.
-    // TODO: Use lazy initialization as in data and hints
+    // results first include isolines, then isobands
 
-    NFmiDataMatrix<float> values = theMatrix;
-    CoordinatesPtr coords = theCoordinates;
+    auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
+    std::vector<OGRGeometryPtr> retval(nresults);
 
-    // Make sure the values are NaN instead of kFloatMissing
-    set_missing_to_nan(values);
+    // Try to extract everything from the cache first without any
+    // preprocessing or parallelism
 
-    if (needs_flipping(*coords, theQhash, theDataCRS))
+    std::vector<std::size_t> todo_contours;
+
+    for (auto icontour = 0ul; icontour < nresults; icontour++)
     {
-      for (std::size_t j1 = 0; j1 < ny / 2; j1++)
-      {
-        std::size_t j2 = ny - j1 - 1;
-
-        for (std::size_t i = 0; i < nx; i++)
-          std::swap(values[i][j1], values[i][j2]);
-      }
-
-      // we copy the coordinates only when we have to flip them
-      coords.reset(new Fmi::CoordinateMatrix(*coords));
-
-      for (std::size_t j1 = 0; j1 < ny / 2; j1++)
-      {
-        std::size_t j2 = ny - j1 - 1;
-
-        for (std::size_t i = 0; i < nx; i++)
-        {
-          NFmiPoint pt1 = (*coords)(i, j1);
-          NFmiPoint pt2 = (*coords)(i, j2);
-          coords->set(i, j1, pt2);
-          coords->set(i, j2, pt1);
-        }
-      }
+      auto hash = contour_cache_keys[icontour];
+      auto opt_geom = itsContourCache.find(hash);
+      if (opt_geom)
+        retval[icontour] = *opt_geom;
+      else
+        todo_contours.push_back(icontour);
     }
 
-    // We generate helper data only if needed
+    // We're done if there is nothing on the TODO-list
 
-    std::unique_ptr<DataMatrixAdapter> data;
-    std::unique_ptr<MyHints> hints;
+    if (todo_contours.empty())
+      return retval;
+
+    // Otherwise we must process the data for contouring
+
+    // Get the values to be contoured, filter them etc
+
+    auto values = theMatrix;
+
+    // Use NaN instead of kFloatMissing for easier arithmetic
+    set_missing_to_nan(values);
+
+    // Unit conversions
+    if (theOptions.hasTransformation())
+    {
+      double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
+      double b = (theOptions.offset ? *theOptions.offset : 0.0);
+
+      for (std::size_t j = 0; j < ny; j++)
+        for (std::size_t i = 0; i < nx; i++)
+          values[i][j] = a * values[i][j] + b;
+    }
+
+    // Extrapolate if requested
+    extrapolate(values, theOptions.extrapolation);
+
+    // Get the grid analysis of the projected coordinates from
+    // the cache, or do the analysis and cache it.
+
+    TODOOOOO;
+    auto analysis = get_coordinatematrix_analysis(
+        theDataHash, theCoordinates, theDataCRS, theOutputCRS, worldwrap);
+
+    // Flip the data and the coordinates if necessary. The copy below could
+    // be avoided if we used pointers and copied the coordinates only
+    // when flipping
+
+    auto coords = theCoordinates;
+
+    if (analysis.m_needs_flipping)
+    {
+      flip(values);
+      flip(coords);
+    }
+
+    /*
+     * Finally we determine which grid cells are valid and have the correct winding rule
+     * taking into account potential flipping.
+     *
+     *    Needs flipping:
+     *         F   T
+     *       +-------
+     * CW  T | T   F      --> xor returns correct combination of CW cells even when flipped
+     *     F | F   T
+     */
+
+    auto valid_cells = analysis.m_invalid;
+
+    for (auto j = 0; j < valid_cells.height(); j++)
+      for (auto i = 0; i < valid_cells.width(); i++)
+        if (valid_cells(i, j))
+          valid_cells.set(i, j, analysis.m_needs_flipping ^ analysis.m_clockwise(i, j));
+
+    // Helper data structure for contouring
+
+    DataMatrixAdapter data(values, coords, valid_cells);
+
+    // Savitzky-Golay assumes DataMatrix likeAdapter API, not NFmiDataMatrix like API, hence the
+    // filtering is delayed until this point.
+    if (theOptions.filter_size || theOptions.filter_degree)
+    {
+      size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
+      size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
+      Tron::SavitzkyGolay2D::smooth(data, size, degree);
+    }
+
+    // 2D search structure for the final values
+    MyHints hints(data);
 
     // Parallel processing of the contours
 
@@ -716,13 +819,13 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
             if (args.i < theOptions.isovalues.size())
             {
               geom = internal_isoline(
-                  *data, *hints, worldwrap, theOptions.isovalues[args.i], theOptions.interpolation);
+                  data, hints, worldwrap, theOptions.isovalues[args.i], theOptions.interpolation);
             }
             else
             {
               auto iband = args.i - theOptions.isovalues.size();
-              geom = internal_isoband(*data,
-                                      *hints,
+              geom = internal_isoband(data,
+                                      hints,
                                       worldwrap,
                                       theOptions.limits[iband].lolimit,
                                       theOptions.limits[iband].hilimit,
@@ -766,58 +869,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
 
     Fmi::WorkQueue<Args> workqueue(contourer, concurrency);
 
-    for (auto icontour = 0ul; icontour < nresults; icontour++)
+    for (auto icontour : todo_contours)
     {
-      // Establish cache hash
-      auto hash = contour_hash_values[icontour];
-
-      auto opt_geom = itsContourCache.find(hash);
-      if (opt_geom)
-      {
-        retval[icontour] = *opt_geom;
-        continue;
-      }
-
-      // Perform unit conversion, smoothing and building hints only once.
-      // This will be done only if some contour wasn't in the cache.
-
-      if (!data)
-      {
-        // Perform unit conversion
-
-        if (theOptions.hasTransformation())
-        {
-          double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
-          double b = (theOptions.offset ? *theOptions.offset : 0.0);
-
-          std::size_t nx = values.NX();
-          std::size_t ny = values.NY();
-
-          for (std::size_t j = 0; j < ny; j++)
-            for (std::size_t i = 0; i < nx; i++)
-              values[i][j] = a * values[i][j] + b;
-        }
-
-        // Extrapolate if requested
-        extrapolate(values, theOptions.extrapolation);
-
-        // Adapter for contouring
-        data.reset(
-            new DataMatrixAdapter(values, *coords, Fmi::analysis(*coords).m_invalid));  // SHIT
-
-        if (theOptions.filter_size || theOptions.filter_degree)
-        {
-          size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
-          size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
-          Tron::SavitzkyGolay2D::smooth(*data, size, degree);
-        }
-
-        // Search tree for extremum values
-        hints.reset(new MyHints(*data));
-      }
-
-      // Calculate GEOS geometry result in a separate thread
-      Args args{icontour, hash};
+      Args args{icontour, contour_cache_keys[icontour]};
       workqueue(args);
     }
 
@@ -1111,18 +1165,18 @@ void Engine::shutdown()
  */
 // ----------------------------------------------------------------------
 
-std::vector<OGRGeometryPtr> Engine::contour(std::size_t theQhash,
+std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
                                             const Fmi::SpatialReference &theDataCRS,
                                             const Fmi::SpatialReference &theOutputCRS,
                                             const NFmiDataMatrix<float> &theMatrix,
-                                            const CoordinatesPtr theCoordinates,
+                                            const Fmi::CoordinateMatrix &theCoordinates,
                                             const Options &theOptions,
                                             bool worldwrap) const
 {
   try
   {
     return itsImpl->contour(
-        theQhash, theDataCRS, theOutputCRS, theMatrix, theCoordinates, theOptions, worldwrap);
+        theDataHash, theDataCRS, theOutputCRS, theMatrix, theCoordinates, theOptions, worldwrap);
   }
   catch (...)
   {
