@@ -100,13 +100,15 @@ class Engine::Impl
   using GeometryCache = Fmi::Cache::Cache<std::size_t, OGRGeometryPtr>;
   mutable GeometryCache itsContourCache;
 
-  // Cached information on the handedness of grids
-  using HandednessCache = Fmi::Cache::Cache<std::size_t, bool>;
-  mutable HandednessCache itsHandednessCache;
+  // Cached grid analyses
 
-  bool needs_flipping(const Fmi::CoordinateMatrix &coords,
-                      std::size_t datahash,
-                      OGRSpatialReference *srs) const;
+  using AnalysisCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<Fmi::CoordinateAnalysis>>;
+  mutable AnalysisCache itsAnalysisCache;
+
+  std::shared_ptr<Fmi::CoordinateAnalysis> get_analysis(std::size_t theDataHash,
+                                                        const Fmi::CoordinateMatrix &theCoordinates,
+                                                        const Fmi::SpatialReference &theOutputCRS,
+                                                        bool worldwrap) const;
 
   GeometryPtr internal_isoline(const DataMatrixAdapter &data,
                                const MyHints &hints,
@@ -413,8 +415,8 @@ void Engine::Impl::init()
     itsConfig.reset(new Config(itsConfigFile));
     itsContourCache.resize(itsConfig->getMaxContourCacheSize());
 
-    // 10,000 booleans doesn't take much space
-    itsHandednessCache.resize(10000);
+    // Rough estimate: 50 producers times 10 projections = 500
+    itsAnalysisCache.resize(1000);
   }
   catch (...)
   {
@@ -555,33 +557,30 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Returns true if the handedness of the data is incorrect
+ * \brief Return a coordinate analysis of the projected grid coordinates
  */
 // ----------------------------------------------------------------------
 
-bool Engine::Impl::needs_flipping(const Fmi::CoordinateMatrix &coords,
-                                  std::size_t datahash,
-                                  OGRSpatialReference *crs) const
+std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
+    std::size_t theDataHash,
+    const Fmi::CoordinateMatrix &theCoordinates,
+    const Fmi::SpatialReference &theOutputCRS,
+    bool worldwrap) const
 {
   // Combined hash value includes data details and output projection
-  std::size_t hash = datahash;
-  if (crs != nullptr)
-    boost::hash_combine(hash, boost::hash_value(Fmi::OGR::exportToWkt(*crs)));
+  std::size_t hash = theDataHash;
+  boost::hash_combine(hash, theOutputCRS.hashValue());
 
   // See if the result has already been cached
 
-  auto cached = itsHandednessCache.find(hash);
+  auto cached = itsAnalysisCache.find(hash);
   if (cached)
     return *cached;
 
-  // Calculate handedness
+  auto analysis = std::make_shared<Fmi::CoordinateAnalysis>(Fmi::analysis(theCoordinates));
 
-  bool handedness = false;
-
-  // Cache the result
-
-  itsHandednessCache.insert(hash, handedness);
-  return handedness;
+  itsAnalysisCache.insert(hash, analysis);
+  return analysis;
 }
 
 // ----------------------------------------------------------------------
@@ -727,8 +726,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Otherwise we must process the data for contouring
 
-    // Get the values to be contoured, filter them etc
-
     auto values = theMatrix;
 
     // Use NaN instead of kFloatMissing for easier arithmetic
@@ -751,9 +748,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Get the grid analysis of the projected coordinates from
     // the cache, or do the analysis and cache it.
 
-    TODOOOOO;
-    auto analysis = get_coordinatematrix_analysis(
-        theDataHash, theCoordinates, theDataCRS, theOutputCRS, worldwrap);
+    auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS, worldwrap);
 
     // Flip the data and the coordinates if necessary. The copy below could
     // be avoided if we used pointers and copied the coordinates only
@@ -761,7 +756,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     auto coords = theCoordinates;
 
-    if (analysis.m_needs_flipping)
+    if (analysis->needs_flipping)
     {
       flip(values);
       flip(coords);
@@ -769,21 +764,24 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     /*
      * Finally we determine which grid cells are valid and have the correct winding rule
-     * taking into account potential flipping.
+     * while taking into account potential flipping.
      *
      *    Needs flipping:
      *         F   T
      *       +-------
      * CW  T | T   F      --> xor returns correct combination of CW cells even when flipped
      *     F | F   T
+     *
+     * Note: Fmi::analysis could do this for us, and the result would be cached. This
+     *       is very fast though.
      */
 
-    auto valid_cells = analysis.m_invalid;
+    auto valid_cells = analysis->valid;
 
-    for (auto j = 0; j < valid_cells.height(); j++)
-      for (auto i = 0; i < valid_cells.width(); i++)
+    for (std::size_t j = 0; j < valid_cells.height(); j++)
+      for (std::size_t i = 0; i < valid_cells.width(); i++)
         if (valid_cells(i, j))
-          valid_cells.set(i, j, analysis.m_needs_flipping ^ analysis.m_clockwise(i, j));
+          valid_cells.set(i, j, analysis->needs_flipping ^ analysis->clockwise(i, j));
 
     // Helper data structure for contouring
 
@@ -791,6 +789,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Savitzky-Golay assumes DataMatrix likeAdapter API, not NFmiDataMatrix like API, hence the
     // filtering is delayed until this point.
+
     if (theOptions.filter_size || theOptions.filter_degree)
     {
       size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
@@ -799,15 +798,19 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
 
     // 2D search structure for the final values
+
     MyHints hints(data);
 
-    // Parallel processing of the contours
+    // Parallel processing of the contours uses this struct to identify the contour to be processed
+    // and the cache key with which to store it.
 
     struct Args
     {
       std::size_t i;
       std::size_t hash;
     };
+
+    // Lambda for processing a single contouring task (isoline or isoband)
 
     const auto contourer =
         [&retval, this, &theOptions, &theDataCRS, &theOutputCRS, &worldwrap, &data, &hints](
@@ -816,6 +819,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
           {
             // Calculate GEOS geometry result
             GeometryPtr geom;
+
             if (args.i < theOptions.isovalues.size())
             {
               geom = internal_isoline(
@@ -864,6 +868,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
         };
 
     // Do not use all cores until better balancing & locking is implemented
+
     const auto max_concurrency = std::thread::hardware_concurrency();
     const auto concurrency = std::max(1u, max_concurrency / 8);
 
