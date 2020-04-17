@@ -85,7 +85,7 @@ endif
 # Compile options in detault, debug and profile modes
 # Note: Must not use -Ofast, we need infinities
 
-CFLAGS_RELEASE = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -g
+CFLAGS_RELEASE = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
 CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -O0 -g
 
 ifneq (,$(findstring debug,$(MAKECMDGOALS)))
