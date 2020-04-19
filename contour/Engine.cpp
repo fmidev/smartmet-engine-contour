@@ -476,17 +476,19 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(*itsGeomFactory);
 
+  bool wrap = false;  // worldwrap is broken for GFS! TODO!!!!!!!!!!!!
+
   // isoline
   switch (interpolation)
   {
     case Linear:
     {
-      MyLinearContourer::line(builder, data, isovalue, worldwrap, hints);
+      MyLinearContourer::line(builder, data, isovalue, wrap, hints);
       break;
     }
     case LogLinear:
     {
-      MyLogLinearContourer::line(builder, data, isovalue, worldwrap, hints);
+      MyLogLinearContourer::line(builder, data, isovalue, wrap, hints);
       break;
     }
     case Nearest:
@@ -528,26 +530,28 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   if (hilimit)
     hi = *hilimit;
 
+  bool wrap = false;  // worldwrap is broken for GFS! TODO!!!!!!!!!!!!
+
   switch (interpolation)
   {
     case Linear:
     {
-      MyLinearContourer::fill(builder, data, lo, hi, worldwrap, hints);
+      MyLinearContourer::fill(builder, data, lo, hi, wrap, hints);
       break;
     }
     case LogLinear:
     {
-      MyLogLinearContourer::fill(builder, data, lo, hi, worldwrap, hints);
+      MyLogLinearContourer::fill(builder, data, lo, hi, wrap, hints);
       break;
     }
     case Nearest:
     {
-      MyNearestContourer::fill(builder, data, lo, hi, worldwrap, hints);
+      MyNearestContourer::fill(builder, data, lo, hi, wrap, hints);
       break;
     }
     case Discrete:
     {
-      MyDiscreteContourer::fill(builder, data, lo, hi, worldwrap, hints);
+      MyDiscreteContourer::fill(builder, data, lo, hi, wrap, hints);
       break;
     }
   }
@@ -749,6 +753,15 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // the cache, or do the analysis and cache it.
 
     auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS, worldwrap);
+
+#if 0    
+    for (std::size_t j = 0; j < analysis->valid.height(); ++j)
+      for (std::size_t i = 0; i < analysis->valid.width(); ++i)
+      {
+        if ((i < 120 || i > 270) || j < 690)
+          analysis->valid.set(i, j, false);
+      }
+#endif
 
     // Flip the data and the coordinates if necessary. The copy below could
     // be avoided if we used pointers and copied the coordinates only
