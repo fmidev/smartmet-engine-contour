@@ -21,7 +21,14 @@ endif
 CC = g++
 CFLAGS = -DUNIX -O0 -g $(FLAGS) -Wno-write-strings
 
-INCLUDES = \
+# Boost 1.69
+
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif
+
+INCLUDES += \
 	-I../contour \
 	-I/usr/include/smartmet \
 	-I/usr/include/smartmet/newbase \
@@ -29,7 +36,7 @@ INCLUDES = \
 	-I/usr/geos38/include \
 	`pkg-config --cflags libconfig++`
 
-LIBS = \
+LIBS += \
 	../contour.so \
 	/usr/share/smartmet/engines/querydata.so \
 	-lsmartmet-spine \
