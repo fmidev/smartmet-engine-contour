@@ -28,8 +28,6 @@ BuildRequires: zlib-devel
 Requires: geos38
 Requires: gdal30-libs
 Requires: libconfig
-Requires: geos
-Requires: gdal
 Requires: libconfig
 Requires: smartmet-library-newbase >= 20.4.18
 Requires: smartmet-library-macgyver >= 20.4.18
