@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 20.4.18
+Version: 20.4.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -18,10 +18,10 @@ BuildRequires: geos38-devel
 BuildRequires: gdal30-devel
 BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 20.4.18
-BuildRequires: smartmet-library-newbase-devel >= 20.4.18
+BuildRequires: smartmet-library-newbase-devel >= 20.4.20
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
 BuildRequires: smartmet-library-tron >= 20.4.18
-BuildRequires: smartmet-library-gis-devel >= 20.4.18
+BuildRequires: smartmet-library-gis-devel >= 20.4.20
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
@@ -29,10 +29,10 @@ Requires: geos38
 Requires: gdal30-libs
 Requires: libconfig
 Requires: libconfig
-Requires: smartmet-library-newbase >= 20.4.18
+Requires: smartmet-library-newbase >= 20.4.20
 Requires: smartmet-library-macgyver >= 20.4.18
 Requires: smartmet-library-spine >= 20.4.18
-Requires: smartmet-library-gis >= 20.4.18
+Requires: smartmet-library-gis >= 20.4.20
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Apr 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.20-1.fmi
+- Improved gdal30/geos38 detection
+
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgraded to Boost 1.69
 
