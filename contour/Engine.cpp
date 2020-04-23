@@ -34,6 +34,12 @@
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
+namespace SmartMet
+{
+namespace Engine
+{
+namespace Contour
+{
 // Contourers
 
 using MyTraits = Tron::Traits<double, double, Tron::InfMissing>;
@@ -52,12 +58,6 @@ using MyNearestContourer =
 using MyDiscreteContourer =
     Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::DiscreteInterpolation>;
 
-namespace SmartMet
-{
-namespace Engine
-{
-namespace Contour
-{
 class Engine::Impl
 {
  public:
@@ -73,8 +73,7 @@ class Engine::Impl
                                       const Fmi::SpatialReference &theOutputCRS,
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const Fmi::CoordinateMatrix &theCoordinates,
-                                      const Options &theOptions,
-                                      bool worldwrap) const;
+                                      const Options &theOptions) const;
 
   // Produce an OGR crossection for the given data
   std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo &theQInfo,
@@ -105,20 +104,18 @@ class Engine::Impl
   using AnalysisCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<Fmi::CoordinateAnalysis>>;
   mutable AnalysisCache itsAnalysisCache;
 
-  std::shared_ptr<Fmi::CoordinateAnalysis> get_analysis(std::size_t theDataHash,
-                                                        const Fmi::CoordinateMatrix &theCoordinates,
-                                                        const Fmi::SpatialReference &theOutputCRS,
-                                                        bool worldwrap) const;
+  std::shared_ptr<Fmi::CoordinateAnalysis> get_analysis(
+      std::size_t theDataHash,
+      const Fmi::CoordinateMatrix &theCoordinates,
+      const Fmi::SpatialReference &theOutputCRS) const;
 
   GeometryPtr internal_isoline(const DataMatrixAdapter &data,
                                const MyHints &hints,
-                               bool worldwrap,
                                double isovalue,
                                Interpolation interpolation);
 
   GeometryPtr internal_isoband(const DataMatrixAdapter &data,
                                const MyHints &hints,
-                               bool worldwrap,
                                const boost::optional<double> &lolimit,
                                const boost::optional<double> &hilimit,
                                Interpolation interpolation);
@@ -469,26 +466,23 @@ void Engine::Impl::clearCache()
 
 GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
                                            const MyHints &hints,
-                                           bool worldwrap,
                                            double isovalue,
                                            Interpolation interpolation)
 {
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(*itsGeomFactory);
 
-  bool wrap = false;  // worldwrap is broken for GFS! TODO!!!!!!!!!!!!
-
   // isoline
   switch (interpolation)
   {
     case Linear:
     {
-      MyLinearContourer::line(builder, data, isovalue, wrap, hints);
+      MyLinearContourer::line(builder, data, isovalue, hints);
       break;
     }
     case LogLinear:
     {
-      MyLogLinearContourer::line(builder, data, isovalue, wrap, hints);
+      MyLogLinearContourer::line(builder, data, isovalue, hints);
       break;
     }
     case Nearest:
@@ -514,7 +508,6 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
 
 GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
                                            const MyHints &hints,
-                                           bool worldwrap,
                                            const boost::optional<double> &lolimit,
                                            const boost::optional<double> &hilimit,
                                            Interpolation interpolation)
@@ -530,28 +523,26 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   if (hilimit)
     hi = *hilimit;
 
-  bool wrap = false;  // worldwrap is broken for GFS! TODO!!!!!!!!!!!!
-
   switch (interpolation)
   {
     case Linear:
     {
-      MyLinearContourer::fill(builder, data, lo, hi, wrap, hints);
+      MyLinearContourer::fill(builder, data, lo, hi, hints);
       break;
     }
     case LogLinear:
     {
-      MyLogLinearContourer::fill(builder, data, lo, hi, wrap, hints);
+      MyLogLinearContourer::fill(builder, data, lo, hi, hints);
       break;
     }
     case Nearest:
     {
-      MyNearestContourer::fill(builder, data, lo, hi, wrap, hints);
+      MyNearestContourer::fill(builder, data, lo, hi, hints);
       break;
     }
     case Discrete:
     {
-      MyDiscreteContourer::fill(builder, data, lo, hi, wrap, hints);
+      MyDiscreteContourer::fill(builder, data, lo, hi, hints);
       break;
     }
   }
@@ -568,8 +559,7 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
 std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
     std::size_t theDataHash,
     const Fmi::CoordinateMatrix &theCoordinates,
-    const Fmi::SpatialReference &theOutputCRS,
-    bool worldwrap) const
+    const Fmi::SpatialReference &theOutputCRS) const
 {
   // Combined hash value includes data details and output projection
   std::size_t hash = theDataHash;
@@ -681,8 +671,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
-                                                  const Options &theOptions,
-                                                  bool worldwrap) const
+                                                  const Options &theOptions) const
 {
   try
   {
@@ -752,7 +741,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Get the grid analysis of the projected coordinates from
     // the cache, or do the analysis and cache it.
 
-    auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS, worldwrap);
+    auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS);
 
 #if 0    
     for (std::size_t j = 0; j < analysis->valid.height(); ++j)
@@ -825,60 +814,58 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Lambda for processing a single contouring task (isoline or isoband)
 
-    const auto contourer =
-        [&retval, this, &theOptions, &theDataCRS, &theOutputCRS, &worldwrap, &data, &hints](
-            Args &args) {
-          try
-          {
-            // Calculate GEOS geometry result
-            GeometryPtr geom;
+    const auto contourer = [&retval, this, &theOptions, &theDataCRS, &theOutputCRS, &data, &hints](
+                               Args &args) {
+      try
+      {
+        // Calculate GEOS geometry result
+        GeometryPtr geom;
 
-            if (args.i < theOptions.isovalues.size())
-            {
-              geom = internal_isoline(
-                  data, hints, worldwrap, theOptions.isovalues[args.i], theOptions.interpolation);
-            }
-            else
-            {
-              auto iband = args.i - theOptions.isovalues.size();
-              geom = internal_isoband(data,
-                                      hints,
-                                      worldwrap,
-                                      theOptions.limits[iband].lolimit,
-                                      theOptions.limits[iband].hilimit,
-                                      theOptions.interpolation);
-            }
+        if (args.i < theOptions.isovalues.size())
+        {
+          geom =
+              internal_isoline(data, hints, theOptions.isovalues[args.i], theOptions.interpolation);
+        }
+        else
+        {
+          auto iband = args.i - theOptions.isovalues.size();
+          geom = internal_isoband(data,
+                                  hints,
+                                  theOptions.limits[iband].lolimit,
+                                  theOptions.limits[iband].hilimit,
+                                  theOptions.interpolation);
+        }
 
-            // Cache as OGRGeometry
+        // Cache as OGRGeometry
 
-            if (!geom)
-            {
-              // We want to cache empty results too to save speed!
-              auto ret = OGRGeometryPtr();
-              itsContourCache.insert(args.hash, ret);
-              retval[args.i] = ret;
-              return;
-            }
+        if (!geom)
+        {
+          // We want to cache empty results too to save speed!
+          auto ret = OGRGeometryPtr();
+          itsContourCache.insert(args.hash, ret);
+          retval[args.i] = ret;
+          return;
+        }
 
-            // Convert to OGR object and cache the result
+        // Convert to OGR object and cache the result
 
-            auto ret = geos_to_ogr(geom, theOutputCRS.get()->Clone());
+        auto ret = geos_to_ogr(geom, theOutputCRS.get()->Clone());
 
-            // Despeckle even closed isolines (pressure curves)
-            if (theOptions.minarea)
-              ret.reset(Fmi::OGR::despeckle(*ret, *theOptions.minarea));
+        // Despeckle even closed isolines (pressure curves)
+        if (theOptions.minarea)
+          ret.reset(Fmi::OGR::despeckle(*ret, *theOptions.minarea));
 
-            retval[args.i] = ret;
-            itsContourCache.insert(args.hash, ret);
-          }
-          catch (...)
-          {
-            // Cannot let an exception cause termination. We'll let the user get an empty result
-            // instead.
-            Spine::Exception ex(BCP, "Contouring failed");
-            ex.printError();
-          }
-        };
+        retval[args.i] = ret;
+        itsContourCache.insert(args.hash, ret);
+      }
+      catch (...)
+      {
+        // Cannot let an exception cause termination. We'll let the user get an empty result
+        // instead.
+        Spine::Exception ex(BCP, "Contouring failed");
+        ex.printError();
+      }
+    };
 
     // Do not use all cores until better balancing & locking is implemented
 
@@ -1062,21 +1049,18 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       // Is it an isovalue request?
       bool isovaluerequest = (icontour < theOptions.isovalues.size());
 
-      bool worldwrap = false;
-
       // Calculate GEOS geometry result
       GeometryPtr geom;
       if (isovaluerequest)
       {
-        geom = internal_isoline(
-            data, hints, worldwrap, theOptions.isovalues[icontour], theOptions.interpolation);
+        geom =
+            internal_isoline(data, hints, theOptions.isovalues[icontour], theOptions.interpolation);
       }
       else
       {
         auto i = icontour - theOptions.isovalues.size();
         geom = internal_isoband(data,
                                 hints,
-                                worldwrap,
                                 theOptions.limits[i].lolimit,
                                 theOptions.limits[i].hilimit,
                                 theOptions.interpolation);
@@ -1188,13 +1172,12 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
                                             const Fmi::SpatialReference &theOutputCRS,
                                             const NFmiDataMatrix<float> &theMatrix,
                                             const Fmi::CoordinateMatrix &theCoordinates,
-                                            const Options &theOptions,
-                                            bool worldwrap) const
+                                            const Options &theOptions) const
 {
   try
   {
     return itsImpl->contour(
-        theDataHash, theDataCRS, theOutputCRS, theMatrix, theCoordinates, theOptions, worldwrap);
+        theDataHash, theDataCRS, theOutputCRS, theMatrix, theCoordinates, theOptions);
   }
   catch (...)
   {

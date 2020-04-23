@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 20.4.20
+Version: 20.4.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -18,9 +18,9 @@ BuildRequires: geos38-devel
 BuildRequires: gdal30-devel
 BuildRequires: libconfig-devel
 BuildRequires: smartmet-library-spine-devel >= 20.4.18
-BuildRequires: smartmet-library-newbase-devel >= 20.4.20
+BuildRequires: smartmet-library-newbase-devel >= 20.4.23
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
-BuildRequires: smartmet-library-tron >= 20.4.18
+BuildRequires: smartmet-library-tron >= 20.4.23
 BuildRequires: smartmet-library-gis-devel >= 20.4.20
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
@@ -29,7 +29,7 @@ Requires: geos38
 Requires: gdal30-libs
 Requires: libconfig
 Requires: libconfig
-Requires: smartmet-library-newbase >= 20.4.20
+Requires: smartmet-library-newbase >= 20.4.23
 Requires: smartmet-library-macgyver >= 20.4.18
 Requires: smartmet-library-spine >= 20.4.18
 Requires: smartmet-library-gis >= 20.4.20
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Apr 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.22-1.fmi
+- Rewrote global grid wrapping code
+
 * Wed Apr 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.20-1.fmi
 - Improved gdal30/geos38 detection
 

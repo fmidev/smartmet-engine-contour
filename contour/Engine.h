@@ -57,8 +57,7 @@ class Engine : public Spine::SmartMetEngine
                                       const Fmi::SpatialReference& theOutputCRS,
                                       const NFmiDataMatrix<float>& theMatrix,
                                       const Fmi::CoordinateMatrix& theCoordinates,
-                                      const Options& theOptions,
-                                      bool worldwrap) const;
+                                      const Options& theOptions) const;
 
   // Produce a cross section contour
   std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo& theQInfo,

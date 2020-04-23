@@ -4,7 +4,20 @@
 #include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiDataMatrix.h>
 #include <newbase/NFmiPoint.h>
+#include <spine/Exception.h>
 
+// Note: The values may be one column narrower than the coordinates if the data needs a wraparound
+// to fill the globe. In this case the last coordinate is the projected metric coordinate with
+// different value to column zero, but essentially the same location on earth in geographic
+// coordinates. The values have not been wrapped similarly, hence an extra test is needed when
+// fetching values.
+
+namespace SmartMet
+{
+namespace Engine
+{
+namespace Contour
+{
 class DataMatrixAdapter
 {
  public:
@@ -18,31 +31,22 @@ class DataMatrixAdapter
       : itsCoords(theCoords),
         itsValidCells(theValidCells),
         itsMatrix(theMatrix),
-        itsWidth(theMatrix.NX()),
-        itsHeight(theMatrix.NY())
+        itsNX(theMatrix.NX()),
+        itsWidth(theCoords.width()),
+        itsHeight(theCoords.height())
   {
+    if (theCoords.height() != theMatrix.NY() ||
+        (theCoords.width() != theMatrix.NX() && theCoords.width() != theMatrix.NX() + 1))
+      throw Spine::Exception(BCP, "Contoured data and coordinate dimensions mismatch");
   }
 
   // Provide wrap-around capability for world data
-  const value_type& operator()(size_type i, size_type j) const
-  {
-    return itsMatrix[i % itsWidth][j];
-  }
 
-  // Provide wrap-around capability for world data
-  value_type& operator()(size_type i, size_type j) { return itsMatrix[i % itsWidth][j]; }
-  // Now wrap-around for coordinates, we need both left and right
-  // edge coordinates for world data
-  coord_type x(size_type i, size_type j) const
-  {
-    if (i < itsWidth)
-      return itsCoords.x(i, j);
-    else
-      return 360;  // TODO: Could be 180 too for some data
-  }
+  const value_type& operator()(size_type i, size_type j) const { return itsMatrix[i % itsNX][j]; }
+  value_type& operator()(size_type i, size_type j) { return itsMatrix[i % itsNX][j]; }
 
-  // For latitude wrap-around value should be OK or the data is not OK
-  coord_type y(size_type i, size_type j) const { return itsCoords.y(i % itsWidth, j); }
+  coord_type x(size_type i, size_type j) const { return itsCoords.x(i, j); }
+  coord_type y(size_type i, size_type j) const { return itsCoords.y(i, j); }
 
   bool valid(size_type i, size_type j) const { return itsValidCells(i, j); }
 
@@ -54,7 +58,11 @@ class DataMatrixAdapter
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
+  const size_type itsNX;
   const size_type itsWidth;
   const size_type itsHeight;
 
 };  // class DataMatrixAdapter
+}  // namespace Contour
+}  // namespace Engine
+}  // namespace SmartMet
