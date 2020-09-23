@@ -16,7 +16,7 @@
 #include <geos/geom/Point.h>
 #include <geos/geom/Polygon.h>
 #include <geos/geom/PrecisionModel.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -79,7 +79,7 @@ void writeLinearRingSVG(const LinearRing* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -118,7 +118,7 @@ void writeLineStringSVG(const LineString* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -143,7 +143,7 @@ void writePolygonSVG(const Polygon* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -168,7 +168,7 @@ void writeMultiPointSVG(const MultiPoint* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -189,7 +189,7 @@ void writeMultiLineStringSVG(const MultiLineString* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -210,7 +210,7 @@ void writeMultiPolygonSVG(const MultiPolygon* geom, std::ostream& out)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -231,7 +231,7 @@ void writeGeometryCollectionSVG(const GeometryCollection* geom, std::ostream& ou
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -265,11 +265,11 @@ void writeSVG(const Geometry* geom, std::ostream& out)
     else if (const GeometryCollection* g = dynamic_cast<const GeometryCollection*>(geom))
       writeGeometryCollectionSVG(g, out);
     else
-      throw Spine::Exception(BCP, "Encountered an unsupported GEOS geometry component");
+      throw Fmi::Exception(BCP, "Encountered an unsupported GEOS geometry component");
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 }  // namespace
@@ -301,7 +301,7 @@ std::string getSVG(const Geometry& theGeom, int thePrecision)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

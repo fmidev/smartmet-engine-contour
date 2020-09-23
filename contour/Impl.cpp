@@ -15,7 +15,7 @@
 #include <gis/OGR.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/WorkQueue.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <tron/SavitzkyGolay2D.h>
 #include <cmath>
 #include <limits>
@@ -121,7 +121,7 @@ std::size_t hash_value(const OGRSpatialReference &theSR)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -212,13 +212,13 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   {
     // Sanity checks
     if (lon1 == lon2 && lat1 == lat2)
-      throw Spine::Exception(BCP, "Ill-defined isocircle: start and end points are equal");
+      throw Fmi::Exception(BCP, "Ill-defined isocircle: start and end points are equal");
 
     if (std::abs(lon1 - lon2) == 180 && std::abs(lat1 - (90 - lat2)) == 90)
-      throw Spine::Exception(BCP, "Ill-defined isocircle: points at opposing ends of the earth");
+      throw Fmi::Exception(BCP, "Ill-defined isocircle: points at opposing ends of the earth");
 
     if (steps < 1 || steps > 10000)
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Number of points on isocircle must be 1-10000, not " +
                                  boost::lexical_cast<std::string>(steps));
 
@@ -252,7 +252,7 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -293,7 +293,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
     {
       // we assume createFromWkb does not destroy the spatial reference on failure
       delete theSR;
-      throw Spine::Exception(BCP, "Failed to convert contoured WKB to OGRGeometry");
+      throw Fmi::Exception(BCP, "Failed to convert contoured WKB to OGRGeometry");
     }
 
     if (theSR != nullptr)
@@ -306,7 +306,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -348,7 +348,7 @@ void Engine::Impl::init()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -371,7 +371,7 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -695,7 +695,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
           {
             // Cannot let an exception cause termination. We'll let the user get an empty result
             // instead.
-            Spine::Exception ex(BCP, "Contouring failed");
+            Fmi::Exception ex(BCP, "Contouring failed");
             ex.printError();
           }
         };
@@ -787,7 +787,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theQhash,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -812,11 +812,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // Trivial option checks
 
     if (theOptions.level)
-      throw Spine::Exception(BCP, "Using the level option is meaningless for cross-sections");
+      throw Fmi::Exception(BCP, "Using the level option is meaningless for cross-sections");
     if (theOptions.filter_size)
-      throw Spine::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
+      throw Fmi::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
     if (theOptions.filter_degree)
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Using the filter_degree option is meaningless for cross-sections");
 
     // Verify height parameter is available
@@ -971,7 +971,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

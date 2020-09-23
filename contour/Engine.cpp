@@ -7,7 +7,7 @@
 #include "Engine.h"
 #include "GeosTools.h"
 #include "Impl.h"
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 
 #include <gdal/cpl_conv.h>  // For configuring GDAL
 
@@ -41,7 +41,7 @@ void Engine::init()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -59,7 +59,7 @@ CacheReportingStruct Engine::getCacheSizes() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -105,7 +105,7 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theQhash,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -131,7 +131,7 @@ std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryI
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -158,7 +158,7 @@ std::vector<OGRGeometryPtr> Engine::crossection(boost::shared_ptr<NFmiFastQueryI
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

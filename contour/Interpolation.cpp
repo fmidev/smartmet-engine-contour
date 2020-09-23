@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "Interpolation.h"
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <stdexcept>
 
 namespace SmartMet
@@ -33,11 +33,11 @@ Interpolation parseInterpolation(const std::string& theName)
     else if (theName == "Discrete")
       return Discrete;
 
-    throw Spine::Exception(BCP, "Unknown interpolation method '" + theName + "'");
+    throw Fmi::Exception(BCP, "Unknown interpolation method '" + theName + "'");
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
