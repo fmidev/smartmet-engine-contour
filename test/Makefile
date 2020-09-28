@@ -24,7 +24,7 @@ CFLAGS = -DUNIX -O0 -g $(FLAGS) -Wno-write-strings
 # Special external dependencies
 
 ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
+  INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
 endif
 
@@ -77,4 +77,4 @@ test: $(PROG)
 	done
 
 $(PROG) : % : %.cpp ../contour.so
-	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)

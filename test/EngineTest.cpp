@@ -788,6 +788,7 @@ int main(void)
   opts.parseConfig();
 
   SmartMet::Spine::Reactor reactor(opts);
+  reactor.init();
   qengine = reinterpret_cast<SmartMet::Engine::Querydata::Engine *>(
       reactor.getSingleton("Querydata", NULL));
   contour =

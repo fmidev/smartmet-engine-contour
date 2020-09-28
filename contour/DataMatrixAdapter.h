@@ -4,7 +4,7 @@
 #include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiDataMatrix.h>
 #include <newbase/NFmiPoint.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 
 // Note: The values may be one column narrower than the coordinates if the data needs a wraparound
 // to fill the globe. In this case the last coordinate is the projected metric coordinate with
@@ -37,7 +37,7 @@ class DataMatrixAdapter
   {
     if (theCoords.height() != theMatrix.NY() ||
         (theCoords.width() != theMatrix.NX() && theCoords.width() != theMatrix.NX() + 1))
-      throw Spine::Exception(BCP, "Contoured data and coordinate dimensions mismatch");
+      throw Fmi::Exception(BCP, "Contoured data and coordinate dimensions mismatch");
   }
 
   // Provide wrap-around capability for world data

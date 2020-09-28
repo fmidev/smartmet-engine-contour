@@ -17,11 +17,11 @@ BuildRequires: boost169-devel
 BuildRequires: geos38-devel
 BuildRequires: gdal30-devel
 BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 20.8.21
-BuildRequires: smartmet-library-newbase-devel >= 20.8.27
-BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
+BuildRequires: smartmet-library-spine-devel >= 20.9.23
+BuildRequires: smartmet-library-newbase-devel >= 20.9.25
+BuildRequires: smartmet-library-macgyver-devel >= 20.9.18
 BuildRequires: smartmet-library-tron >= 20.4.23
-BuildRequires: smartmet-library-gis-devel >= 20.8.27
+BuildRequires: smartmet-library-gis-devel >= 20.9.25
 BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
@@ -29,10 +29,10 @@ Requires: geos38
 Requires: gdal30-libs
 Requires: libconfig
 Requires: libconfig
-Requires: smartmet-library-newbase >= 20.8.27
-Requires: smartmet-library-macgyver >= 20.8.21
-Requires: smartmet-library-spine >= 20.8.21
-Requires: smartmet-library-gis >= 20.8.27
+Requires: smartmet-library-newbase >= 20.9.25
+Requires: smartmet-library-macgyver >= 20.9.18
+Requires: smartmet-library-spine >= 20.9.23
+Requires: smartmet-library-gis >= 20.9.25
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Sep 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.23-1.fmi
+- Use Fmi::Exception instead of Spine::Exception
+
 * Thu Aug 27 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.27-1.fmi
 - NFmiGrid API changed
 

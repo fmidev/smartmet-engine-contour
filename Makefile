@@ -34,7 +34,7 @@ GCC_DIAG_COLOR ?= always
 # Special external dependencies
 
 ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
+  INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
 endif
 
@@ -52,7 +52,6 @@ else
   INCLUDES += -I/usr/include/geos
 endif
 
-
 ifeq ($(CXX), clang++)
 
  FLAGS = \
@@ -63,8 +62,7 @@ ifeq ($(CXX), clang++)
 	-Wno-padded \
 	-Wno-missing-prototypes
 
- INCLUDES =+ \
-	-isystem $(includedir) \
+ INCLUDES += \
 	-isystem $(includedir)/smartmet
 
 else
@@ -85,7 +83,6 @@ else
  FLAGS_RELEASE = -Wuninitialized
 
  INCLUDES += \
-	-I$(includedir) \
 	-I$(includedir)/smartmet
 
 endif
@@ -162,7 +159,7 @@ configtest:
 	@if [ -x "$$(command -v cfgvalidate)" ]; then cfgvalidate -v test/cnf/contour.conf; fi
 
 $(LIBFILE): $(OBJS)
-	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
+	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(LIBFILE) $(OBJS) *~ $(SUBNAME)/*~
