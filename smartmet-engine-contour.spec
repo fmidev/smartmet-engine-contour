@@ -27,7 +27,7 @@ BuildRequires: bzip2-devel
 BuildRequires: zlib-devel
 Requires: smartmet-library-gis >= 20.8.21
 Requires: geos
-Requires: gdal
+Requires: gdal-libs
 Requires: libconfig
 Requires: smartmet-library-newbase >= 20.9.11
 Requires: smartmet-library-macgyver >= 20.9.18
@@ -42,6 +42,21 @@ Requires: boost169-thread
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
 Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
+#TestRequires: boost169-devel
+#TestRequires: bzip2-devel
+#TestRequires: gcc-c++
+#TestRequires: gdal-devel
+#TestRequires: geos-devel
+#TestRequires: libconfig-devel
+#TestRequires: libjpeg-turbo-devel
+#TestRequires: libpng-devel
+#TestRequires: smartmet-engine-querydata >= 20.10.6
+#TestRequires: smartmet-engine-querydata-devel >= 20.10.6
+#TestRequires: smartmet-library-regression >= 20.5.7
+#TestRequires: smartmet-library-spine-devel >= 20.9.23
+#TestRequires: smartmet-test-data >= 20.10.29
+#TestRequires: zlib-devel
+
 
 %description
 SmartMet contour engine
