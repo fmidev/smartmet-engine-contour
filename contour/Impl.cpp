@@ -7,9 +7,9 @@
 #include "Impl.h"
 #include "Options.h"
 #include <boost/functional/hash.hpp>
-#include <gdal/ogr_core.h>
-#include <gdal/ogr_geometry.h>
-#include <gdal/ogr_spatialref.h>
+#include <ogr_core.h>
+#include <ogr_geometry.h>
+#include <ogr_spatialref.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
 #include <gis/OGR.h>
