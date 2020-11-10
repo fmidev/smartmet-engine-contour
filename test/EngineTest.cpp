@@ -806,5 +806,5 @@ int main(void)
 
   cout << endl << "Engine tester" << endl << "=============" << endl;
   Tests::tests t;
-  t.run();
+  return t.run();
 }
