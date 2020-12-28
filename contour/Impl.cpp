@@ -7,18 +7,18 @@
 #include "Impl.h"
 #include "Options.h"
 #include <boost/functional/hash.hpp>
-#include <ogr_core.h>
-#include <ogr_geometry.h>
-#include <ogr_spatialref.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
 #include <gis/OGR.h>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/WorkQueue.h>
-#include <macgyver/Exception.h>
 #include <tron/SavitzkyGolay2D.h>
 #include <cmath>
 #include <limits>
+#include <ogr_core.h>
+#include <ogr_geometry.h>
+#include <ogr_spatialref.h>
 
 #include <gis/OGR.h>
 
@@ -115,7 +115,7 @@ std::size_t hash_value(const OGRSpatialReference &theSR)
     char *wkt;
     theSR.exportToWkt(&wkt);
     std::string tmp(wkt);
-    OGRFree(wkt);
+    CPLFree(wkt);
     boost::hash<std::string> hasher;
     return hasher(tmp);
   }
@@ -219,8 +219,8 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
 
     if (steps < 1 || steps > 10000)
       throw Fmi::Exception(BCP,
-                             "Number of points on isocircle must be 1-10000, not " +
-                                 boost::lexical_cast<std::string>(steps));
+                           "Number of points on isocircle must be 1-10000, not " +
+                               boost::lexical_cast<std::string>(steps));
 
     // Calculate bearing and distance to be travelled
 
@@ -402,7 +402,7 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
                                            Interpolation interpolation)
 {
   // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(itsGeomFactory);
+  Tron::FmiBuilder builder(*itsGeomFactory);
 
   // isoline
   switch (interpolation)
@@ -446,7 +446,7 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
                                            Interpolation interpolation)
 {
   // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(itsGeomFactory);
+  Tron::FmiBuilder builder(*itsGeomFactory);
 
   double lo = -std::numeric_limits<double>::infinity();
   double hi = +std::numeric_limits<double>::infinity();
@@ -816,8 +816,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     if (theOptions.filter_size)
       throw Fmi::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
     if (theOptions.filter_degree)
-      throw Fmi::Exception(BCP,
-                             "Using the filter_degree option is meaningless for cross-sections");
+      throw Fmi::Exception(BCP, "Using the filter_degree option is meaningless for cross-sections");
 
     // Verify height parameter is available
 

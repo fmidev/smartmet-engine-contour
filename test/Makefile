@@ -1,64 +1,31 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
-FLAGS = -std=c++11 -Wall -W -Wno-unused-parameter
+REQUIRES = geos gdal configpp
 
-EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
-	-Wcast-align -Wconversion -Winline \
-	-Wctor-dtor-privacy -Wnon-virtual-dtor -Wno-pmf-conversions \
-	-Wsign-promo -Wchar-subscripts -Wold-style-cast \
-	-Wshadow -Woverloaded-virtual
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
-DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
-
-ifeq ($(TSAN), yes)
-  FLAGS += -fsanitize=thread
-endif
-ifeq ($(ASAN), yes)
-  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
-endif
-
-
-CC = g++
-CFLAGS = -DUNIX -O0 -g $(FLAGS) -Wno-write-strings
-
-# Boost 1.69
-
-ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -isystem /usr/include/boost169
-  LIBS += -L/usr/lib64/boost169
-endif
-
-ifneq "$(wildcard /usr/gdal30/include)" ""
-  INCLUDES += -isystem /usr/gdal30/include
-  LIBS += -L$(PREFIX)/gdal30/lib
-else
-  INCLUDES += -isystem /usr/include/gdal
-endif
-
+CFLAGS = -DUNIX -DUSE_UNSTABLE_GEOS_CPP_API -O0 -g $(FLAGS)
 
 INCLUDES += \
 	-I../contour \
-	-I/usr/include/smartmet \
-	-I/usr/include/smartmet/newbase \
-	`pkg-config --cflags libconfig++`
+	-isystem /usr/include/smartmet
 
 LIBS += \
 	../contour.so \
 	/usr/share/smartmet/engines/querydata.so \
+	$(REQUIRED_LIBS) \
 	-lsmartmet-spine \
-	-lsmartmet-gis \
+	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
-	-lgeos \
-	-lgdal \
+	-lsmartmet-gis \
 	-lboost_date_time \
-	-lboost_iostreams \
-	-lboost_filesystem \
 	-lboost_thread \
+	-lboost_filesystem \
+	-lboost_regex \
+	-lboost_iostreams \
 	-lboost_timer \
 	-lboost_system \
-	`pkg-config --libs libconfig++` \
-	-lbz2 -ljpeg -lpng -lz \
-	-lpthread
+	-lbz2 -lz -lpthread
 
 all: $(PROG)
 clean:
@@ -66,9 +33,7 @@ clean:
 
 test: $(PROG)
 	@echo Running tests:
-	@for prog in $(PROG); do \
-	./$$prog; \
-	done
+	@for prog in $(PROG); do ./$$prog; done
 
 $(PROG) : % : %.cpp ../contour.so
 	$(CXX) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
