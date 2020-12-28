@@ -2,6 +2,8 @@ PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
 REQUIRES = geos gdal configpp
 
+CXX_STD=c++11
+
 include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 CFLAGS = -DUNIX -DUSE_UNSTABLE_GEOS_CPP_API -O0 -g $(FLAGS)
