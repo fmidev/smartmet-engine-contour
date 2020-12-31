@@ -15,6 +15,7 @@ BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
 %if %{defined el7}
 BuildRequires: devtoolset-7-gcc-c++
+#TestRequires: devtoolset-7-gcc-c++
 %endif
 BuildRequires: gdal32-devel
 BuildRequires: geos38-devel
