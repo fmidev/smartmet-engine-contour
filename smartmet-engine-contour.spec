@@ -13,15 +13,18 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost169-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
+%if %{defined el7}
+BuildRequires: devtoolset-7-gcc-c++
+%endif
 BuildRequires: gdal32-devel
 BuildRequires: geos38-devel
 BuildRequires: libconfig-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 20.12.15
+BuildRequires: smartmet-library-gis-devel >= 20.12.31
 BuildRequires: smartmet-library-macgyver-devel >= 20.12.15
 BuildRequires: smartmet-library-newbase-devel >= 20.12.15
-BuildRequires: smartmet-library-spine-devel >= 20.12.15
+BuildRequires: smartmet-library-spine-devel >= 20.12.30
 BuildRequires: smartmet-library-tron >= 20.12.28
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -33,10 +36,10 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos38
 Requires: libconfig
-Requires: smartmet-library-gis >= 20.12.15
+Requires: smartmet-library-gis >= 20.12.31
 Requires: smartmet-library-macgyver >= 20.12.15
 Requires: smartmet-library-newbase >= 20.12.15
-Requires: smartmet-library-spine >= 20.12.15
+Requires: smartmet-library-spine >= 20.12.30
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -52,7 +55,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 20.10.6
 #TestRequires: smartmet-engine-querydata-devel >= 20.10.6
 #TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 20.12.15
+#TestRequires: smartmet-library-spine-devel >= 20.12.30
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
