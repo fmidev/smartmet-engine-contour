@@ -35,9 +35,6 @@ void lines()
   q->param(temperature.number());
 
   // Full data area
-  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
-  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
-  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
 
   std::size_t qhash = Engine::Querydata::hash_value(q);
 
@@ -50,8 +47,7 @@ void lines()
 
   // below the minimum we get nothing
   {
-    std::vector<double> isovalues;
-    isovalues.push_back(0.0);
+    std::vector<double> isovalues{0};
     Engine::Contour::Options opt(temperature, t, isovalues);
 
     auto valueshash = qhash;
@@ -62,16 +58,15 @@ void lines()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
     if (result != ok)
-      TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
+      TEST_FAILED("Isovalue: 0\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
 
   // above the maximum we get nothing
   {
-    std::vector<double> isovalues;
-    isovalues.push_back(30.0);
+    std::vector<double> isovalues{30};
     Engine::Contour::Options opt(temperature, t, isovalues);
 
     auto valueshash = qhash;
@@ -82,16 +77,15 @@ void lines()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
     if (result != ok)
-      TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
+      TEST_FAILED("Isovalue: 30\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
 
   // should get something smallish just below the max
   {
-    std::vector<double> isovalues;
-    isovalues.push_back(25.5);
+    std::vector<double> isovalues{25};
     Engine::Contour::Options opt(temperature, t, isovalues);
 
     auto valueshash = qhash;
@@ -103,23 +97,26 @@ void lines()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
-    string ok = "M0 97.4 0.7 97.9 0.9 98 1.5 98.6 1.6 98.7 2.2 99.3 2.2 99.4 2.6 100";
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
+
+    string ok =
+        "M5.7 52 5.9 52 6 51.9 6.2 51.9 6.3 51.9 6.4 51.8 6.5 51.8 6.7 51.7 6.9 51.6 7 51.4M15.7 "
+        "52.3 15.9 52.3 16 52.3";
     if (result != ok)
-      TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
+      TEST_FAILED("Isovalue: 25\n\tExpected: " + ok + "\n\tObtained: " + result);
 
     // test another resolution
-    result = Fmi::OGR::exportToSvg(*geom, area, 0);
+    result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 2);
 
-    ok = "M0 97 1 98 1 99 2 99 3 100";
+    ok = "M5.72 51.99 5.92 51.95 5.95 51.95 6.19 51.90 6.28 51.87 6.44 51.82 6.54 51.78 6.70 51.70 "
+         "6.75 51.68 6.90 51.57 6.99 51.45M15.75 52.27 15.93 52.29 16 52.28";
     if (result != ok)
-      TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
+      TEST_FAILED("Isovalue: 25\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
 
   // Smoothen the data a little
   {
-    std::vector<double> isovalues;
-    isovalues.push_back(25.5);
+    std::vector<double> isovalues{25};
     Engine::Contour::Options opt(temperature, t, isovalues);
     opt.filter_size = 1;
     opt.filter_degree = 1;
@@ -132,10 +129,12 @@ void lines()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
-    string ok = "M0 97.5 0.7 97.9 0.8 98 1.5 98.6 1.6 98.7 2.1 99.3 2.2 99.5 2.6 100";
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
+    string ok =
+        "M5.7 52 5.9 52 6 51.9 6.2 51.9 6.3 51.9 6.4 51.8 6.5 51.8 6.7 51.7 6.9 51.6 7 51.5 7.1 "
+        "51.5";
     if (result != ok)
-      TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
+      TEST_FAILED("Isovalue: 25 smoothed\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
 
   TEST_PASSED();
@@ -155,9 +154,6 @@ void fills()
 
   // Full data area
 
-  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
-  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
-  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
 
   // Use native coordinates
@@ -181,7 +177,7 @@ void fills()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
@@ -201,7 +197,7 @@ void fills()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
@@ -221,16 +217,19 @@ void fills()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok =
-        "M0 100 0 99.3 0 98.7 0 98 0 97.4 0.3 97.6 0.4 97.6 0.7 97.9 0.8 97.9 0.9 98 1.2 98.3 1.5 "
-        "98.6 1.6 98.7 1.9 99 2.2 99.3 2.2 99.4 2.5 99.8 2.6 100 2.2 100 1.5 100 0.7 100Z";
+        "M5.8 51.8 5.9 51.8 6 51.7 6.1 51.7 6.2 51.7 6.3 51.6 6.4 51.6 6.5 51.5 6.6 51.5 6.7 51.4 "
+        "6.6 51.4 6.4 51.4 6.2 51.3 6 51.3 5.9 51.4 5.9 51.6 5.8 51.7Z";
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
 
     // test another resolution too
-    result = Fmi::OGR::exportToSvg(*geom, area, 0);
-    ok = "M0 100 0 99 0 98 0 97 0 98 1 98 1 99 2 99 2 100 3 100 2 100 1 100Z";
+    result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 2);
+    ok = "M5.81 51.78 5.92 51.76 5.93 51.75 6.04 51.73 6.07 51.72 6.10 51.71 6.19 51.68 6.30 51.63 "
+         "6.31 51.62 6.32 51.61 6.43 51.57 6.44 51.56 6.53 51.51 6.55 51.51 6.56 51.50 6.65 51.44 "
+         "6.70 51.41 6.60 51.39 6.40 51.36 6.20 51.33 6 51.30 5.95 51.42 5.90 51.55 5.85 51.68Z";
+
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
   }
@@ -251,10 +250,11 @@ void fills()
     auto matrix = qengine->getValues(q, valueshash, opt.time);
     auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
-    auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
+    auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok =
-        "M0 100 0 99.3 0 98.7 0 98 0 97.5 0.3 97.7 0.5 97.8 0.7 97.9 0.8 98 1.2 98.3 1.5 98.6 1.6 "
-        "98.7 1.9 99 2.1 99.3 2.2 99.4 2.2 99.5 2.5 99.8 2.6 100 2.2 100 1.5 100 0.7 100Z";
+        "M5.8 51.8 5.9 51.7 6 51.7 6.1 51.7 6.2 51.7 6.3 51.6 6.4 51.6 6.5 51.5 6.6 51.5 6.6 51.4 "
+        "6.7 51.4 6.6 51.4 6.4 51.4 6.2 51.3 6 51.3 5.9 51.4 5.9 51.6 5.8 51.7Z";
+
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
   }
@@ -796,5 +796,5 @@ int main(void)
 
   cout << endl << "Engine tester" << endl << "=============" << endl;
   Tests::tests t;
-  t.run();
+  return t.run();
 }

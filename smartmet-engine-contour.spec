@@ -3,44 +3,63 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 20.10.6
+Version: 21.1.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: rpm-build
-BuildRequires: gcc-c++
-BuildRequires: make
 BuildRequires: boost169-devel
-BuildRequires: geos38-devel
-BuildRequires: gdal30-devel
-BuildRequires: libconfig-devel
-BuildRequires: smartmet-library-spine-devel >= 20.10.6
-BuildRequires: smartmet-library-newbase-devel >= 20.10.2
-BuildRequires: smartmet-library-macgyver-devel >= 20.10.5
-BuildRequires: smartmet-library-tron >= 20.4.23
-BuildRequires: smartmet-library-gis-devel >= 20.9.25
-BuildRequires: sparsehash-devel
 BuildRequires: bzip2-devel
+BuildRequires: gcc-c++
+%if %{defined el7}
+BuildRequires: devtoolset-7-gcc-c++
+#TestRequires: devtoolset-7-gcc-c++
+%endif
+BuildRequires: gdal32-devel
+BuildRequires: geos39-devel
+BuildRequires: libconfig-devel
+BuildRequires: make
+BuildRequires: rpm-build
+BuildRequires: smartmet-library-gis-devel >= 21.1.14
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
+BuildRequires: smartmet-library-newbase-devel >= 21.1.14
+BuildRequires: smartmet-library-spine-devel >= 21.1.14
+BuildRequires: smartmet-library-tron >= 21.1.14
+BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
-Requires: geos38
-Requires: gdal30-libs
-Requires: libconfig
-Requires: libconfig
-Requires: smartmet-library-newbase >= 20.10.2
-Requires: smartmet-library-macgyver >= 20.10.5
-Requires: smartmet-library-spine >= 20.10.6
-Requires: smartmet-library-gis >= 20.9.25
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
 Requires: boost169-system
 Requires: boost169-thread
+Requires: gdal32-libs
+Requires: geos39
+Requires: libconfig
+Requires: smartmet-library-gis >= 21.1.14
+Requires: smartmet-library-macgyver >= 21.1.14
+Requires: smartmet-library-newbase >= 21.1.14
+Requires: smartmet-library-spine >= 21.1.14
+
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
 Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
+#TestRequires: boost169-devel
+#TestRequires: bzip2-devel
+#TestRequires: gcc-c++
+#TestRequires: gdal32-devel
+#TestRequires: geos39-devel
+#TestRequires: libconfig-devel
+#TestRequires: libjpeg-turbo-devel
+#TestRequires: libpng-devel
+#TestRequires: smartmet-engine-querydata >= 20.10.6
+#TestRequires: smartmet-engine-querydata-devel >= 20.10.6
+#TestRequires: smartmet-library-regression >= 20.5.7
+#TestRequires: smartmet-library-spine-devel >= 21.1.14
+#TestRequires: smartmet-test-data >= 20.10.29
+#TestRequires: zlib-devel
+
 
 %description
 SmartMet contour engine
@@ -77,6 +96,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
+- Repackaged smartmet to resolve debuginfo issues
+
+* Tue Jan  5 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.5-1.fmi
+- Upgrade to GEOS 3.9
+
+* Mon Dec 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.28-1.fmi
+- Upgraded tron library
+
+* Tue Dec 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.15-1.fmi
+- Upgrade to pgdg12
+
+* Fri Nov  6 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.11.6-1.fmi
+- Modified includes to enable gdal 3.0 support
+
 * Tue Oct  6 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.6-1.fmi
 - Enable sensible relative libconfig include paths
 

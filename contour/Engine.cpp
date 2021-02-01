@@ -298,8 +298,8 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
 
     if (steps < 1 || steps > 10000)
       throw Fmi::Exception(BCP,
-                             "Number of points on isocircle must be 1-10000, not " +
-                                 boost::lexical_cast<std::string>(steps));
+                           "Number of points on isocircle must be 1-10000, not " +
+                               boost::lexical_cast<std::string>(steps));
 
     // Calculate bearing and distance to be travelled
 
@@ -915,8 +915,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     if (theOptions.filter_size)
       throw Fmi::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
     if (theOptions.filter_degree)
-      throw Fmi::Exception(BCP,
-                             "Using the filter_degree option is meaningless for cross-sections");
+      throw Fmi::Exception(BCP, "Using the filter_degree option is meaningless for cross-sections");
 
     // Verify height parameter is available
 
