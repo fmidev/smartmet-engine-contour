@@ -826,8 +826,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Lambda for processing a single contouring task (isoline or isoband)
 
-    const auto contourer = [&retval, this, &theOptions, &theDataCRS, &theOutputCRS, &data, &hints](
-                               Args &args) {
+    const auto contourer = [&retval, this, &theOptions, &theOutputCRS, &data, &hints](Args &args) {
       try
       {
         // Calculate GEOS geometry result
