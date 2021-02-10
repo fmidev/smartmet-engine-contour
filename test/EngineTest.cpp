@@ -39,7 +39,6 @@ void lines()
   std::size_t qhash = Engine::Querydata::hash_value(q);
 
   // Use native coordinates
-  auto crs = q->SpatialReference();
   CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   // Temperature for 200808061200 UTC:

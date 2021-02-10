@@ -264,8 +264,15 @@ void flip(Fmi::CoordinateMatrix &coords)
 
     for (std::size_t i = 0; i < nx; i++)
     {
+#ifdef NEW_NFMIAREA
       NFmiPoint pt1 = coords(i, j1);
       NFmiPoint pt2 = coords(i, j2);
+#else
+      const auto c1 = coords(i, j1);
+      const auto c2 = coords(i, j2);
+      NFmiPoint pt1(c1.first, c1.second);
+      NFmiPoint pt2(c2.first, c2.second);
+#endif
       coords.set(i, j1, pt2);
       coords.set(i, j2, pt1);
     }
@@ -319,7 +326,12 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     {
       // Should this be fixed? Probably not - the coordinates should behave the same
       double dist = i * distance / steps;
+#ifdef NEW_NFMIAREA
       auto loc = startpoint.GetLocation(bearing, dist);
+#else
+      const bool pacific_view = false;
+      auto loc = startpoint.GetLocation(bearing, dist, pacific_view);
+#endif
       coordinates.push_back(loc.GetLocation());
       distances.push_back(dist / 1000.0);
     }
@@ -743,7 +755,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS);
 
-#if 0    
+#if 0
     for (std::size_t j = 0; j < analysis->valid.height(); ++j)
       for (std::size_t i = 0; i < analysis->valid.width(); ++i)
       {
