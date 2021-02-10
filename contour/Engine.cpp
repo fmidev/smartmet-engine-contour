@@ -112,13 +112,13 @@ class Engine::Impl
   GeometryPtr internal_isoline(const DataMatrixAdapter &data,
                                const MyHints &hints,
                                double isovalue,
-                               Interpolation interpolation);
+                               Interpolation interpolation) const;
 
   GeometryPtr internal_isoband(const DataMatrixAdapter &data,
                                const MyHints &hints,
                                const boost::optional<double> &lolimit,
                                const boost::optional<double> &hilimit,
-                               Interpolation interpolation);
+                               Interpolation interpolation) const;
 };
 
 }  // namespace Contour
@@ -479,7 +479,7 @@ void Engine::Impl::clearCache()
 GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
                                            const MyHints &hints,
                                            double isovalue,
-                                           Interpolation interpolation)
+                                           Interpolation interpolation) const
 {
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(*itsGeomFactory);
@@ -522,7 +522,7 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
                                            const MyHints &hints,
                                            const boost::optional<double> &lolimit,
                                            const boost::optional<double> &hilimit,
-                                           Interpolation interpolation)
+                                           Interpolation interpolation) const
 {
   // Should support multiple builders with different SRIDs
   Tron::FmiBuilder builder(*itsGeomFactory);
