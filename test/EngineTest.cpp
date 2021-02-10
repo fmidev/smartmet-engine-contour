@@ -10,6 +10,8 @@
 #include <spine/ParameterFactory.h>
 #include <spine/Reactor.h>
 #include <libconfig.h++>
+#include <ogr_geometry.h>
+#include <ogr_spatialref.h>
 
 using namespace std;
 
@@ -35,8 +37,9 @@ void lines()
   // Full data area
 
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   // Temperature for 200808061200 UTC:
   // Min:6.01 Mean:14.84 Max:25.95
@@ -52,9 +55,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
@@ -73,9 +74,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
@@ -95,9 +94,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
 
@@ -129,9 +126,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok =
@@ -159,8 +154,10 @@ void fills()
   // Full data area
 
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   // Temperature for 200808061200 UTC:
   // Min:6.01 Mean:14.84 Max:25.95
@@ -177,9 +174,7 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
@@ -199,9 +194,7 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
@@ -221,9 +214,7 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok =
@@ -256,9 +247,7 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geom =
-        *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok =
@@ -305,7 +294,7 @@ void crossection()
 
     boost::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
 
-    auto geom = *(contour->crossection(qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
+    auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
@@ -322,7 +311,7 @@ void crossection()
     Engine::Contour::Options opt(temperature, t, limits);
     boost::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
 
-    auto geom = *(contour->crossection(qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
+    auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok = "M54.5 25 59.8 30 59.8 25 74.7 22.5 59.8 20.3 55.5 24.3Z";
@@ -350,8 +339,10 @@ void speed()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   {
     std::cout << std::endl;
@@ -377,8 +368,7 @@ void speed()
         q->selectLevel(*opt.level);
 
       auto matrix = qengine->getValues(q, valueshash, opt.time);
-      CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-      auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+      auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
     }
   }
   TEST_PASSED();
@@ -400,8 +390,10 @@ void speed_all_at_once()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   {
     std::cout << std::endl;
@@ -423,8 +415,7 @@ void speed_all_at_once()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+    auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
   }
   TEST_PASSED();
 }
@@ -447,8 +438,10 @@ void pressure()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 360, 180);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   {
     std::cout << std::endl;
@@ -472,8 +465,7 @@ void pressure()
         q->selectLevel(*opt.level);
 
       auto matrix = qengine->getValues(q, valueshash, opt.time);
-      CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-      auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+      auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
     }
   }
   TEST_PASSED();
@@ -495,8 +487,10 @@ void pressure_all_at_once()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 360, 180);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   {
     std::cout << std::endl;
@@ -516,8 +510,7 @@ void pressure_all_at_once()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-    auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+    auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
   }
   TEST_PASSED();
 }
@@ -539,8 +532,10 @@ void fillvalidation()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   {
     std::cout << std::endl;
@@ -570,8 +565,7 @@ void fillvalidation()
           q->selectLevel(*opt.level);
 
         auto matrix = qengine->getValues(q, valueshash, opt.time);
-        CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-        auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+        auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
       }
     }
   }
@@ -595,8 +589,10 @@ void linevalidation()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   {
     std::cout << std::endl;
@@ -625,8 +621,7 @@ void linevalidation()
           q->selectLevel(*opt.level);
 
         auto matrix = qengine->getValues(q, valueshash, opt.time);
-        CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-        auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+        auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
       }
     }
   }
@@ -647,8 +642,7 @@ void globalykj()
 
   // YKJ spatial reference
 
-  std::unique_ptr<OGRSpatialReference> ykj(new OGRSpatialReference);
-  ykj->SetFromUserInput("EPSG:2393");
+  Fmi::SpatialReference ykj("EPSG:2393");
 
   // Full data area
 
@@ -656,8 +650,7 @@ void globalykj()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
-  OGRSpatialReference *sr = nullptr;
+  auto crs = q->SpatialReference();
 
   std::vector<Engine::Contour::Range> limits;
   limits.push_back(Engine::Contour::Range(-100, 0));
@@ -669,9 +662,8 @@ void globalykj()
     q->selectLevel(*opt.level);
 
   auto matrix = qengine->getValues(q, valueshash, opt.time);
-  CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
-  auto geom =
-      *(contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr).begin());
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q, ykj);
+  auto geom = *(contour->contour(qhash, crs, ykj, *matrix, *coords, opt).begin());
 
   if (!geom)
     TEST_FAILED("Failed to contour temperature interval -100...0");
@@ -716,9 +708,10 @@ void worldwrap()
   auto world2 = q->area().XYToWorldXY(q->area().TopRight());
   Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
-  std::string wkt = q->area().WKT();
 
-  OGRSpatialReference *sr = nullptr;
+  // Use native coordinates
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
 
   // This contour spans the world horizontally
   double lolimit = 0;
@@ -734,9 +727,8 @@ void worldwrap()
     q->selectLevel(*opt.level);
 
   auto matrix = qengine->getValues(q, valueshash, opt.time);
-  CoordinatesPtr coords = qengine->getWorldCoordinates(q, sr);
 
-  auto geoms = contour->contour(qhash, wkt, *matrix, coords, opt, q->needsWraparound(), sr);
+  auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
 
   if (geoms.empty())
     TEST_FAILED("Failed to contour GFS data interval 0-2");
@@ -744,9 +736,9 @@ void worldwrap()
   OGREnvelope envelope;
   geoms[0]->getEnvelope(&envelope);
   if (envelope.MinX != 0)
-    TEST_FAILED("Contour 0-2 minimum x value should be 0");
+    TEST_FAILED("Contour 0-2 minimum x value should be 0, not " + std::to_string(envelope.MinX));
   if (envelope.MaxX != 360)
-    TEST_FAILED("Contour 0-2 maximum x value should be 360");
+    TEST_FAILED("Contour 0-2 maximum x value should be 360, not " + std::to_string(envelope.MaxX));
 
   TEST_PASSED();
 }

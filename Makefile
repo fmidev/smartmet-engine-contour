@@ -6,7 +6,7 @@ REQUIRES = geos gdal
 
 include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
-DEFINES = -DUNIX -D_REENTRANT -DUSE_UNSTABLE_GEOS_CPP_API
+DEFINES = -DUNIX -D_REENTRANT -DUSE_UNSTABLE_GEOS_CPP_API -DWGS84
 
 LIBS += -L$(libdir) \
 	$(REQUIRED_LIBS) \

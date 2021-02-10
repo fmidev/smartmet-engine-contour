@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.1.14
+Version: 21.2.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,11 +22,11 @@ BuildRequires: geos39-devel
 BuildRequires: libconfig-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.1.14
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
-BuildRequires: smartmet-library-newbase-devel >= 21.1.14
-BuildRequires: smartmet-library-spine-devel >= 21.1.14
-BuildRequires: smartmet-library-tron >= 21.1.14
+BuildRequires: smartmet-library-gis-devel >= 21.2.10
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
+BuildRequires: smartmet-library-newbase-devel >= 21.2.10
+BuildRequires: smartmet-library-spine-devel >= 21.2.5
+BuildRequires: smartmet-library-tron >= 21.2.10
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -37,10 +37,10 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos39
 Requires: libconfig
-Requires: smartmet-library-gis >= 21.1.14
-Requires: smartmet-library-macgyver >= 21.1.14
-Requires: smartmet-library-newbase >= 21.1.14
-Requires: smartmet-library-spine >= 21.1.14
+Requires: smartmet-library-gis >= 21.2.10
+Requires: smartmet-library-macgyver >= 21.1.25
+Requires: smartmet-library-newbase >= 21.2.10
+Requires: smartmet-library-spine >= 21.2.5
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -56,7 +56,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 20.10.6
 #TestRequires: smartmet-engine-querydata-devel >= 20.10.6
 #TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.1.14
+#TestRequires: smartmet-library-spine-devel >= 21.2.5
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Feb 10 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.10-1.fmi
+- Use CoordinateMatrix APIs
+
 * Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
 - Repackaged smartmet to resolve debuginfo issues
 
@@ -117,14 +120,50 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Sep 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.23-1.fmi
 - Use Fmi::Exception instead of Spine::Exception
 
+* Thu Aug 27 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.27-1.fmi
+- NFmiGrid API changed
+
+* Wed Aug 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.26-1.fmi
+- Numerous newbase API changes
+
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
 - Upgraded to fmt 6.2
+
+* Thu Jul  2 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.7.2-1.fmi
+- SpatialReference API changed
 
 * Wed May 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.13-1.fmi
 - Repackaged since Spine Parameter class ABI changed
 
+* Thu Apr 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.22-1.fmi
+- Rewrote global grid wrapping code
+
+* Wed Apr 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.20-1.fmi
+- Improved gdal30/geos38 detection
+
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgraded to Boost 1.69
+
+* Thu Apr  9 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.9-1.fmi
+- Repackaged since code inlines from Tron changed
+
+* Thu Apr  2 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.2-1.fmi
+- Use NFmiCoordinateMatrix instead of NFmiDataMatrix<NFmiPoint>
+
+* Mon Mar 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.30-1.fmi
+- Full repackaging of the server
+
+* Thu Feb 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.13-1.fmi
+- Use GDAL forward declarations in Engine API to avoid dependency escalation
+
+* Wed Feb 12 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.12-1.fmi
+- Repackaged due to API changes
+
+* Fri Dec 13 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.13-1.fmi
+- Repackaged due to NFmiArea API changes
+
+* Wed Dec 11 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.11-1.fmi
+- Upgrade to GDAL 3.0 and GEOS 3.8
 
 * Wed Nov 20 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.20-1.fmi
 - Repackaged due to newbase API changes

@@ -7,17 +7,18 @@
 #pragma once
 
 #include "Options.h"
-#include "Types.h"
-#include <boost/shared_ptr.hpp>
-#include <ogr_geometry.h>
-#include <ogr_spatialref.h>
+#include <gis/CoordinateMatrix.h>
+#include <gis/SpatialReference.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/SmartMetEngine.h>
+#include <memory>
 #include <string>
 
-typedef NFmiDataMatrix<NFmiPoint> Coordinates;
-typedef boost::shared_ptr<Coordinates> CoordinatesPtr;
+class OGRGeometry;
+class OGRSpatialReference;
+
+using OGRGeometryPtr = std::shared_ptr<OGRGeometry>;
 
 namespace SmartMet
 {
@@ -38,7 +39,7 @@ class Engine : public Spine::SmartMetEngine
 
   // Hide caches etc behind an implementation
   class Impl;
-  boost::shared_ptr<Impl> itsImpl;
+  std::shared_ptr<Impl> itsImpl;
 
  protected:
   virtual void init();
@@ -49,18 +50,17 @@ class Engine : public Spine::SmartMetEngine
 
   Engine(const std::string& theFileName);
 
-  // Produce vector of OGR geometries in world XY coordinates
+  // Produce vector of OGR geometries in output spatial reference
 
-  std::vector<OGRGeometryPtr> contour(std::size_t theQhash,
-                                      const std::string theQAreaWKT,
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
+                                      const Fmi::SpatialReference& theDataCRS,
+                                      const Fmi::SpatialReference& theOutputCRS,
                                       const NFmiDataMatrix<float>& theMatrix,
-                                      const CoordinatesPtr theCoordinates,
-                                      const Options& theOptions,
-                                      bool worldwrap,
-                                      OGRSpatialReference* theSR = 0) const;
+                                      const Fmi::CoordinateMatrix& theCoordinates,
+                                      const Options& theOptions) const;
 
   // Produce a cross section contour
-  std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo& theQInfo,
                                           const Options& theOptions,
                                           double theLon1,
                                           double theLat1,
@@ -69,7 +69,7 @@ class Engine : public Spine::SmartMetEngine
                                           std::size_t theSteps) const;
 
   // Produce a cross section contour with given parameter for Z-values
-  std::vector<OGRGeometryPtr> crossection(boost::shared_ptr<NFmiFastQueryInfo> theQInfo,
+  std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo& theQInfo,
                                           const Spine::Parameter& theZParameter,
                                           const Options& theOptions,
                                           double theLon1,
