@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.2.10
+Version: 21.2.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,7 +22,7 @@ BuildRequires: geos39-devel
 BuildRequires: libconfig-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.2.10
+BuildRequires: smartmet-library-gis-devel >= 21.2.11
 BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
 BuildRequires: smartmet-library-newbase-devel >= 21.2.10
 BuildRequires: smartmet-library-spine-devel >= 21.2.5
@@ -37,7 +37,7 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos39
 Requires: libconfig
-Requires: smartmet-library-gis >= 21.2.10
+Requires: smartmet-library-gis >= 21.2.11
 Requires: smartmet-library-macgyver >= 21.1.25
 Requires: smartmet-library-newbase >= 21.2.10
 Requires: smartmet-library-spine >= 21.2.5
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Feb 11 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.11-1.fmi
+- Use GIS-library definition of OGRGeometryPtr for consistency
+
 * Wed Feb 10 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.10-1.fmi
 - Use CoordinateMatrix APIs
 
