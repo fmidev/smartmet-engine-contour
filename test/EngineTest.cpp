@@ -710,14 +710,11 @@ void worldwrap()
 
   // Full data area
 
-  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
-  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
-  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
   std::size_t qhash = Engine::Querydata::hash_value(q);
 
   // Use native coordinates
   auto crs = q->SpatialReference();
-  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q, "WGS84");
 
   // This contour spans the world horizontally
   double lolimit = 0;
@@ -739,12 +736,14 @@ void worldwrap()
   if (geoms.empty())
     TEST_FAILED("Failed to contour GFS data interval 0-2");
 
+  // GFS data is from 0 to 359.75, but getWorldCoordinates should return an extended matrix to 360.
+
   OGREnvelope envelope;
   geoms[0]->getEnvelope(&envelope);
-  if (envelope.MinX != 0)
-    TEST_FAILED("Contour 0-2 minimum x value should be 0, not " + std::to_string(envelope.MinX));
-  if (envelope.MaxX != 360)
-    TEST_FAILED("Contour 0-2 maximum x value should be 360, not " + std::to_string(envelope.MaxX));
+  if (std::abs(envelope.MaxX - 180) > 0.01)
+    TEST_FAILED("Contour 0-2 maximum x value should be 180, not " + std::to_string(envelope.MaxX));
+  if (std::abs(envelope.MinX - (-180)) > 0.01)
+    TEST_FAILED("Contour 0-2 minimum x value should be -180, not " + std::to_string(envelope.MinX));
 
   TEST_PASSED();
 }
@@ -764,17 +763,17 @@ class tests : public tframe::tests
     contour->clearCache();
     TEST(crossection);
     contour->clearCache();
-    TEST(speed);
+    TEST(worldwrap);
     contour->clearCache();
-    TEST(speed_all_at_once);
-    contour->clearCache();
+#else
     TEST(pressure);
     contour->clearCache();
     TEST(pressure_all_at_once);
     contour->clearCache();
-    TEST(worldwrap);
+    TEST(speed);
     contour->clearCache();
-#else
+    TEST(speed_all_at_once);
+    contour->clearCache();
     // these have been used only to make sure everything validates. Too slow for other testing
     TEST(fillvalidation);
     TEST(linevalidation);
