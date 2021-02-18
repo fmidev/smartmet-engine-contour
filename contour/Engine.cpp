@@ -264,15 +264,8 @@ void flip(Fmi::CoordinateMatrix &coords)
 
     for (std::size_t i = 0; i < nx; i++)
     {
-#ifdef NEW_NFMIAREA
       NFmiPoint pt1 = coords(i, j1);
       NFmiPoint pt2 = coords(i, j2);
-#else
-      const auto c1 = coords(i, j1);
-      const auto c2 = coords(i, j2);
-      NFmiPoint pt1(c1.first, c1.second);
-      NFmiPoint pt2(c2.first, c2.second);
-#endif
       coords.set(i, j1, pt2);
       coords.set(i, j2, pt1);
     }
