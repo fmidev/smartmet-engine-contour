@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.3.23
+Version: 21.4.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,11 +22,11 @@ BuildRequires: geos39-devel
 BuildRequires: libconfig-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.2.11
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
-BuildRequires: smartmet-library-newbase-devel >= 21.2.18
-BuildRequires: smartmet-library-spine-devel >= 21.2.5
-BuildRequires: smartmet-library-tron >= 21.2.10
+BuildRequires: smartmet-library-gis-devel >= 21.3.29
+BuildRequires: smartmet-library-macgyver-devel >= 21.2.25
+BuildRequires: smartmet-library-newbase-devel >= 21.3.20
+BuildRequires: smartmet-library-spine-devel >= 21.3.27
+BuildRequires: smartmet-library-tron >= 21.4.8
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -37,10 +37,10 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos39
 Requires: libconfig
-Requires: smartmet-library-gis >= 21.2.11
-Requires: smartmet-library-macgyver >= 21.1.25
-Requires: smartmet-library-newbase >= 21.2.18
-Requires: smartmet-library-spine >= 21.2.5
+Requires: smartmet-library-gis >= 21.3.29
+Requires: smartmet-library-macgyver >= 21.2.25
+Requires: smartmet-library-newbase >= 21.3.20
+Requires: smartmet-library-spine >= 21.3.27
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -56,7 +56,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 20.10.6
 #TestRequires: smartmet-engine-querydata-devel >= 20.10.6
 #TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.2.5
+#TestRequires: smartmet-library-spine-devel >= 21.3.27
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Apr  8 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.8-1.fmi
+- Rebuilt with optimized Tron library
+
 * Tue Mar 23 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.23-1.fmi
 - Repackaged due to geos39 updates
 
