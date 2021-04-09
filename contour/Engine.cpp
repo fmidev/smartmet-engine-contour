@@ -757,16 +757,19 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       }
 #endif
 
-    // Flip the data and the coordinates if necessary. The copy below could
-    // be avoided if we used pointers and copied the coordinates only
-    // when flipping
+    // Flip the data and the coordinates if necessary. We avoid an unnecessary
+    // copy of the coordinates if no flipping is needed by using a pointer.
 
-    auto coords = theCoordinates;
+    auto *coords = &theCoordinates;
+    std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
 
     if (analysis->needs_flipping)
     {
       flip(values);
-      flip(coords);
+
+      flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
+      flip(*flipped_coordinates);
+      coords = flipped_coordinates.get();
     }
 
     /*
@@ -792,7 +795,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Helper data structure for contouring
 
-    DataMatrixAdapter data(values, coords, valid_cells);
+    DataMatrixAdapter data(values, *coords, valid_cells);
 
     // Savitzky-Golay assumes DataMatrix likeAdapter API, not NFmiDataMatrix like API, hence the
     // filtering is delayed until this point.
