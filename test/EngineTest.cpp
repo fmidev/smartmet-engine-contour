@@ -224,16 +224,15 @@ void fills()
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M0 100 0 99.3 0 98.7 0 98 0 97.4 0.3 97.6 0.4 97.6 0.7 97.9 0.8 97.9 0.9 98 1.2 98.3 1.5 "
-        "98.6 1.6 98.7 1.9 99 2.2 99.3 2.2 99.4 2.5 99.8 2.6 100 2.2 100 1.5 100 0.7 100Z";
+        "M0 100 0 99.3 0 98.7 0 98 0 97.4 0.7 97.9 0.9 98 1.5 98.6 1.6 98.7 2.2 99.3 2.2 99.4 2.6 "
+        "100 2.2 100 1.5 100 0.7 100Z";
     if (result != ok)
       TEST_FAILED("Isoband (1 decimal): 25.5-30\n\tExpected: " + ok + "\n\tObtained: " + result);
 
     // test another resolution too
     result = Fmi::OGR::exportToSvg(*geom, area, 2);
-    ok = "M0 100 0 99.33 0 98.66 0 97.99 0 97.42 0.35 97.63 0.38 97.65 0.75 97.87 0.82 97.92 0.92 "
-         "97.99 1.19 98.25 1.49 98.58 1.53 98.62 1.56 98.66 1.87 98.99 1.91 99.03 2.16 99.33 2.20 "
-         "99.37 2.24 99.42 2.49 99.78 2.60 100 2.24 100 1.49 100 0.75 100Z";
+    ok = "M0 100 0 99.33 0 98.66 0 97.99 0 97.42 0.75 97.87 0.92 97.99 1.49 98.58 1.56 98.66 2.16 "
+         "99.33 2.24 99.42 2.60 100 2.24 100 1.49 100 0.75 100Z";
 
     if (result != ok)
       TEST_FAILED("Isoband (2 decimals): 25.5-30 \n\tExpected: " + ok + "\n\tObtained: " + result);
@@ -257,8 +256,8 @@ void fills()
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M0 100 0 99.3 0 98.7 0 98 0 97.5 0.3 97.7 0.5 97.8 0.7 97.9 0.8 98 1.2 98.3 1.5 98.6 1.6 "
-        "98.7 1.9 99 2.1 99.3 2.2 99.4 2.2 99.5 2.5 99.8 2.6 100 2.2 100 1.5 100 0.7 100Z";
+        "M0 100 0 99.3 0 98.7 0 98 0 97.5 0.7 97.9 0.8 98 1.5 98.6 1.6 98.7 2.1 99.3 2.2 99.5 2.6 "
+        "100 2.2 100 1.5 100 0.7 100Z";
 
     if (result != ok)
       TEST_FAILED("Smoothened isoband: 25.5-30\n\tExpected: " + ok + "\n\tObtained: " + result);
@@ -320,7 +319,7 @@ void crossection()
     auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
-    string ok = "M54.5 25 59.8 30 59.8 25 74.7 22.5 59.8 20.3 55.5 24.3Z";
+    string ok = "M54.5 25 59.8 30 59.8 25 74.7 22.5 59.8 20.3Z";
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
   }
