@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.4.8
+Version: 21.4.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -26,7 +26,7 @@ BuildRequires: smartmet-library-gis-devel >= 21.3.29
 BuildRequires: smartmet-library-macgyver-devel >= 21.2.25
 BuildRequires: smartmet-library-newbase-devel >= 21.3.20
 BuildRequires: smartmet-library-spine-devel >= 21.3.27
-BuildRequires: smartmet-library-tron >= 21.4.8
+BuildRequires: smartmet-library-tron >= 21.4.9
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Apr  9 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.9-1.fmi
+- More Tron optimizations
+
 * Thu Apr  8 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.4.8-1.fmi
 - Rebuilt with optimized Tron library
 
