@@ -1,6 +1,6 @@
 #include "Config.h"
-#include <macgyver/Exception.h>
 #include <boost/filesystem/path.hpp>
+#include <macgyver/Exception.h>
 #include <stdexcept>
 
 namespace SmartMet
@@ -26,7 +26,7 @@ Config::Config(const std::string& theFileName) : itsConfig()
     boost::filesystem::path p = theFileName;
     p.remove_filename();
     itsConfig.setIncludeDir(p.c_str());
-    
+
     itsConfig.readFile(theFileName.c_str());
 
     if (!itsConfig.exists("cache.max_contours"))

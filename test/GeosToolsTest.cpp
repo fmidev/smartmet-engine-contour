@@ -1,22 +1,21 @@
 #include "GeosTools.h"
-#include <geos/io/WKTReader.h>
-#include <regression/tframe.h>
-#include <geos/version.h>
 #include <boost/shared_ptr.hpp>
+#include <geos/io/WKTReader.h>
+#include <geos/version.h>
+#include <regression/tframe.h>
 
 using namespace std;
 
 #if GEOS_VERSION_MAJOR == 3
-#if GEOS_VERSION_MINOR < 7  
-geos::geom::GeometryFactory * factory = new geos::geom::GeometryFactory();
+#if GEOS_VERSION_MINOR < 7
+geos::geom::GeometryFactory* factory = new geos::geom::GeometryFactory();
 #else
 auto factoryptr = geos::geom::GeometryFactory::create();
-auto * factory = factoryptr.get();
+auto* factory = factoryptr.get();
 #endif
 #else
 #pragma message(Cannot handle current GEOS version correctly)
-#endif 
-
+#endif
 
 namespace Tests
 {
