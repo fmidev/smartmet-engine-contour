@@ -5,6 +5,7 @@
 #include <engines/querydata/Engine.h>
 #include <gis/Box.h>
 #include <gis/OGR.h>
+#include <macgyver/Hash.h>
 #include <regression/tframe.h>
 #include <spine/Options.h>
 #include <spine/ParameterFactory.h>
@@ -54,7 +55,7 @@ void lines()
     Engine::Contour::Options opt(temperature, t, isovalues);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -73,7 +74,7 @@ void lines()
     Engine::Contour::Options opt(temperature, t, isovalues);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -92,7 +93,7 @@ void lines()
     Engine::Contour::Options opt(temperature, t, isovalues);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
 
     if (opt.level)
       q->selectLevel(*opt.level);
@@ -125,7 +126,7 @@ void lines()
     opt.filter_degree = 1;
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -175,7 +176,7 @@ void fills()
     Engine::Contour::Options opt(temperature, t, limits);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -195,7 +196,7 @@ void fills()
     Engine::Contour::Options opt(temperature, t, limits);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -215,7 +216,7 @@ void fills()
     Engine::Contour::Options opt(temperature, t, limits);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -247,7 +248,7 @@ void fills()
     opt.filter_degree = 1;
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -368,7 +369,7 @@ void speed()
       Engine::Contour::Options opt(temperature, t, limits);
 
       auto valueshash = qhash;
-      boost::hash_combine(valueshash, opt.data_hash_value());
+      Fmi::hash_combine(valueshash, opt.data_hash_value());
       if (opt.level)
         q->selectLevel(*opt.level);
 
@@ -415,7 +416,7 @@ void speed_all_at_once()
     Engine::Contour::Options opt(temperature, t, limits);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -465,7 +466,7 @@ void pressure()
       Engine::Contour::Options opt(pressure, t, isolines);
 
       auto valueshash = qhash;
-      boost::hash_combine(valueshash, opt.data_hash_value());
+      Fmi::hash_combine(valueshash, opt.data_hash_value());
       if (opt.level)
         q->selectLevel(*opt.level);
 
@@ -510,7 +511,7 @@ void pressure_all_at_once()
     Engine::Contour::Options opt(pressure, t, isolines);
 
     auto valueshash = qhash;
-    boost::hash_combine(valueshash, opt.data_hash_value());
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
     if (opt.level)
       q->selectLevel(*opt.level);
 
@@ -565,7 +566,7 @@ void fillvalidation()
         Engine::Contour::Options opt(temperature, q->validTime(), limits);
 
         auto valueshash = qhash;
-        boost::hash_combine(valueshash, opt.data_hash_value());
+        Fmi::hash_combine(valueshash, opt.data_hash_value());
         if (opt.level)
           q->selectLevel(*opt.level);
 
@@ -621,7 +622,7 @@ void linevalidation()
         Engine::Contour::Options opt(temperature, q->validTime(), isovalues);
 
         auto valueshash = qhash;
-        boost::hash_combine(valueshash, opt.data_hash_value());
+        Fmi::hash_combine(valueshash, opt.data_hash_value());
         if (opt.level)
           q->selectLevel(*opt.level);
 
@@ -662,7 +663,7 @@ void globalykj()
   Engine::Contour::Options opt(temperature, t, limits);  // freezing temperatures
 
   auto valueshash = qhash;
-  boost::hash_combine(valueshash, opt.data_hash_value());
+  Fmi::hash_combine(valueshash, opt.data_hash_value());
   if (opt.level)
     q->selectLevel(*opt.level);
 
@@ -724,7 +725,7 @@ void worldwrap()
   Engine::Contour::Options opt(temperature, t, limits);
 
   auto valueshash = qhash;
-  boost::hash_combine(valueshash, opt.data_hash_value());
+  Fmi::hash_combine(valueshash, opt.data_hash_value());
   if (opt.level)
     q->selectLevel(*opt.level);
 
@@ -765,7 +766,6 @@ class tests : public tframe::tests
     contour->clearCache();
     TEST(worldwrap);
     contour->clearCache();
-#else
     TEST(pressure);
     contour->clearCache();
     TEST(pressure_all_at_once);
@@ -774,6 +774,7 @@ class tests : public tframe::tests
     contour->clearCache();
     TEST(speed_all_at_once);
     contour->clearCache();
+#else
     // these have been used only to make sure everything validates. Too slow for other testing
     TEST(fillvalidation);
     TEST(linevalidation);

@@ -10,7 +10,6 @@
 #include "Engine.h"
 #include "GeosTools.h"
 #include "Options.h"
-#include <boost/functional/hash.hpp>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -19,6 +18,7 @@
 #include <gis/OGR.h>
 #include <macgyver/Cache.h>
 #include <macgyver/Exception.h>
+#include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/WorkQueue.h>
 #include <tron/FmiBuilder.h>
@@ -129,33 +129,6 @@ class Engine::Impl
 
 namespace
 {
-// ----------------------------------------------------------------------
-/*!
- * \brief Hash for OGR spatial reference
- *
- * Compiler lookup issues prevented placing this into spine.
- * Placing this into the above anonymous namespace or into the
- * Contour namespace below did not work either.
- */
-// ----------------------------------------------------------------------
-
-std::size_t hash_value(const OGRSpatialReference &theSR)
-{
-  try
-  {
-    char *wkt;
-    theSR.exportToWkt(&wkt);
-    std::string tmp(wkt);
-    CPLFree(wkt);
-    boost::hash<std::string> hasher;
-    return hasher(tmp);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Utility function for extrapolation
@@ -568,7 +541,7 @@ std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
 {
   // Combined hash value includes data details and output projection
   std::size_t hash = theDataHash;
-  boost::hash_combine(hash, theOutputCRS.hashValue());
+  Fmi::hash_combine(hash, theOutputCRS.hashValue());
 
   // See if the result has already been cached
 
@@ -623,41 +596,41 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
 {
   // The hash for the result
   auto common_hash = theDataHash;
-  boost::hash_combine(common_hash, theOptions.filtered_data_hash_value());
-  boost::hash_combine(common_hash, theOutputCRS.hashValue());
+  Fmi::hash_combine(common_hash, theOptions.filtered_data_hash_value());
+  Fmi::hash_combine(common_hash, theOutputCRS.hashValue());
 
   // results first include isolines, then isobands
   const auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
 
   std::vector<std::size_t> hash_values(nresults, 0);
 
-  const auto isoline_hash = boost::hash_value("isoline");
-  const auto isoband_hash = boost::hash_value("isoband");
+  const auto isoline_hash = Fmi::hash_value(std::string("isoline"));
+  const auto isoband_hash = Fmi::hash_value(std::string("isoband"));
 
   for (auto icontour = 0ul; icontour < nresults; icontour++)
   {
     auto hash = common_hash;
     if (icontour < theOptions.isovalues.size())
     {
-      boost::hash_combine(hash, isoline_hash);
-      boost::hash_combine(hash, boost::hash_value(theOptions.isovalues[icontour]));
+      Fmi::hash_combine(hash, isoline_hash);
+      Fmi::hash_combine(hash, Fmi::hash_value(theOptions.isovalues[icontour]));
     }
     else
     {
-      boost::hash_combine(hash, isoband_hash);
+      Fmi::hash_combine(hash, isoband_hash);
 
       auto i = icontour - theOptions.isovalues.size();
 
       // TODO: Use generic code as in wms/Hash.h
       if (theOptions.limits[i].lolimit)
-        boost::hash_combine(hash, boost::hash_value(*theOptions.limits[i].lolimit));
+        Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].lolimit));
       else
-        boost::hash_combine(hash, boost::hash_value(false));
+        Fmi::hash_combine(hash, Fmi::hash_value(false));
 
       if (theOptions.limits[i].hilimit)
-        boost::hash_combine(hash, boost::hash_value(*theOptions.limits[i].hilimit));
+        Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].hilimit));
       else
-        boost::hash_combine(hash, boost::hash_value(false));
+        Fmi::hash_combine(hash, Fmi::hash_value(false));
     }
 
     hash_values[icontour] = hash;

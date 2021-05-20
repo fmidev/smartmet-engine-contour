@@ -5,9 +5,8 @@
 // ======================================================================
 
 #include "Options.h"
-#include <boost/functional/hash.hpp>
 #include <macgyver/Exception.h>
-#include <spine/Hash.h>
+#include <macgyver/Hash.h>
 
 namespace SmartMet
 {
@@ -79,25 +78,25 @@ bool Options::hasTransformation() const
 std::size_t hash_value(const Options& theOptions)
 {
   std::size_t seed = 0;
-  boost::hash_combine(seed, theOptions.interpolation);
-  boost::hash_combine(seed, theOptions.extrapolation);
-  boost::hash_combine(seed, theOptions.parameter);
-  boost::hash_combine(seed, theOptions.time);
-  boost::hash_combine(seed, theOptions.level);
+  Fmi::hash_combine(seed, Fmi::hash_value(static_cast<int>(theOptions.interpolation)));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.extrapolation));
+  Fmi::hash_combine(seed, theOptions.parameter.hashValue());
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.time));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.level));
 
   for (auto isovalue : theOptions.isovalues)
-    boost::hash_combine(seed, isovalue);
+    Fmi::hash_combine(seed, Fmi::hash_value(isovalue));
   for (auto range : theOptions.limits)
   {
-    boost::hash_combine(seed, range.lolimit);
-    boost::hash_combine(seed, range.hilimit);
+    Fmi::hash_combine(seed, Fmi::hash_value(range.lolimit));
+    Fmi::hash_combine(seed, Fmi::hash_value(range.hilimit));
   }
 
-  boost::hash_combine(seed, theOptions.multiplier);
-  boost::hash_combine(seed, theOptions.offset);
-  boost::hash_combine(seed, theOptions.filter_size);
-  boost::hash_combine(seed, theOptions.filter_degree);
-  boost::hash_combine(seed, theOptions.minarea);
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.multiplier));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.offset));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.filter_size));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.filter_degree));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.minarea));
   return seed;
 }
 
@@ -115,19 +114,19 @@ std::size_t Options::data_hash_value() const
   try
   {
     std::size_t seed = 0;
-    // NO: boost::hash_combine(seed, interpolation);
-    // NO: boost::hash_combine(seed, extrapolation);
-    boost::hash_combine(seed, parameter);
-    boost::hash_combine(seed, time);
-    boost::hash_combine(seed, level);
-    // NO: boost::hash_combine(seed, isovalue);
-    // NO: boost::hash_combine(seed, lolimit);
-    // NO: boost::hash_combine(seed, hilimit);
-    // NO: boost::hash_combine(seed, multiplier);
-    // NO: boost::hash_combine(seed, offset);
-    // NO: boost::hash_combine(seed, filter_size);
-    // NO: boost::hash_combine(seed, filter_degree);
-    // NO: boost::hash_combine(seed, minarea);
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(interpolation));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(extrapolation));
+    Fmi::hash_combine(seed, parameter.hashValue());
+    Fmi::hash_combine(seed, Fmi::hash_value(time));
+    Fmi::hash_combine(seed, Fmi::hash_value(level));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(isovalue));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(lolimit));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(hilimit));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(multiplier));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(offset));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(filter_size));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(filter_degree));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(minarea));
     return seed;
   }
   catch (...)
@@ -150,19 +149,19 @@ std::size_t Options::filtered_data_hash_value() const
   try
   {
     std::size_t seed = 0;
-    boost::hash_combine(seed, interpolation);
-    boost::hash_combine(seed, extrapolation);
-    boost::hash_combine(seed, parameter);
-    boost::hash_combine(seed, time);
-    boost::hash_combine(seed, level);
-    // NO: boost::hash_combine(seed, isovalue);
-    // NO: boost::hash_combine(seed, lolimit);
-    // NO: boost::hash_combine(seed, hilimit);
-    boost::hash_combine(seed, multiplier);
-    boost::hash_combine(seed, offset);
-    boost::hash_combine(seed, filter_size);
-    boost::hash_combine(seed, filter_degree);
-    boost::hash_combine(seed, minarea);
+    Fmi::hash_combine(seed, Fmi::hash_value(static_cast<int>(interpolation)));
+    Fmi::hash_combine(seed, Fmi::hash_value(extrapolation));
+    Fmi::hash_combine(seed, parameter.hashValue());
+    Fmi::hash_combine(seed, Fmi::hash_value(time));
+    Fmi::hash_combine(seed, Fmi::hash_value(level));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(isovalue));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(lolimit));
+    // NO: Fmi::hash_combine(seed, Fmi::hash_value(hilimit));
+    Fmi::hash_combine(seed, Fmi::hash_value(multiplier));
+    Fmi::hash_combine(seed, Fmi::hash_value(offset));
+    Fmi::hash_combine(seed, Fmi::hash_value(filter_size));
+    Fmi::hash_combine(seed, Fmi::hash_value(filter_degree));
+    Fmi::hash_combine(seed, Fmi::hash_value(minarea));
     return seed;
   }
   catch (...)
