@@ -292,7 +292,7 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
     {
       // Should this be fixed? Probably not - the coordinates should behave the same
       double dist = i * distance / steps;
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
       auto loc = startpoint.GetLocation(bearing, dist);
 #else
       const bool pacific_view = false;
