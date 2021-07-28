@@ -69,10 +69,8 @@ void writeLinearRingSVG(const LinearRing* geom, std::ostream& out)
     {
       if (i == 0)
         out << 'M';
-      else if (i == 1)
-        out << ' ';  // implicit lineto, we could also write an 'L'
       else
-        out << ' ';
+        out << ' ';  // first lineto is implicit, no need to handle i==1
       writeCoordinateSVG(geom->getCoordinateN(boost::numeric_cast<int>(i)), out);
     }
     out << 'Z';
@@ -101,10 +99,8 @@ void writeLineStringSVG(const LineString* geom, std::ostream& out)
     {
       if (i == 0)
         out << 'M';
-      else if (i == 1)
-        out << ' ';  // implicit lineto, we could also write an 'L'
       else
-        out << ' ';
+        out << ' ';  // first lineto is implicit, no need to handle i==1
       writeCoordinateSVG(geom->getCoordinateN(boost::numeric_cast<int>(i)), out);
     }
 
