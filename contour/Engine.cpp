@@ -270,9 +270,8 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
       throw Fmi::Exception(BCP, "Ill-defined isocircle: points at opposing ends of the earth");
 
     if (steps < 1 || steps > 10000)
-      throw Fmi::Exception(BCP,
-                           "Number of points on isocircle must be 1-10000, not " +
-                               boost::lexical_cast<std::string>(steps));
+      throw Fmi::Exception(
+          BCP, "Number of points on isocircle must be 1-10000, not " + Fmi::to_string(steps));
 
     // Calculate bearing and distance to be travelled
 
