@@ -15,7 +15,7 @@ namespace Contour
  */
 // ----------------------------------------------------------------------
 
-Config::Config(const std::string& theFileName) : itsConfig()
+Config::Config(const std::string& theFileName)
 {
   try
   {
