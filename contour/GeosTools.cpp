@@ -244,21 +244,21 @@ void writeSVG(const Geometry* geom, std::ostream& out)
 {
   try
   {
-    if (const Point* point = dynamic_cast<const Point*>(geom))
+    if (const auto* point = dynamic_cast<const Point*>(geom))
       writePointSVG(point->getCoordinate(), out);
-    else if (const LinearRing* lr = dynamic_cast<const LinearRing*>(geom))
+    else if (const auto* lr = dynamic_cast<const LinearRing*>(geom))
       writeLinearRingSVG(lr, out);
-    else if (const LineString* ls = dynamic_cast<const LineString*>(geom))
+    else if (const auto* ls = dynamic_cast<const LineString*>(geom))
       writeLineStringSVG(ls, out);
-    else if (const Polygon* p = dynamic_cast<const Polygon*>(geom))
+    else if (const auto* p = dynamic_cast<const Polygon*>(geom))
       writePolygonSVG(p, out);
-    else if (const MultiPoint* mp = dynamic_cast<const MultiPoint*>(geom))
+    else if (const auto* mp = dynamic_cast<const MultiPoint*>(geom))
       writeMultiPointSVG(mp, out);
-    else if (const MultiLineString* ml = dynamic_cast<const MultiLineString*>(geom))
+    else if (const auto* ml = dynamic_cast<const MultiLineString*>(geom))
       writeMultiLineStringSVG(ml, out);
-    else if (const MultiPolygon* mpg = dynamic_cast<const MultiPolygon*>(geom))
+    else if (const auto* mpg = dynamic_cast<const MultiPolygon*>(geom))
       writeMultiPolygonSVG(mpg, out);
-    else if (const GeometryCollection* g = dynamic_cast<const GeometryCollection*>(geom))
+    else if (const auto* g = dynamic_cast<const GeometryCollection*>(geom))
       writeGeometryCollectionSVG(g, out);
     else
       throw Fmi::Exception(BCP, "Encountered an unsupported GEOS geometry component");
