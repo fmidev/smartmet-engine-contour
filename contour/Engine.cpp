@@ -644,7 +644,7 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
-                                                  const Fmi::SpatialReference &theDataCRS,
+                                                  const Fmi::SpatialReference & /*theDataCRS */,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
