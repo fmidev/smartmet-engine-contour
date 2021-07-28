@@ -36,10 +36,8 @@ struct Range
 
 struct Options
 {
- private:
-  Options();
-
  public:
+  Options() = delete;
   Options(const Spine::Parameter& theParam,
           const boost::posix_time::ptime& theTime,
           const std::vector<double>& theIsoValues);

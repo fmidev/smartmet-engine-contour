@@ -33,20 +33,10 @@ struct CacheReportingStruct
 
 class Engine : public Spine::SmartMetEngine
 {
- private:
-  Engine();
-
-  // Hide caches etc behind an implementation
-  class Impl;
-  std::shared_ptr<Impl> itsImpl;
-
- protected:
-  virtual void init();
-  void shutdown();
-
  public:
   // constructor is available only with a libconfig configuration file
 
+  Engine() = delete;
   Engine(const std::string& theFileName);
 
   // Produce vector of OGR geometries in output spatial reference
@@ -79,6 +69,15 @@ class Engine : public Spine::SmartMetEngine
 
   CacheReportingStruct getCacheSizes() const;
   void clearCache() const;
+
+ protected:
+  virtual void init();
+  void shutdown();
+
+ private:
+  // Hide caches etc behind an implementation
+  class Impl;
+  std::shared_ptr<Impl> itsImpl;
 
 };  // class Engine
 

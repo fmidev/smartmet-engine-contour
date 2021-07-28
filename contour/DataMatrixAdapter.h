@@ -25,6 +25,8 @@ class DataMatrixAdapter
   using coord_type = double;
   using size_type = NFmiDataMatrix<float>::size_type;
 
+  DataMatrixAdapter() = delete;
+
   DataMatrixAdapter(NFmiDataMatrix<float>& theMatrix,
                     const Fmi::CoordinateMatrix& theCoords,
                     const Fmi::BoolMatrix& theValidCells)
@@ -54,7 +56,6 @@ class DataMatrixAdapter
   size_type height() const { return itsHeight; }
 
  private:
-  DataMatrixAdapter();
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
