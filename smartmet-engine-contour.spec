@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.6.28
+Version: 21.7.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,11 +22,11 @@ BuildRequires: geos39-devel
 BuildRequires: libconfig-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.5.20
-BuildRequires: smartmet-library-macgyver-devel >= 21.5.20
-BuildRequires: smartmet-library-newbase-devel >= 21.5.6
-BuildRequires: smartmet-library-spine-devel >= 21.5.20
-BuildRequires: smartmet-library-tron-devel >= 21.4.15
+BuildRequires: smartmet-library-gis-devel >= 21.7.27
+BuildRequires: smartmet-library-macgyver-devel >= 21.7.28
+BuildRequires: smartmet-library-newbase-devel >= 21.6.16
+BuildRequires: smartmet-library-spine-devel >= 21.7.28
+BuildRequires: smartmet-library-tron-devel >= 21.6.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -37,11 +37,11 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos39
 Requires: libconfig
-Requires: smartmet-library-gis >= 21.5.20
-Requires: smartmet-library-macgyver >= 21.5.20
-Requires: smartmet-library-newbase >= 21.5.6
-Requires: smartmet-library-spine >= 21.5.20
-Requires: smartmet-library-tron >= 21.4.15
+Requires: smartmet-library-gis >= 21.7.27
+Requires: smartmet-library-macgyver >= 21.7.28
+Requires: smartmet-library-newbase >= 21.6.16
+Requires: smartmet-library-spine >= 21.7.28
+Requires: smartmet-library-tron >= 21.6.21
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -57,8 +57,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 20.10.6
 #TestRequires: smartmet-engine-querydata-devel >= 20.10.6
 #TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.5.20
-#TestRequires: smartmet-library-tron >= 21.4.15
+#TestRequires: smartmet-library-spine-devel >= 21.7.28
+#TestRequires: smartmet-library-tron >= 21.6.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -98,6 +98,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Jul 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.7.28-1.fmi
+- Silenced compiler warnings
+
 * Mon Jun 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.28-1.fmi
 - Detect newbase version from external WGS84 define
 
