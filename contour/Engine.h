@@ -71,8 +71,8 @@ class Engine : public Spine::SmartMetEngine
   void clearCache() const;
 
  protected:
-  virtual void init();
-  void shutdown();
+  void init() override;
+  void shutdown() override;
 
  private:
   // Hide caches etc behind an implementation
