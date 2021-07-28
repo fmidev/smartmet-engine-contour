@@ -606,7 +606,7 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
   const auto isoline_hash = Fmi::hash_value(std::string("isoline"));
   const auto isoband_hash = Fmi::hash_value(std::string("isoband"));
 
-  for (auto icontour = 0ul; icontour < nresults; icontour++)
+  for (auto icontour = 0UL; icontour < nresults; icontour++)
   {
     auto hash = common_hash;
     if (icontour < theOptions.isovalues.size())
@@ -679,7 +679,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     std::vector<std::size_t> todo_contours;
 
-    for (auto icontour = 0ul; icontour < nresults; icontour++)
+    for (auto icontour = 0UL; icontour < nresults; icontour++)
     {
       auto hash = contour_cache_keys[icontour];
       auto opt_geom = itsContourCache.find(hash);
@@ -850,7 +850,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Do not use all cores until better balancing & locking is implemented
 
     const auto max_concurrency = std::thread::hardware_concurrency();
-    const auto concurrency = std::max(1u, max_concurrency / 8);
+    const auto concurrency = std::max(1U, max_concurrency / 8);
 
     Fmi::WorkQueue<Args> workqueue(contourer, concurrency);
 
@@ -1023,7 +1023,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // The results
     std::vector<OGRGeometryPtr> retval(nresults);
 
-    for (auto icontour = 0ul; icontour < nresults; icontour++)
+    for (auto icontour = 0UL; icontour < nresults; icontour++)
     {
       // Is it an isovalue request?
       bool isovaluerequest = (icontour < theOptions.isovalues.size());
