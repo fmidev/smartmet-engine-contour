@@ -732,7 +732,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Flip the data and the coordinates if necessary. We avoid an unnecessary
     // copy of the coordinates if no flipping is needed by using a pointer.
 
-    auto *coords = &theCoordinates;
+    const auto *coords = &theCoordinates;
     std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
 
     if (analysis->needs_flipping)
