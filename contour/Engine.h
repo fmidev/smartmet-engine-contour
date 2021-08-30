@@ -79,6 +79,8 @@ class Engine : public Spine::SmartMetEngine
   class Impl;
   std::shared_ptr<Impl> itsImpl;
 
+  Fmi::Cache::CacheStatistics getCacheStats() const override;
+
 };  // class Engine
 
 }  // namespace Contour

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.8.17
+Version: 21.8.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,10 +22,10 @@ BuildRequires: geos39-devel
 BuildRequires: libconfig-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.8.3
-BuildRequires: smartmet-library-macgyver-devel >= 21.8.5
+BuildRequires: smartmet-library-gis-devel >= 21.8.30
+BuildRequires: smartmet-library-macgyver-devel >= 21.8.30
 BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.8.17
+BuildRequires: smartmet-library-spine-devel >= 21.8.30
 BuildRequires: smartmet-library-tron-devel >= 21.6.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -37,10 +37,10 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos39
 Requires: libconfig
-Requires: smartmet-library-gis >= 21.8.3
-Requires: smartmet-library-macgyver >= 21.8.5
+Requires: smartmet-library-gis >= 21.8.30
+Requires: smartmet-library-macgyver >= 21.8.30
 Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.8.17
+Requires: smartmet-library-spine >= 21.8.30
 Requires: smartmet-library-tron >= 21.6.21
 
 Provides: %{SPECNAME}
@@ -98,6 +98,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Aug 30 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.8.30-1.fmi
+- Cache counters added (BRAINSTORM-1005)
+
 * Tue Aug 17 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.17-1.fmi
 - Repackaged due to shutdown ABI changes
 
