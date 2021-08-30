@@ -87,6 +87,7 @@ class Engine::Impl
 
   CacheReportingStruct getCacheSizes();
   void clearCache();
+  Fmi::Cache::CacheStatistics getCacheStats() const;
 
  private:
   std::string itsConfigFile;
@@ -1057,6 +1058,16 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
   }
 }
 
+Fmi::Cache::CacheStatistics Engine::Impl::getCacheStats() const
+{
+  Fmi::Cache::CacheStatistics ret;
+
+  ret.insert(std::make_pair("Contour::contour_cache", itsContourCache.statistics()));
+  ret.insert(std::make_pair("Contour::analysis_cache", itsAnalysisCache.statistics()));
+
+  return ret;
+}
+
 }  // namespace Contour
 }  // namespace Engine
 }  // namespace SmartMet
@@ -1215,6 +1226,11 @@ std::vector<OGRGeometryPtr> Engine::crossection(NFmiFastQueryInfo &theQInfo,
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+Fmi::Cache::CacheStatistics Engine::getCacheStats() const
+{
+  return itsImpl->getCacheStats();
 }
 
 }  // namespace Contour
