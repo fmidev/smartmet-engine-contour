@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.9.7
+Version: 21.9.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,10 +21,10 @@ BuildRequires: gdal32-devel
 BuildRequires: geos39-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.8.30
-BuildRequires: smartmet-library-macgyver-devel >= 21.8.30
+BuildRequires: smartmet-library-gis-devel >= 21.9.13
+BuildRequires: smartmet-library-macgyver-devel >= 21.9.13
 BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.9.7
+BuildRequires: smartmet-library-spine-devel >= 21.9.13
 BuildRequires: smartmet-library-tron-devel >= 21.6.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -35,10 +35,10 @@ Requires: boost169-system
 Requires: boost169-thread
 Requires: gdal32-libs
 Requires: geos39
-Requires: smartmet-library-gis >= 21.8.30
-Requires: smartmet-library-macgyver >= 21.8.30
+Requires: smartmet-library-gis >= 21.9.13
+Requires: smartmet-library-macgyver >= 21.9.13
 Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.9.7
+Requires: smartmet-library-spine >= 21.9.13
 Requires: smartmet-library-tron >= 21.6.21
 
 Provides: %{SPECNAME}
@@ -54,7 +54,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 20.10.6
 #TestRequires: smartmet-engine-querydata-devel >= 20.10.6
 #TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.9.7
+#TestRequires: smartmet-library-spine-devel >= 21.9.13
 #TestRequires: smartmet-library-tron >= 21.6.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
@@ -95,6 +95,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Sep 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.9.13-1.fmi
+- Repackaged due to Fmi::Cache statistics fixes
+
 * Tue Sep  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.9.7-1.fmi
 - Rebuild due to dependency changes
 
