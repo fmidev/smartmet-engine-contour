@@ -106,14 +106,15 @@ void lines()
     string ok =
         "M0 96.3 0.6 96.6 0.7 96.7 1.5 97.1 1.8 97.3 2.2 97.7 2.5 98 3 98.5 3.1 98.7 3.5 99.3 3.7 "
         "100M35.2 100 35.8 99.9 36.1 100";
+
     if (result != ok)
       TEST_FAILED("Isovalue: 25\n\tExpected: " + ok + "\n\tObtained: " + result);
 
     // test another resolution
     result = Fmi::OGR::exportToSvg(*geom, area, 2);
 
-    ok = "M0 96.31 0.63 96.64 0.75 96.71 1.49 97.12 1.78 97.32 2.24 97.70 2.55 97.99 2.99 98.50 "
-         "3.12 98.66 3.50 99.33 3.68 100M35.17 100 35.82 99.93 36.06 100";
+    ok = "M0 96.31 0.63 96.64 0.75 96.71 1.49 97.12 1.78 97.32 2.24 97.7 2.55 97.99 2.99 98.5 3.12 "
+         "98.66 3.5 99.33 3.68 100M35.17 100 35.82 99.93 36.06 100";
     if (result != ok)
       TEST_FAILED("Isovalue: 25\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
@@ -233,7 +234,7 @@ void fills()
     // test another resolution too
     result = Fmi::OGR::exportToSvg(*geom, area, 2);
     ok = "M0 100 0 99.33 0 98.66 0 97.99 0 97.42 0.75 97.87 0.92 97.99 1.49 98.58 1.56 98.66 2.16 "
-         "99.33 2.24 99.42 2.60 100 2.24 100 1.49 100 0.75 100Z";
+         "99.33 2.24 99.42 2.6 100 2.24 100 1.49 100 0.75 100Z";
 
     if (result != ok)
       TEST_FAILED("Isoband (2 decimals): 25.5-30 \n\tExpected: " + ok + "\n\tObtained: " + result);
