@@ -44,13 +44,22 @@ class DataMatrixAdapter
 
   // Provide wrap-around capability for world data
 
+  const value_type& z(size_type i, size_type j) const { return itsMatrix[i % itsNX][j]; }
+  value_type& z(size_type i, size_type j) { return itsMatrix[i % itsNX][j]; }
+
   const value_type& operator()(size_type i, size_type j) const { return itsMatrix[i % itsNX][j]; }
   value_type& operator()(size_type i, size_type j) { return itsMatrix[i % itsNX][j]; }
 
   coord_type x(size_type i, size_type j) const { return itsCoords.x(i, j); }
   coord_type y(size_type i, size_type j) const { return itsCoords.y(i, j); }
 
-  bool valid(size_type i, size_type j) const { return itsValidCells(i, j); }
+  bool valid(int i, int j) const
+  {
+    if (i < 0 || j < 0 || static_cast<size_type>(i) >= itsWidth ||
+        static_cast<size_type>(j) >= itsHeight)
+      return false;
+    return itsValidCells(i, j);
+  }
 
   size_type width() const { return itsWidth; }
   size_type height() const { return itsHeight; }

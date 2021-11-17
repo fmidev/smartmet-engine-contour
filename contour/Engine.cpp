@@ -1,3 +1,5 @@
+
+
 // ======================================================================
 /*!
  * \brief Implementation details for the Contour engine
@@ -21,9 +23,6 @@
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/WorkQueue.h>
-#include <tron/FmiBuilder.h>
-#include <tron/SavitzkyGolay2D.h>
-#include <tron/Tron.h>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
 #include <limits>
@@ -31,6 +30,13 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
+
+#include <trax/Contour.h>
+#include <trax/Geos.h>
+#include <trax/IsobandLimits.h>
+#include <trax/IsolineValues.h>
+
+#include <tron/SavitzkyGolay2D.h>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
@@ -41,22 +47,6 @@ namespace Engine
 namespace Contour
 {
 // Contourers
-
-using MyTraits = Tron::Traits<double, double, Tron::InfMissing>;
-using MyBuilder = Tron::FmiBuilder;
-using MyHints = Tron::Hints<DataMatrixAdapter, MyTraits>;
-
-using MyLinearContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::LinearInterpolation>;
-
-using MyLogLinearContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::LogLinearInterpolation>;
-
-using MyNearestContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::NearestNeighbourInterpolation>;
-
-using MyDiscreteContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::DiscreteInterpolation>;
 
 class Engine::Impl
 {
@@ -111,15 +101,13 @@ class Engine::Impl
       const Fmi::SpatialReference &theOutputCRS) const;
 
   GeometryPtr internal_isoline(const DataMatrixAdapter &data,
-                               const MyHints &hints,
                                double isovalue,
-                               Interpolation interpolation) const;
+                               Trax::InterpolationType interpolation) const;
 
   GeometryPtr internal_isoband(const DataMatrixAdapter &data,
-                               const MyHints &hints,
                                const boost::optional<double> &lolimit,
                                const boost::optional<double> &hilimit,
-                               Interpolation interpolation) const;
+                               Trax::InterpolationType interpolation) const;
 };
 
 }  // namespace Contour
@@ -443,36 +431,15 @@ void Engine::Impl::clearCache()
 // ----------------------------------------------------------------------
 
 GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
-                                           const MyHints &hints,
                                            double isovalue,
-                                           Interpolation interpolation) const
+                                           Trax::InterpolationType interpolation) const
 {
-  // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(*itsGeomFactory);
+  Trax::IsolineValues limits;
+  limits.add(isovalue);
 
-  // isoline
-  switch (interpolation)
-  {
-    case Linear:
-    {
-      MyLinearContourer::line(builder, data, isovalue, hints);
-      break;
-    }
-    case LogLinear:
-    {
-      MyLogLinearContourer::line(builder, data, isovalue, hints);
-      break;
-    }
-    case Nearest:
-    {
-      throw std::runtime_error("Isolines not supported with nearest neighbour interpolation");
-    }
-    case Discrete:
-    {
-      throw std::runtime_error("Isolines not supported with discrete interpolation");
-    }
-  }
-  return builder.result();
+  Trax::Contour contour(interpolation);
+  auto result = contour.isolines(data, limits);
+  return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
 
 // ----------------------------------------------------------------------
@@ -485,14 +452,10 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
 // ----------------------------------------------------------------------
 
 GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
-                                           const MyHints &hints,
                                            const boost::optional<double> &lolimit,
                                            const boost::optional<double> &hilimit,
-                                           Interpolation interpolation) const
+                                           Trax::InterpolationType interpolation) const
 {
-  // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(*itsGeomFactory);
-
   double lo = -std::numeric_limits<double>::infinity();
   double hi = +std::numeric_limits<double>::infinity();
 
@@ -501,31 +464,13 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   if (hilimit)
     hi = *hilimit;
 
-  switch (interpolation)
-  {
-    case Linear:
-    {
-      MyLinearContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-    case LogLinear:
-    {
-      MyLogLinearContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-    case Nearest:
-    {
-      MyNearestContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-    case Discrete:
-    {
-      MyDiscreteContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-  }
+  Trax::IsobandLimits limits;
+  limits.add(lo, hi);
 
-  return builder.result();
+  Trax::Contour contour(interpolation);
+  auto result = contour.isobands(data, limits);
+
+  return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
 
 // ----------------------------------------------------------------------
@@ -780,10 +725,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       Tron::SavitzkyGolay2D::smooth(data, size, degree);
     }
 
-    // 2D search structure for the final values
-
-    MyHints hints(data);
-
     // Parallel processing of the contours uses this struct to identify the contour to be processed
     // and the cache key with which to store it.
 
@@ -795,8 +736,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Lambda for processing a single contouring task (isoline or isoband)
 
-    const auto contourer = [&retval, this, &theOptions, &theOutputCRS, &data, &hints](Args &args)
-    {
+    const auto contourer = [&retval, this, &theOptions, &theOutputCRS, &data](Args &args) {
       try
       {
         // Calculate GEOS geometry result
@@ -804,14 +744,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
         if (args.i < theOptions.isovalues.size())
         {
-          geom =
-              internal_isoline(data, hints, theOptions.isovalues[args.i], theOptions.interpolation);
+          geom = internal_isoline(data, theOptions.isovalues[args.i], theOptions.interpolation);
         }
         else
         {
           auto iband = args.i - theOptions.isovalues.size();
           geom = internal_isoband(data,
-                                  hints,
                                   theOptions.limits[iband].lolimit,
                                   theOptions.limits[iband].hilimit,
                                   theOptions.interpolation);
@@ -843,7 +781,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       {
         // Cannot let an exception cause termination. We'll let the user get an empty result
         // instead.
-        Fmi::Exception ex(BCP, "Contouring failed");
+        Fmi::Exception ex(BCP, "Contouring failed", nullptr);
         ex.printError();
       }
     };
@@ -1016,7 +954,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
 
     Fmi::BoolMatrix grid_is_fine(coords.width(), coords.height(), true);
     DataMatrixAdapter data(values, coords, grid_is_fine);
-    MyHints hints(data);
 
     // results first include isolines, then isobands
     auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
@@ -1033,14 +970,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       GeometryPtr geom;
       if (isovaluerequest)
       {
-        geom =
-            internal_isoline(data, hints, theOptions.isovalues[icontour], theOptions.interpolation);
+        geom = internal_isoline(data, theOptions.isovalues[icontour], theOptions.interpolation);
       }
       else
       {
         auto i = icontour - theOptions.isovalues.size();
         geom = internal_isoband(data,
-                                hints,
                                 theOptions.limits[i].lolimit,
                                 theOptions.limits[i].hilimit,
                                 theOptions.interpolation);

@@ -13,7 +13,7 @@ LIBS += -L$(libdir) \
 	-lsmartmet-spine \
 	-lsmartmet-newbase \
 	-lsmartmet-macgyver \
-	-lsmartmet-tron \
+	-lsmartmet-trax \
 	-lsmartmet-gis \
 	-lboost_regex \
 	-lboost_date_time \

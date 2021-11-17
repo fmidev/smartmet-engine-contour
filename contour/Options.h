@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "Interpolation.h"
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
 #include <spine/Parameter.h>
+#include <trax/InterpolationType.h>
 #include <vector>
 
 namespace SmartMet
@@ -54,7 +54,7 @@ struct Options
   void transformation(double theMultiplier, double theOffset);
   bool hasTransformation() const;
 
-  Interpolation interpolation;
+  Trax::InterpolationType interpolation = Trax::InterpolationType::Linear;
   int extrapolation = 0;
   Spine::Parameter parameter;
   boost::posix_time::ptime time;

@@ -23,7 +23,7 @@ namespace Contour
 Options::Options(const Spine::Parameter& theParam,
                  const boost::posix_time::ptime& theTime,
                  const std::vector<double>& theIsoValues)
-    : interpolation(Linear), parameter(theParam), time(theTime), isovalues(theIsoValues)
+    : parameter(theParam), time(theTime), isovalues(theIsoValues)
 {
 }
 
@@ -36,7 +36,7 @@ Options::Options(const Spine::Parameter& theParam,
 Options::Options(const Spine::Parameter& theParam,
                  const boost::posix_time::ptime& theTime,
                  const std::vector<Range>& theLimits)
-    : interpolation(Linear), parameter(theParam), time(theTime), limits(theLimits)
+    : parameter(theParam), time(theTime), limits(theLimits)
 {
 }
 
