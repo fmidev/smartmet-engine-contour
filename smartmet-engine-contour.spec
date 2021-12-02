@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.9.28
+Version: 21.12.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,10 +21,10 @@ BuildRequires: gdal33-devel
 BuildRequires: geos39-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.9.13
-BuildRequires: smartmet-library-macgyver-devel >= 21.9.13
-BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.9.13
+BuildRequires: smartmet-library-gis-devel >= 21.12.1
+BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
+BuildRequires: smartmet-library-newbase-devel >= 21.12.1
+BuildRequires: smartmet-library-spine-devel >= 21.12.2
 BuildRequires: smartmet-library-tron-devel >= 21.6.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -35,10 +35,10 @@ Requires: boost169-system
 Requires: boost169-thread
 Requires: gdal33-libs
 Requires: geos39
-Requires: smartmet-library-gis >= 21.9.13
-Requires: smartmet-library-macgyver >= 21.9.13
-Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.9.13
+Requires: smartmet-library-gis >= 21.12.1
+Requires: smartmet-library-macgyver >= 21.12.1
+Requires: smartmet-library-newbase >= 21.12.1
+Requires: smartmet-library-spine >= 21.12.2
 Requires: smartmet-library-tron >= 21.6.21
 
 Provides: %{SPECNAME}
@@ -51,10 +51,10 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: geos39-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
-#TestRequires: smartmet-engine-querydata >= 20.10.6
-#TestRequires: smartmet-engine-querydata-devel >= 20.10.6
+#TestRequires: smartmet-engine-querydata >= 20.12.2
+#TestRequires: smartmet-engine-querydata-devel >= 20.12.2
 #TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.9.13
+#TestRequires: smartmet-library-spine-devel >= 21.12.2
 #TestRequires: smartmet-library-tron >= 21.6.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
@@ -67,6 +67,7 @@ SmartMet contour engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
+Requires: %{SPECNAME} = %{version}-%{release}
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
