@@ -25,7 +25,7 @@ BuildRequires: smartmet-library-gis-devel >= 21.9.13
 BuildRequires: smartmet-library-macgyver-devel >= 21.9.13
 BuildRequires: smartmet-library-newbase-devel >= 21.6.16
 BuildRequires: smartmet-library-spine-devel >= 21.9.13
-BuildRequires: smartmet-library-tron-devel >= 21.6.21
+BuildRequires: smartmet-library-trax-devel >= 21.6.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -39,7 +39,7 @@ Requires: smartmet-library-gis >= 21.9.13
 Requires: smartmet-library-macgyver >= 21.9.13
 Requires: smartmet-library-newbase >= 21.6.16
 Requires: smartmet-library-spine >= 21.9.13
-Requires: smartmet-library-tron >= 21.6.21
+Requires: smartmet-library-trax >= 21.6.21
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1

@@ -35,8 +35,7 @@
 #include <trax/Geos.h>
 #include <trax/IsobandLimits.h>
 #include <trax/IsolineValues.h>
-
-#include <tron/SavitzkyGolay2D.h>
+#include <trax/SavitzkyGolay2D.h>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
@@ -722,7 +721,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     {
       size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
       size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
-      Tron::SavitzkyGolay2D::smooth(data, size, degree);
+      Trax::SavitzkyGolay2D::smooth(data, size, degree);
     }
 
     // Parallel processing of the contours uses this struct to identify the contour to be processed
