@@ -22,7 +22,12 @@
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
-#include <macgyver/WorkQueue.h>
+#include <trax/Contour.h>
+#include <trax/Geos.h>
+#include <trax/IsobandLimits.h>
+#include <trax/IsolineValues.h>
+#include <trax/OGR.h>
+#include <trax/SavitzkyGolay2D.h>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
 #include <limits>
@@ -30,12 +35,6 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
-
-#include <trax/Contour.h>
-#include <trax/Geos.h>
-#include <trax/IsobandLimits.h>
-#include <trax/IsolineValues.h>
-#include <trax/SavitzkyGolay2D.h>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
@@ -543,42 +542,50 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
   Fmi::hash_combine(common_hash, theOptions.filtered_data_hash_value());
   Fmi::hash_combine(common_hash, theOutputCRS.hashValue());
 
-  // results first include isolines, then isobands
-  const auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
+  if (!theOptions.isovalues.empty())
+  {
+    // isolines mode
+    const auto nresults = theOptions.isovalues.size();
+    std::vector<std::size_t> hash_values(nresults, 0);
 
+    const auto isoline_hash = Fmi::hash_value(std::string("isoline"));
+    Fmi::hash_combine(common_hash, isoline_hash);
+
+    for (auto i = 0UL; i < nresults; i++)
+    {
+      auto hash = common_hash;
+      Fmi::hash_combine(hash, Fmi::hash_value(theOptions.isovalues[i]));
+      hash_values[i] = hash;
+    }
+
+    return hash_values;
+  }
+
+  // isoband mode
+  const auto nresults = theOptions.limits.size();
   std::vector<std::size_t> hash_values(nresults, 0);
 
-  const auto isoline_hash = Fmi::hash_value(std::string("isoline"));
   const auto isoband_hash = Fmi::hash_value(std::string("isoband"));
+  Fmi::hash_combine(common_hash, isoband_hash);
 
-  for (auto icontour = 0UL; icontour < nresults; icontour++)
+  for (auto i = 0UL; i < nresults; i++)
   {
     auto hash = common_hash;
-    if (icontour < theOptions.isovalues.size())
-    {
-      Fmi::hash_combine(hash, isoline_hash);
-      Fmi::hash_combine(hash, Fmi::hash_value(theOptions.isovalues[icontour]));
-    }
+
+    // TODO: Use generic code as in wms/Hash.h
+    if (theOptions.limits[i].lolimit)
+      Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].lolimit));
     else
-    {
-      Fmi::hash_combine(hash, isoband_hash);
+      Fmi::hash_combine(hash, Fmi::hash_value(false));
 
-      auto i = icontour - theOptions.isovalues.size();
+    if (theOptions.limits[i].hilimit)
+      Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].hilimit));
+    else
+      Fmi::hash_combine(hash, Fmi::hash_value(false));
 
-      // TODO: Use generic code as in wms/Hash.h
-      if (theOptions.limits[i].lolimit)
-        Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].lolimit));
-      else
-        Fmi::hash_combine(hash, Fmi::hash_value(false));
-
-      if (theOptions.limits[i].hilimit)
-        Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].hilimit));
-      else
-        Fmi::hash_combine(hash, Fmi::hash_value(false));
-    }
-
-    hash_values[icontour] = hash;
+    hash_values[i] = hash;
   }
+
   return hash_values;
 }
 
@@ -608,15 +615,18 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (nx == 0 || ny == 0)
       return {};
 
+    if (!theOptions.isovalues.empty() && !theOptions.limits.empty())
+      throw Fmi::Exception(BCP, "Cannot calculate isolines and isobands simultaneously");
+
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
 
     std::vector<std::size_t> contour_cache_keys =
         get_contour_cache_keys(theDataHash, theOutputCRS, theOptions);
 
-    // results first include isolines, then isobands
+    // Initialize empty results
 
-    auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
+    auto nresults = std::max(theOptions.isovalues.size(), theOptions.limits.size());
     std::vector<OGRGeometryPtr> retval(nresults);
 
     // Try to extract everything from the cache first without any
@@ -624,14 +634,14 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     std::vector<std::size_t> todo_contours;
 
-    for (auto icontour = 0UL; icontour < nresults; icontour++)
+    for (auto i = 0UL; i < nresults; i++)
     {
-      auto hash = contour_cache_keys[icontour];
+      auto hash = contour_cache_keys[i];
       auto opt_geom = itsContourCache.find(hash);
       if (opt_geom)
-        retval[icontour] = *opt_geom;
+        retval[i] = *opt_geom;
       else
-        todo_contours.push_back(icontour);
+        todo_contours.push_back(i);
     }
 
     // We're done if there is nothing on the TODO-list
@@ -724,81 +734,55 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       Trax::SavitzkyGolay2D::smooth(data, size, degree);
     }
 
-    // Parallel processing of the contours uses this struct to identify the contour to be processed
-    // and the cache key with which to store it.
-
-    struct Args
-    {
-      std::size_t i;
-      std::size_t hash;
-    };
-
     // Lambda for processing a single contouring task (isoline or isoband)
 
-    const auto contourer = [&retval, this, &theOptions, &theOutputCRS, &data](Args &args) {
-      try
-      {
-        // Calculate GEOS geometry result
-        GeometryPtr geom;
+    Trax::Contour contour(theOptions.interpolation);
 
-        if (args.i < theOptions.isovalues.size())
-        {
-          geom = internal_isoline(data, theOptions.isovalues[args.i], theOptions.interpolation);
-        }
-        else
-        {
-          auto iband = args.i - theOptions.isovalues.size();
-          geom = internal_isoband(data,
-                                  theOptions.limits[iband].lolimit,
-                                  theOptions.limits[iband].hilimit,
-                                  theOptions.interpolation);
-        }
+    Trax::GeometryCollections results;
 
-        // Cache as OGRGeometry
-
-        if (!geom)
-        {
-          // We want to cache empty results too to save speed!
-          auto ret = OGRGeometryPtr();
-          itsContourCache.insert(args.hash, ret);
-          retval[args.i] = ret;
-          return;
-        }
-
-        // Convert to OGR object and cache the result
-
-        auto ret = geos_to_ogr(geom, theOutputCRS.get()->Clone());
-
-        // Despeckle even closed isolines (pressure curves)
-        if (theOptions.minarea)
-          ret.reset(Fmi::OGR::despeckle(*ret, *theOptions.minarea));
-
-        retval[args.i] = ret;
-        itsContourCache.insert(args.hash, ret);
-      }
-      catch (...)
-      {
-        // Cannot let an exception cause termination. We'll let the user get an empty result
-        // instead.
-        Fmi::Exception ex(BCP, "Contouring failed", nullptr);
-        ex.printError();
-      }
-    };
-
-    // Do not use all cores until better balancing & locking is implemented
-
-    const auto max_concurrency = std::thread::hardware_concurrency();
-    const auto concurrency = std::max(1U, max_concurrency / 8);
-
-    Fmi::WorkQueue<Args> workqueue(contourer, concurrency);
-
-    for (auto icontour : todo_contours)
+    if (!theOptions.isovalues.empty())
     {
-      Args args{icontour, contour_cache_keys[icontour]};
-      workqueue(args);
+      // Calculate isolines
+      Trax::IsolineValues isovalues;
+      for (auto i : todo_contours)
+        isovalues.add(theOptions.isovalues[i]);
+
+      results = contour.isolines(data, isovalues);
+    }
+    else
+    {
+      // Calculate isobands
+      Trax::IsobandLimits isobands;
+      for (auto i : todo_contours)
+      {
+        double lo = -std::numeric_limits<double>::infinity();
+        double hi = +std::numeric_limits<double>::infinity();
+
+        if (theOptions.limits[i].lolimit)
+          lo = *theOptions.limits[i].lolimit;
+        if (theOptions.limits[i].hilimit)
+          hi = *theOptions.limits[i].hilimit;
+        isobands.add(lo, hi);
+      }
+
+      results = contour.isobands(data, isobands);
     }
 
-    workqueue.join_all();
+    // Update results and cache
+    for (auto i = 0UL; i < todo_contours.size(); i++)
+    {
+      OGRGeometryPtr tmp(Trax::to_ogr_geom(results[i]).release());
+
+      if (theOutputCRS.get() != nullptr)
+        tmp->assignSpatialReference(theOutputCRS.get()->Clone());
+
+      // Despeckle even closed isolines (pressure curves)
+      if (theOptions.minarea)
+        tmp.reset(Fmi::OGR::despeckle(*tmp, *theOptions.minarea));
+
+      retval[todo_contours[i]] = tmp;
+      itsContourCache.insert(contour_cache_keys[todo_contours[i]], tmp);
+    }
 
     return retval;
   }
