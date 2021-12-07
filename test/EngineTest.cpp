@@ -761,20 +761,20 @@ class tests : public tframe::tests
   void test()
   {
 #if 1
-    TEST(lines);
-    contour->clearCache();
-    TEST(fills);
-    contour->clearCache();
-    TEST(crossection);
-    contour->clearCache();
-    TEST(worldwrap);
-    contour->clearCache();
-    TEST(pressure);
-    contour->clearCache();
-    TEST(pressure_all_at_once);
-    contour->clearCache();
-    TEST(speed);
-    contour->clearCache();
+    // TEST(lines);
+    // contour->clearCache();
+    // TEST(fills);
+    // contour->clearCache();
+    // TEST(crossection);
+    // contour->clearCache();
+    // TEST(worldwrap);
+    // contour->clearCache();
+    // TEST(pressure);
+    // contour->clearCache();
+    // TEST(pressure_all_at_once);
+    // contour->clearCache();
+    // TEST(speed);
+    // contour->clearCache();
     TEST(speed_all_at_once);
     contour->clearCache();
 #else
