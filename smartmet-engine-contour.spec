@@ -17,15 +17,15 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: gdal33-devel
-BuildRequires: geos39-devel
+BuildRequires: gdal34-devel
+BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 21.12.1
-BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
-BuildRequires: smartmet-library-newbase-devel >= 21.12.1
-BuildRequires: smartmet-library-spine-devel >= 21.12.2
-BuildRequires: smartmet-library-tron-devel >= 21.6.21
+BuildRequires: smartmet-library-gis-devel >= 21.1.21
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.21
+BuildRequires: smartmet-library-newbase-devel >= 21.1.21
+BuildRequires: smartmet-library-spine-devel >= 21.1.21
+BuildRequires: smartmet-library-tron-devel >= 21.1.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -33,13 +33,13 @@ Requires: boost169-filesystem
 Requires: boost169-iostreams
 Requires: boost169-system
 Requires: boost169-thread
-Requires: gdal33-libs
-Requires: geos39
-Requires: smartmet-library-gis >= 21.12.1
-Requires: smartmet-library-macgyver >= 21.12.1
-Requires: smartmet-library-newbase >= 21.12.1
-Requires: smartmet-library-spine >= 21.12.2
-Requires: smartmet-library-tron >= 21.6.21
+Requires: gdal34-libs
+Requires: geos310
+Requires: smartmet-library-gis >= 21.1.21
+Requires: smartmet-library-macgyver >= 21.1.21
+Requires: smartmet-library-newbase >= 21.1.21
+Requires: smartmet-library-spine >= 21.1.21
+Requires: smartmet-library-tron >= 21.1.21
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -47,15 +47,15 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: boost169-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
-#TestRequires: gdal33-devel
-#TestRequires: geos39-devel
+#TestRequires: gdal34-devel
+#TestRequires: geos310-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
-#TestRequires: smartmet-engine-querydata >= 20.12.2
-#TestRequires: smartmet-engine-querydata-devel >= 20.12.2
-#TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.12.2
-#TestRequires: smartmet-library-tron >= 21.6.21
+#TestRequires: smartmet-engine-querydata >= 21.1.21
+#TestRequires: smartmet-engine-querydata-devel >= 21.1.21
+#TestRequires: smartmet-library-regression >= 21.1.21
+#TestRequires: smartmet-library-spine-devel >= 21.1.21
+#TestRequires: smartmet-library-tron >= 21.1.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
