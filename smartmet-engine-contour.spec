@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 21.9.28
+Version: 22.1.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -17,8 +17,8 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: gdal32-devel
-BuildRequires: geos39-devel
+BuildRequires: gdal34-devel
+BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 21.9.13
@@ -33,13 +33,13 @@ Requires: boost169-filesystem
 Requires: boost169-iostreams
 Requires: boost169-system
 Requires: boost169-thread
-Requires: gdal32-libs
-Requires: geos39
-Requires: smartmet-library-gis >= 21.9.13
-Requires: smartmet-library-macgyver >= 21.9.13
-Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.9.13
-Requires: smartmet-library-trax >= 21.6.21
+Requires: gdal34-libs
+Requires: geos310
+Requires: smartmet-library-gis >= 21.1.21
+Requires: smartmet-library-macgyver >= 21.1.21
+Requires: smartmet-library-newbase >= 21.1.21
+Requires: smartmet-library-spine >= 21.1.21
+Requires: smartmet-library-tron >= 21.1.21
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -47,15 +47,15 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: boost169-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
-#TestRequires: gdal32-devel
-#TestRequires: geos39-devel
+#TestRequires: gdal34-devel
+#TestRequires: geos310-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
-#TestRequires: smartmet-engine-querydata >= 20.10.6
-#TestRequires: smartmet-engine-querydata-devel >= 20.10.6
-#TestRequires: smartmet-library-regression >= 20.5.7
-#TestRequires: smartmet-library-spine-devel >= 21.9.13
-#TestRequires: smartmet-library-tron >= 21.6.21
+#TestRequires: smartmet-engine-querydata >= 21.1.21
+#TestRequires: smartmet-engine-querydata-devel >= 21.1.21
+#TestRequires: smartmet-library-regression >= 21.1.21
+#TestRequires: smartmet-library-spine-devel >= 21.1.21
+#TestRequires: smartmet-library-tron >= 21.1.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -67,6 +67,7 @@ SmartMet contour engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
+Requires: %{SPECNAME} = %{version}-%{release}
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -95,6 +96,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
+- Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
+
+* Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
+- Update to postgresql 13 and gdal 3.3
+
 * Tue Sep 28 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.9.28-1.fmi
 - Repackage due to dependency change: moving libconfig files to differentr directory
 
