@@ -435,7 +435,9 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
   Trax::IsolineValues limits;
   limits.add(isovalue);
 
-  Trax::Contour contour(interpolation);
+  Trax::Contour contour;
+  contour.interpolation(interpolation);
+
   auto result = contour.isolines(data, limits);
   return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
@@ -465,7 +467,9 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   Trax::IsobandLimits limits;
   limits.add(lo, hi);
 
-  Trax::Contour contour(interpolation);
+  Trax::Contour contour;
+  contour.interpolation(interpolation);
+  contour.closed_range(true);
   auto result = contour.isobands(data, limits);
 
   return Trax::to_geos_geom(result[0], itsGeomFactory);
@@ -736,7 +740,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Lambda for processing a single contouring task (isoline or isoband)
 
-    Trax::Contour contour(theOptions.interpolation);
+    Trax::Contour contour;
+    contour.interpolation(theOptions.interpolation);
+    contour.closed_range(true);
 
     Trax::GeometryCollections results;
 
