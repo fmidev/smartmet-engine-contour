@@ -8,8 +8,8 @@
 #include <macgyver/Hash.h>
 #include <regression/tframe.h>
 #include <spine/Options.h>
-#include <spine/ParameterFactory.h>
 #include <spine/Reactor.h>
+#include <timeseries/ParameterFactory.h>
 #include <libconfig.h++>
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
@@ -32,7 +32,7 @@ void lines()
 
   auto q = qengine->get("pal_skandinavia");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2008-08-06 12:00");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area
@@ -154,7 +154,7 @@ void fills()
 
   auto q = qengine->get("pal_skandinavia");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2008-08-06 12:00");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area
@@ -276,7 +276,7 @@ void crossection()
 
   auto q = qengine->get("hbm");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2014-07-28 02:00");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("TemperatureSea");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("TemperatureSea");
   q->param(temperature.number());
 
   // Full data area
@@ -337,7 +337,7 @@ void speed()
 
   auto q = qengine->get("ecmwf_maailma_pinta");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area
@@ -388,7 +388,7 @@ void speed_all_at_once()
 
   auto q = qengine->get("ecmwf_maailma_pinta");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area
@@ -436,7 +436,7 @@ void pressure()
 
   auto q = qengine->get("ecmwf_pressure");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2016-04-25 09:00");
-  Spine::Parameter pressure = Spine::ParameterFactory::instance().parse("Pressure");
+  Spine::Parameter pressure = TimeSeries::ParameterFactory::instance().parse("Pressure");
   q->param(pressure.number());
 
   // Full data area
@@ -485,7 +485,7 @@ void pressure_all_at_once()
 
   auto q = qengine->get("ecmwf_pressure");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2016-04-25 09:00");
-  Spine::Parameter pressure = Spine::ParameterFactory::instance().parse("Pressure");
+  Spine::Parameter pressure = TimeSeries::ParameterFactory::instance().parse("Pressure");
   q->param(pressure.number());
 
   // Full data area
@@ -530,7 +530,7 @@ void fillvalidation()
   using Fmi::Box;
 
   auto q = qengine->get("ecmwf_temperature");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area
@@ -587,7 +587,7 @@ void linevalidation()
   using Fmi::Box;
 
   auto q = qengine->get("ecmwf_temperature");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area
@@ -644,7 +644,7 @@ void globalykj()
 
   auto q = qengine->get("ecmwf_maailma_pinta");
   boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // YKJ spatial reference
@@ -706,7 +706,7 @@ void worldwrap()
   auto q = qengine->get("gfs");
   q->firstTime();
   boost::posix_time::ptime t = q->validTime();
-  Spine::Parameter temperature = Spine::ParameterFactory::instance().parse("Temperature");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
   // Full data area

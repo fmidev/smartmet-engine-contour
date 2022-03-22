@@ -14,6 +14,7 @@ LIBS += \
 	../contour.so \
 	/usr/share/smartmet/engines/querydata.so \
 	$(REQUIRED_LIBS) \
+	-lsmartmet-timeseries \
 	-lsmartmet-spine \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \

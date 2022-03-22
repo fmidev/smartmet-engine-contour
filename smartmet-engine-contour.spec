@@ -23,9 +23,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 22.1.24
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
-BuildRequires: smartmet-library-timeseries-devel >= 22.3.10
+BuildRequires: smartmet-library-timeseries-devel >= 22.3.18
 BuildRequires: smartmet-library-newbase-devel >= 22.1.21
-BuildRequires: smartmet-library-spine-devel >= 22.3.8
+BuildRequires: smartmet-library-spine-devel >= 22.3.18
 BuildRequires: smartmet-library-tron-devel >= 22.1.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -39,7 +39,8 @@ Requires: geos310
 Requires: smartmet-library-gis >= 22.1.24
 Requires: smartmet-library-macgyver >= 22.3.8
 Requires: smartmet-library-newbase >= 22.1.21
-Requires: smartmet-library-spine >= 22.3.8
+Requires: smartmet-library-spine >= 22.3.18
+Requires: smartmet-library-timeseries >= 22.3.18
 Requires: smartmet-library-tron >= 22.1.21
 
 Provides: %{SPECNAME}
@@ -55,8 +56,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 21.1.21
 #TestRequires: smartmet-engine-querydata-devel >= 21.1.21
 #TestRequires: smartmet-library-regression >= 21.1.21
-#TestRequires: smartmet-library-spine-devel >= 22.3.8
-#TestRequires: smartmet-library-timeseries-devel >= 22.3.8
+#TestRequires: smartmet-library-spine-devel >= 22.3.18
+#TestRequires: smartmet-library-timeseries-devel >= 22.3.18
 #TestRequires: smartmet-library-tron >= 22.1.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
