@@ -1,5 +1,3 @@
-
-
 // ======================================================================
 /*!
  * \brief Implementation details for the Contour engine
@@ -12,6 +10,7 @@
 #include "Engine.h"
 #include "GeosTools.h"
 #include "Options.h"
+#include "ShiftedDataMatrixAdapter.h"
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -98,11 +97,11 @@ class Engine::Impl
       const Fmi::CoordinateMatrix &theCoordinates,
       const Fmi::SpatialReference &theOutputCRS) const;
 
-  GeometryPtr internal_isoline(const DataMatrixAdapter &data,
+  GeometryPtr internal_isoline(const Trax::Grid &data,
                                double isovalue,
                                Trax::InterpolationType interpolation) const;
 
-  GeometryPtr internal_isoband(const DataMatrixAdapter &data,
+  GeometryPtr internal_isoband(const Trax::Grid &data,
                                const boost::optional<double> &lolimit,
                                const boost::optional<double> &hilimit,
                                Trax::InterpolationType interpolation) const;
@@ -428,7 +427,7 @@ void Engine::Impl::clearCache()
  */
 // ----------------------------------------------------------------------
 
-GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
+GeometryPtr Engine::Impl::internal_isoline(const Trax::Grid &data,
                                            double isovalue,
                                            Trax::InterpolationType interpolation) const
 {
@@ -437,6 +436,8 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
 
   Trax::Contour contour;
   contour.interpolation(interpolation);
+  contour.strict(false);
+  contour.validate(false);
 
   auto result = contour.isolines(data, limits);
   return Trax::to_geos_geom(result[0], itsGeomFactory);
@@ -451,7 +452,7 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
  */
 // ----------------------------------------------------------------------
 
-GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
+GeometryPtr Engine::Impl::internal_isoband(const Trax::Grid &data,
                                            const boost::optional<double> &lolimit,
                                            const boost::optional<double> &hilimit,
                                            Trax::InterpolationType interpolation) const
@@ -470,6 +471,8 @@ GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
   Trax::Contour contour;
   contour.interpolation(interpolation);
   contour.closed_range(true);
+  contour.strict(false);
+  contour.validate(false);
   auto result = contour.isobands(data, limits);
 
   return Trax::to_geos_geom(result[0], itsGeomFactory);
@@ -679,15 +682,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS);
 
-#if 0
-    for (std::size_t j = 0; j < analysis->valid.height(); ++j)
-      for (std::size_t i = 0; i < analysis->valid.width(); ++i)
-      {
-        if ((i < 120 || i > 270) || j < 690)
-          analysis->valid.set(i, j, false);
-      }
-#endif
-
     // Flip the data and the coordinates if necessary. We avoid an unnecessary
     // copy of the coordinates if no flipping is needed by using a pointer.
 
@@ -724,18 +718,40 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
         if (valid_cells(i, j))
           valid_cells.set(i, j, analysis->needs_flipping ^ analysis->clockwise(i, j));
 
-    // Helper data structure for contouring
+    // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
+    std::shared_ptr<Trax::Grid> data;
+    if (analysis->shift == 0)
+      data = std::make_shared<DataMatrixAdapter>(values, *coords, valid_cells);
+    else
+      data =
+          std::make_shared<ShiftedDataMatrixAdapter>(values, *coords, valid_cells, analysis->shift);
 
-    DataMatrixAdapter data(values, *coords, valid_cells);
+#if 0    
+    std::cout << "Shift = " << analysis->shift << "\n";
 
-    // Savitzky-Golay assumes DataMatrix likeAdapter API, not NFmiDataMatrix like API, hence the
+    std::cout << "Values size = " << values.NX() << "," << values.NY() << "\n";
+    std::cout << "Coords size = " << coords->width() << "," << coords->height() << "\n";
+    std::cout << "Data size = " << data->width() << "," << data->height() << "\n";
+
+    auto j = 100UL;
+    std::cout << "i\tXold\tXnew\tvalue\toldvalue\n";
+    for (auto i = 0UL; i < data->width(); i++)
+    {
+      std::cout << i << "\t" << coords->x(i, j) << "\t" << data->x(i, j) << "\t" << (*data)(i, j);
+      if (i < values.NX())
+        std::cout << "\t" << values[i][j];
+      std::cout << "\n";
+    }
+#endif
+
+    // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the
     // filtering is delayed until this point.
 
     if (theOptions.filter_size || theOptions.filter_degree)
     {
       size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
       size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
-      Trax::SavitzkyGolay2D::smooth(data, size, degree);
+      Trax::SavitzkyGolay2D::smooth(*data, size, degree);
     }
 
     // Lambda for processing a single contouring task (isoline or isoband)
@@ -743,6 +759,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     Trax::Contour contour;
     contour.interpolation(theOptions.interpolation);
     contour.closed_range(true);
+    contour.strict(false);
+    contour.validate(false);
 
     Trax::GeometryCollections results;
 
@@ -753,7 +771,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       for (auto i : todo_contours)
         isovalues.add(theOptions.isovalues[i]);
 
-      results = contour.isolines(data, isovalues);
+      results = contour.isolines(*data, isovalues);
     }
     else
     {
@@ -771,7 +789,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
         isobands.add(lo, hi);
       }
 
-      results = contour.isobands(data, isobands);
+      results = contour.isobands(*data, isobands);
     }
 
     // Update results and cache

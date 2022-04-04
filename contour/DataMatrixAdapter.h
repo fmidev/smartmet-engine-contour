@@ -61,9 +61,9 @@ class DataMatrixAdapter : public Trax::Grid
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
-  std::size_t itsNX;     // coordinates width
-  std::size_t itsWidth;  // data width
-  std::size_t itsHeight;
+  const std::size_t itsNX;     // coordinates width
+  const std::size_t itsWidth;  // data width
+  const std::size_t itsHeight;
 
 };  // class DataMatrixAdapter
 }  // namespace Contour
