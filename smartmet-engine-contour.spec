@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.3.10
+Version: 22.3.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -23,10 +23,8 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 22.1.24
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
-BuildRequires: smartmet-library-timeseries-devel >= 22.3.10
-BuildRequires: smartmet-library-newbase-devel >= 22.1.21
-BuildRequires: smartmet-library-spine-devel >= 22.3.8
 BuildRequires: smartmet-library-trax-devel >= 22.2.11
+BuildRequires: smartmet-library-tron-devel >= 22.1.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -39,7 +37,8 @@ Requires: geos310
 Requires: smartmet-library-gis >= 22.1.24
 Requires: smartmet-library-macgyver >= 22.3.8
 Requires: smartmet-library-newbase >= 22.1.21
-Requires: smartmet-library-spine >= 22.3.8
+Requires: smartmet-library-spine >= 22.3.18
+Requires: smartmet-library-timeseries >= 22.3.18
 Requires: smartmet-library-tron >= 22.1.21
 
 Provides: %{SPECNAME}
@@ -55,7 +54,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 21.1.21
 #TestRequires: smartmet-engine-querydata-devel >= 21.1.21
 #TestRequires: smartmet-library-regression >= 21.1.21
-#TestRequires: smartmet-library-spine-devel >= 21.1.21
+#TestRequires: smartmet-library-spine-devel >= 22.3.18
+#TestRequires: smartmet-library-timeseries-devel >= 22.3.18
 #TestRequires: smartmet-library-tron >= 22.1.21
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
@@ -97,7 +97,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Thu Mar 10 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.10-1.fmi
+* Fri Mar 11 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.11-1.fmi
 - Repackaged due to refactored library dependencies
 
 * Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
