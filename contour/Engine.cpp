@@ -6,11 +6,11 @@
 
 #include "Engine.h"
 #include "Config.h"
-#include "DataMatrixAdapter.h"
 #include "Engine.h"
 #include "GeosTools.h"
+#include "Grid.h"
 #include "Options.h"
-#include "ShiftedDataMatrixAdapter.h"
+#include "ShiftedGrid.h"
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -721,10 +721,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
     std::shared_ptr<Trax::Grid> data;
     if (analysis->shift == 0)
-      data = std::make_shared<DataMatrixAdapter>(values, *coords, valid_cells);
+      data = std::make_shared<Grid>(values, *coords, valid_cells);
     else
-      data =
-          std::make_shared<ShiftedDataMatrixAdapter>(values, *coords, valid_cells, analysis->shift);
+      data = std::make_shared<ShiftedGrid>(values, *coords, valid_cells, analysis->shift);
 
 #if 0    
     std::cout << "Shift = " << analysis->shift << "\n";
@@ -960,7 +959,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // should always be fine.
 
     Fmi::BoolMatrix grid_is_fine(coords.width(), coords.height(), true);
-    DataMatrixAdapter data(values, coords, grid_is_fine);
+    Grid data(values, coords, grid_is_fine);
 
     // results first include isolines, then isobands
     auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
