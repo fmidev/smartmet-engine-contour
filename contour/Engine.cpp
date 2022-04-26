@@ -56,10 +56,23 @@ class Engine::Impl
   // Produce vector of OGR contours for the given spatial reference
 
   std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
-                                      const Fmi::SpatialReference &theDataCRS,
                                       const Fmi::SpatialReference &theOutputCRS,
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const Fmi::CoordinateMatrix &theCoordinates,
+                                      const Options &theOptions) const;
+
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
+                                      const Fmi::SpatialReference &theOutputCRS,
+                                      const NFmiDataMatrix<float> &theMatrix,
+                                      const Fmi::CoordinateMatrix &theCoordinates,
+                                      const Fmi::Box &theClipBox,
+                                      const Options &theOptions) const;
+
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
+                                      const Fmi::SpatialReference &theOutputCRS,
+                                      const NFmiDataMatrix<float> &theMatrix,
+                                      const Fmi::CoordinateMatrix &theCoordinates,
+                                      const Fmi::BoolMatrix &theValidCells,
                                       const Options &theOptions) const;
 
   // Produce an OGR crossection for the given data
@@ -117,7 +130,7 @@ namespace
 {
 // ----------------------------------------------------------------------
 /*!
- * \brief Utility function for extrapolation
+ * \brief Utility class for extrapolation
  */
 // ----------------------------------------------------------------------
 
@@ -229,6 +242,79 @@ void flip(Fmi::CoordinateMatrix &coords)
       coords.set(i, j2, pt1);
     }
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Determine if a rectangular bounding box and a grid cell overlap
+ *
+ * We assume the bounding box to be much larger than grid cells, and hence
+ * do not bother with special cases which can only be resolved by calculating
+ * intersections. Knowing when an intersection is simply not possible is
+ * enough for contouring purposes.
+ */
+// ----------------------------------------------------------------------
+
+bool overlaps(double vmin, double vmax, double v1, double v2, double v3, double v4)
+{
+  // Everything to the right or above the bbox?
+  if (v1 > vmax && v2 > vmax && v3 > vmax && v4 > vmax)
+    return false;
+
+  // Everything to the left or below the bbox?
+  if (v1 < vmin && v2 < vmin && v3 < vmin && v4 < vmin)
+    return false;
+
+  // If a cell is marked as valid due to NaN coordinates, so be it. Other parts
+  // of the code are expected to handle such cases.
+  return true;
+}
+
+bool overlaps(const Fmi::Box &theClipBox,
+              double x1,
+              double y1,
+              double x2,
+              double y2,
+              double x3,
+              double y3,
+              double x4,
+              double y4)
+{
+  return (overlaps(theClipBox.xmin(), theClipBox.xmax(), x1, x2, x3, x4) &&
+          overlaps(theClipBox.ymin(), theClipBox.ymax(), y1, y2, y3, y4));
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Mark cells which overlap the given bounding box
+ */
+// ----------------------------------------------------------------------
+
+Fmi::BoolMatrix mark_valid_cells(const Fmi::CoordinateMatrix &theCoordinates,
+                                 const Fmi::Box &theClipBox)
+{
+  // Assume no overlap for all cells
+  Fmi::BoolMatrix ret(theCoordinates.width(), theCoordinates.height(), false);
+
+  const auto ny = theCoordinates.height();
+  const auto nx = theCoordinates.width();
+
+  for (auto j = 0UL; j < ny - 1; j++)
+    for (auto i = 0UL; i < nx - 1; i++)
+    {
+      if (overlaps(theClipBox,
+                   theCoordinates.x(i, j),  // bottom left
+                   theCoordinates.y(i, j),
+                   theCoordinates.x(i, j + 1),  // top left
+                   theCoordinates.y(i, j + 1),
+                   theCoordinates.x(i + 1, j + 1),  // top right
+                   theCoordinates.y(i + 1, j + 1),
+                   theCoordinates.x(i + 1, j),  // bottom right
+                   theCoordinates.y(i + 1, j)))
+        ret.set(i, j, true);
+    }
+
+  return ret;
 }
 
 }  // anonymous namespace
@@ -603,10 +689,38 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
-                                                  const Fmi::SpatialReference & /*theDataCRS */,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
+                                                  const Options &theOptions) const
+{
+  // All valid cells are to be contoured
+  Fmi::BoolMatrix valid_cells(theCoordinates.width() - 1, theCoordinates.height() - 1, true);
+  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
+}
+
+std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
+                                                  const Fmi::SpatialReference &theOutputCRS,
+                                                  const NFmiDataMatrix<float> &theMatrix,
+                                                  const Fmi::CoordinateMatrix &theCoordinates,
+                                                  const Fmi::Box &theClipBox,
+                                                  const Options &theOptions) const
+{
+  // Mark cells overlapping the bounding box
+  auto valid_cells = mark_valid_cells(theCoordinates, theClipBox);
+
+  // Boxes covering the entire grid have the same hash even if the bounding boxes might differ,
+  // same thing if the grid is not covered at all.
+  Fmi::hash_combine(theDataHash, valid_cells.hashValue());
+
+  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
+}
+
+std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
+                                                  const Fmi::SpatialReference &theOutputCRS,
+                                                  const NFmiDataMatrix<float> &theMatrix,
+                                                  const Fmi::CoordinateMatrix &theCoordinates,
+                                                  const Fmi::BoolMatrix &theValidCells,
                                                   const Options &theOptions) const
 {
   try
@@ -709,6 +823,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
      *
      * Note: Fmi::analysis could do this for us, and the result would be cached. This
      *       is very fast though.
+     *
+     * Note: Contouring may be tiled in which case 'theValidCells' marks which cell overlap
+     *       with the bouding box (expanded by clipping margin). We combine the results
+     *       here instead of optimizing the analysis by skipping cells outside the tile
+     *       since the analysis is cached for the full grid and hence there are no real
+     *       speed gains to be obtained for WMS services.
      */
 
     auto valid_cells = analysis->valid;
@@ -716,7 +836,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     for (std::size_t j = 0; j < valid_cells.height(); j++)
       for (std::size_t i = 0; i < valid_cells.width(); i++)
         if (valid_cells(i, j))
-          valid_cells.set(i, j, analysis->needs_flipping ^ analysis->clockwise(i, j));
+          valid_cells.set(
+              i, j, theValidCells(i, j) && (analysis->needs_flipping ^ analysis->clockwise(i, j)));
 
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
     std::shared_ptr<Trax::Grid> data;
@@ -724,24 +845,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       data = std::make_shared<Grid>(values, *coords, valid_cells);
     else
       data = std::make_shared<ShiftedGrid>(values, *coords, valid_cells, analysis->shift);
-
-#if 0    
-    std::cout << "Shift = " << analysis->shift << "\n";
-
-    std::cout << "Values size = " << values.NX() << "," << values.NY() << "\n";
-    std::cout << "Coords size = " << coords->width() << "," << coords->height() << "\n";
-    std::cout << "Data size = " << data->width() << "," << data->height() << "\n";
-
-    auto j = 100UL;
-    std::cout << "i\tXold\tXnew\tvalue\toldvalue\n";
-    for (auto i = 0UL; i < data->width(); i++)
-    {
-      std::cout << i << "\t" << coords->x(i, j) << "\t" << data->x(i, j) << "\t" << (*data)(i, j);
-      if (i < values.NX())
-        std::cout << "\t" << values[i][j];
-      std::cout << "\n";
-    }
-#endif
 
     // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the
     // filtering is delayed until this point.
@@ -1092,6 +1195,7 @@ void Engine::shutdown()
 {
   std::cout << "  -- Shutdown requested (contour)\n";
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Contour
@@ -1099,7 +1203,6 @@ void Engine::shutdown()
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
-                                            const Fmi::SpatialReference &theDataCRS,
                                             const Fmi::SpatialReference &theOutputCRS,
                                             const NFmiDataMatrix<float> &theMatrix,
                                             const Fmi::CoordinateMatrix &theCoordinates,
@@ -1107,8 +1210,31 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
 {
   try
   {
+    return itsImpl->contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, theOptions);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Contour given Box only
+ */
+// ----------------------------------------------------------------------
+
+std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
+                                            const Fmi::SpatialReference &theOutputCRS,
+                                            const NFmiDataMatrix<float> &theMatrix,
+                                            const Fmi::CoordinateMatrix &theCoordinates,
+                                            const Fmi::Box &theClipBox,
+                                            const Options &theOptions) const
+{
+  try
+  {
     return itsImpl->contour(
-        theDataHash, theDataCRS, theOutputCRS, theMatrix, theCoordinates, theOptions);
+        theDataHash, theOutputCRS, theMatrix, theCoordinates, theClipBox, theOptions);
   }
   catch (...)
   {
