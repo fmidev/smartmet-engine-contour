@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.3.11
+Version: 22.4.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,9 +21,9 @@ BuildRequires: gdal34-devel
 BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.1.24
-BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
-BuildRequires: smartmet-library-trax-devel >= 22.2.11
+BuildRequires: smartmet-library-gis-devel >= 22.4.26
+BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
+BuildRequires: smartmet-library-trax-devel >= 22.4.26
 BuildRequires: smartmet-library-tron-devel >= 22.1.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -34,9 +34,9 @@ Requires: boost169-system
 Requires: boost169-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 22.1.24
-Requires: smartmet-library-macgyver >= 22.3.8
-Requires: smartmet-library-newbase >= 22.1.21
+Requires: smartmet-library-gis >= 22.4.26
+Requires: smartmet-library-macgyver >= 22.3.28
+Requires: smartmet-library-newbase >= 22.3.22
 Requires: smartmet-library-spine >= 22.3.18
 Requires: smartmet-library-timeseries >= 22.3.18
 Requires: smartmet-library-tron >= 22.1.21
@@ -97,6 +97,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Apr 26 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.26-1.fmi
+- Use Trax for contouring
+- Use tiled contouring by default
+
 * Fri Mar 11 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.11-1.fmi
 - Repackaged due to refactored library dependencies
 
