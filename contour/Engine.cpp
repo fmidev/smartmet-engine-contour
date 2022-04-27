@@ -708,11 +708,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 {
   // Mark cells overlapping the bounding box
   auto valid_cells = mark_valid_cells(theCoordinates, theClipBox);
-
-  // Boxes covering the entire grid have the same hash even if the bounding boxes might differ,
-  // same thing if the grid is not covered at all.
-  Fmi::hash_combine(theDataHash, valid_cells.hashValue());
-
   return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
 }
 
@@ -738,6 +733,10 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     if (!theOptions.isovalues.empty() && !theOptions.limits.empty())
       throw Fmi::Exception(BCP, "Cannot calculate isolines and isobands simultaneously");
+
+    // Boxes covering the entire grid have the same hash even if the bounding boxes might differ,
+    // same thing if the grid is not covered at all.
+    Fmi::hash_combine(theDataHash, theValidCells.hashValue());
 
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
