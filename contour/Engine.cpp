@@ -758,14 +758,16 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       throw Fmi::Exception(BCP, "Cannot calculate isolines and isobands simultaneously");
 
     // Boxes covering the entire grid have the same hash even if the bounding boxes might differ,
-    // same thing if the grid is not covered at all.
-    Fmi::hash_combine(theDataHash, theValidCells.hashValue());
+    // same thing if the grid is not covered at all. Note that theDataHash is used later on
+    // to get the analysis for the entire grid from the cache
+    auto contour_hash = theDataHash;
+    Fmi::hash_combine(contour_hash, theValidCells.hashValue());
 
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
 
     std::vector<std::size_t> contour_cache_keys =
-        get_contour_cache_keys(theDataHash, theOutputCRS, theOptions);
+        get_contour_cache_keys(contour_hash, theOutputCRS, theOptions);
 
     // Initialize empty results
 
@@ -903,13 +905,28 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       Trax::IsobandLimits isobands;
       for (auto i : todo_contours)
       {
+        // Change optional settings to corresponding contours. If either limit is set,
+        // the other is +-inf if not set. If neither limit is set, we're contouring
+        // missing values which for Trax is NaN...NaN. Thus if the user really wants
+        // to contour all valid values, input -Inf...Inf must be given instead of
+        // optional values.
         double lo = -std::numeric_limits<double>::infinity();
         double hi = +std::numeric_limits<double>::infinity();
+        const auto &limits = theOptions.limits[i];
 
-        if (theOptions.limits[i].lolimit)
-          lo = *theOptions.limits[i].lolimit;
-        if (theOptions.limits[i].hilimit)
-          hi = *theOptions.limits[i].hilimit;
+        if (!limits.lolimit && !limits.hilimit)
+        {
+          lo = std::numeric_limits<double>::quiet_NaN();
+          hi = lo;
+        }
+        else
+        {
+          if (limits.lolimit)
+            lo = *limits.lolimit;
+          if (limits.hilimit)
+            hi = *limits.hilimit;
+        }
+
         isobands.add(lo, hi);
       }
 
