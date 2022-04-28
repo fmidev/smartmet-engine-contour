@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.3.11
+Version: 22.4.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -24,7 +24,6 @@ BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 22.1.24
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
 BuildRequires: smartmet-library-trax-devel >= 22.2.11
-BuildRequires: smartmet-library-tron-devel >= 22.1.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -39,7 +38,6 @@ Requires: smartmet-library-macgyver >= 22.3.8
 Requires: smartmet-library-newbase >= 22.1.21
 Requires: smartmet-library-spine >= 22.3.18
 Requires: smartmet-library-timeseries >= 22.3.18
-Requires: smartmet-library-tron >= 22.1.21
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
@@ -56,7 +54,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-regression >= 21.1.21
 #TestRequires: smartmet-library-spine-devel >= 22.3.18
 #TestRequires: smartmet-library-timeseries-devel >= 22.3.18
-#TestRequires: smartmet-library-tron >= 22.1.21
+#TestRequires: smartmet-library-trax >= 22.2.11
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -97,6 +95,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Apr 28 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.28-1.fmi
+- Use Trax instead of Tron for Contouring
+
 * Fri Mar 11 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.11-1.fmi
 - Repackaged due to refactored library dependencies
 

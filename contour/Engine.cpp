@@ -73,6 +73,7 @@ class Engine::Impl
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const Fmi::CoordinateMatrix &theCoordinates,
                                       const Fmi::BoolMatrix &theValidCells,
+                                      const Fmi::Box &theClipBox,
                                       const Options &theOptions) const;
 
   // Produce an OGR crossection for the given data
@@ -543,13 +544,27 @@ GeometryPtr Engine::Impl::internal_isoband(const Trax::Grid &data,
                                            const boost::optional<double> &hilimit,
                                            Trax::InterpolationType interpolation) const
 {
+  // Change optional settings to corresponding contours. If either limit is set,
+  // the other is +-inf if not set. If neither limit is set, we're contouring
+  // missing values which for Trax is NaN...NaN. Thus if the user really wants
+  // to contour all valid values, input -Inf...Inf must be given instead of
+  // optional values.
+
   double lo = -std::numeric_limits<double>::infinity();
   double hi = +std::numeric_limits<double>::infinity();
 
-  if (lolimit)
-    lo = *lolimit;
-  if (hilimit)
-    hi = *hilimit;
+  if (!lolimit && !hilimit)
+  {
+    lo = std::numeric_limits<double>::quiet_NaN();
+    hi = lo;
+  }
+  else
+  {
+    if (lolimit)
+      lo = *lolimit;
+    if (hilimit)
+      hi = *hilimit;
+  }
 
   Trax::IsobandLimits limits;
   limits.add(lo, hi);
@@ -696,7 +711,13 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 {
   // All valid cells are to be contoured
   Fmi::BoolMatrix valid_cells(theCoordinates.width() - 1, theCoordinates.height() - 1, true);
-  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
+
+  // Dummy clipbox for generating a rectangle around the valid areas when contouring missing values
+  const double large = 1E10;
+  Fmi::Box clipbox(-large, -large, large, large, 1, 1);
+
+  return contour(
+      theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, clipbox, theOptions);
 }
 
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
@@ -708,7 +729,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 {
   // Mark cells overlapping the bounding box
   auto valid_cells = mark_valid_cells(theCoordinates, theClipBox);
-  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
+  return contour(
+      theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theClipBox, theOptions);
 }
 
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
@@ -716,6 +738,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
                                                   const Fmi::BoolMatrix &theValidCells,
+                                                  const Fmi::Box &theClipBox,
                                                   const Options &theOptions) const
 {
   try
