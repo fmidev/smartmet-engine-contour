@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.4.28
+Version: 22.4.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -95,8 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-
-* Thu Apr 28 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.28-1.fmi
+* Fri Apr 29 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.29-1.fmi
 - Fixed contouring of missing values
 
 * Tue Apr 26 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.26-1.fmi
