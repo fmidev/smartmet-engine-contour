@@ -599,35 +599,6 @@ std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Change all kFloatMissing values to NaN
- */
-// ----------------------------------------------------------------------
-
-void set_missing_to_nan(NFmiDataMatrix<float> &values)
-{
-  const std::size_t nx = values.NX();
-  const std::size_t ny = values.NY();
-  if (nx == 0 || ny == 0)
-    return;
-
-  const auto nan = std::numeric_limits<float>::quiet_NaN();
-
-  // Unfortunately NFmiDataMatrix is a vector of vectors, memory
-  // access patterns are not optimal
-
-  for (std::size_t i = 0; i < nx; i++)
-  {
-    auto &tmp = values[i];
-    for (std::size_t j = 0; j < ny; j++)
-    {
-      if (tmp[j] == kFloatMissing)
-        tmp[j] = nan;
-    }
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Calculate cache keys for the contours to be calculated
  */
 // ----------------------------------------------------------------------
@@ -785,46 +756,10 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (todo_contours.empty())
       return retval;
 
-    // Otherwise we must process the data for contouring
-
-    auto values = theMatrix;
-
-    // Use NaN instead of kFloatMissing for easier arithmetic
-    set_missing_to_nan(values);
-
-    // Unit conversions
-    if (theOptions.hasTransformation())
-    {
-      double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
-      double b = (theOptions.offset ? *theOptions.offset : 0.0);
-
-      for (std::size_t j = 0; j < ny; j++)
-        for (std::size_t i = 0; i < nx; i++)
-          values[i][j] = a * values[i][j] + b;
-    }
-
-    // Extrapolate if requested
-    extrapolate(values, theOptions.extrapolation);
-
     // Get the grid analysis of the projected coordinates from
     // the cache, or do the analysis and cache it.
 
     auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS);
-
-    // Flip the data and the coordinates if necessary. We avoid an unnecessary
-    // copy of the coordinates if no flipping is needed by using a pointer.
-
-    const auto *coords = &theCoordinates;
-    std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
-
-    if (analysis->needs_flipping)
-    {
-      flip(values);
-
-      flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
-      flip(*flipped_coordinates);
-      coords = flipped_coordinates.get();
-    }
 
     /*
      * Finally we determine which grid cells are valid and have the correct winding rule
@@ -848,6 +783,41 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     auto valid_cells = analysis->valid;
     valid_cells &= theValidCells & (analysis->clockwise ^ analysis->needs_flipping);
+
+    auto bbox = valid_cells.bbox();
+
+    // Process the data for contouring
+
+    auto values = theMatrix;
+
+    // Unit conversions
+    if (theOptions.hasTransformation())
+    {
+      double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
+      double b = (theOptions.offset ? *theOptions.offset : 0.0);
+
+      for (std::size_t j = 0; j < ny; j++)
+        for (std::size_t i = 0; i < nx; i++)
+          values[i][j] = a * values[i][j] + b;
+    }
+
+    // Extrapolate if requested
+    extrapolate(values, theOptions.extrapolation);
+
+    // Flip the data and the coordinates if necessary. We avoid an unnecessary
+    // copy of the coordinates if no flipping is needed by using a pointer.
+
+    const auto *coords = &theCoordinates;
+    std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
+
+    if (analysis->needs_flipping)
+    {
+      flip(values);
+
+      flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
+      flip(*flipped_coordinates);
+      coords = flipped_coordinates.get();
+    }
 
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
     std::shared_ptr<Trax::Grid> data;
