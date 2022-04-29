@@ -784,13 +784,23 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     auto valid_cells = analysis->valid;
     valid_cells &= theValidCells & (analysis->clockwise ^ analysis->needs_flipping);
 
-    // Process the data for contouring
+    // Process the data for contouring. We wish to avoid unnecessary copying of
+    // the data, hence we use the existence of an alternative unique_ptr
+    // to indicate the data has been processed.
 
-    auto values = theMatrix;
+    std::unique_ptr<NFmiDataMatrix<float>> alt_values;
 
-    // Unit conversions
+    const bool needs_copying =
+        (theOptions.hasTransformation() || theOptions.extrapolation > 0 ||
+         analysis->needs_flipping || theOptions.filter_size || theOptions.filter_degree);
+
+    if (needs_copying)
+      alt_values.reset(new NFmiDataMatrix<float>(theMatrix));
+
     if (theOptions.hasTransformation())
     {
+      auto &values = *alt_values;
+
       double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
       double b = (theOptions.offset ? *theOptions.offset : 0.0);
 
@@ -800,7 +810,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
 
     // Extrapolate if requested
-    extrapolate(values, theOptions.extrapolation);
+    extrapolate(*alt_values, theOptions.extrapolation);
 
     // Flip the data and the coordinates if necessary. We avoid an unnecessary
     // copy of the coordinates if no flipping is needed by using a pointer.
@@ -810,7 +820,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     if (analysis->needs_flipping)
     {
-      flip(values);
+      flip(*alt_values);
 
       flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
       flip(*flipped_coordinates);
@@ -819,10 +829,21 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
     std::shared_ptr<Trax::Grid> data;
-    if (analysis->shift == 0)
-      data = std::make_shared<Grid>(values, *coords, valid_cells);
+
+    if (alt_values)
+    {
+      if (analysis->shift == 0)
+        data = std::make_shared<Grid>(*alt_values, *coords, valid_cells);
+      else
+        data = std::make_shared<ShiftedGrid>(*alt_values, *coords, valid_cells, analysis->shift);
+    }
     else
-      data = std::make_shared<ShiftedGrid>(values, *coords, valid_cells, analysis->shift);
+    {
+      if (analysis->shift == 0)
+        data = std::make_shared<Grid>(theMatrix, *coords, valid_cells);
+      else
+        data = std::make_shared<ShiftedGrid>(theMatrix, *coords, valid_cells, analysis->shift);
+    }
 
     // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the
     // filtering is delayed until this point.
