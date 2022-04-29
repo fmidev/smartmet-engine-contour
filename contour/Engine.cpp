@@ -784,8 +784,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     auto valid_cells = analysis->valid;
     valid_cells &= theValidCells & (analysis->clockwise ^ analysis->needs_flipping);
 
-    auto bbox = valid_cells.bbox();
-
     // Process the data for contouring
 
     auto values = theMatrix;
@@ -1005,7 +1003,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       for (std::size_t i = 0; i < coordinates.size(); i++)
       {
         const int max_minutes = 360;
-        values[i][j] = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
+
+        auto value = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
+        if (value == kFloatMissing)
+          value = std::numeric_limits<float>::quiet_NaN();
+
+        values[i][j] = value;
 
         if (theZParameter)
         {
@@ -1049,9 +1052,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
         }
       }
     }
-
-    // Make sure the values are NaN instead of kFloatMissing
-    set_missing_to_nan(values);
 
     // Don't bother analyzing the grid for cross sections, the Z coordinates
     // should always be fine.
