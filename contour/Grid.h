@@ -57,6 +57,8 @@ class Grid : public Trax::Grid
   std::size_t width() const override { return itsWidth; }
   std::size_t height() const override { return itsHeight; }
 
+  std::array<std::size_t, 4> bbox() const override { return itsValidCells.bbox(); }
+
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
