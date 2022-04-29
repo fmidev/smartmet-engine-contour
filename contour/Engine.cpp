@@ -271,20 +271,6 @@ bool overlaps(double vmin, double vmax, double v1, double v2, double v3, double 
   return true;
 }
 
-bool overlaps(const Fmi::Box &theClipBox,
-              double x1,
-              double y1,
-              double x2,
-              double y2,
-              double x3,
-              double y3,
-              double x4,
-              double y4)
-{
-  return (overlaps(theClipBox.xmin(), theClipBox.xmax(), x1, x2, x3, x4) &&
-          overlaps(theClipBox.ymin(), theClipBox.ymax(), y1, y2, y3, y4));
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Mark cells which overlap the given bounding box
@@ -303,16 +289,21 @@ Fmi::BoolMatrix mark_valid_cells(const Fmi::CoordinateMatrix &theCoordinates,
   for (auto j = 0UL; j < ny - 1; j++)
     for (auto i = 0UL; i < nx - 1; i++)
     {
-      if (overlaps(theClipBox,
-                   theCoordinates.x(i, j),  // bottom left
+      if (overlaps(theClipBox.xmin(),
+                   theClipBox.xmax(),
+                   theCoordinates.x(i, j),
+                   theCoordinates.x(i, j + 1),
+                   theCoordinates.x(i + 1, j + 1),
+                   theCoordinates.x(i + 1, j)) &&
+          overlaps(theClipBox.ymin(),
+                   theClipBox.ymax(),
                    theCoordinates.y(i, j),
-                   theCoordinates.x(i, j + 1),  // top left
                    theCoordinates.y(i, j + 1),
-                   theCoordinates.x(i + 1, j + 1),  // top right
                    theCoordinates.y(i + 1, j + 1),
-                   theCoordinates.x(i + 1, j),  // bottom right
                    theCoordinates.y(i + 1, j)))
+      {
         ret.set(i, j, true);
+      }
     }
 
   return ret;
