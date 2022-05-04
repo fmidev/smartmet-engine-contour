@@ -5,6 +5,7 @@
 #include <macgyver/Exception.h>
 #include <newbase/NFmiDataMatrix.h>
 #include <newbase/NFmiPoint.h>
+#include <trax/Grid.h>
 
 // Note: The values may be one column narrower than the coordinates if the data needs a wraparound
 // to fill the globe. In this case the last coordinate is the projected metric coordinate with
@@ -18,18 +19,14 @@ namespace Engine
 {
 namespace Contour
 {
-class DataMatrixAdapter
+class Grid : public Trax::Grid
 {
  public:
-  using value_type = float;
-  using coord_type = double;
-  using size_type = NFmiDataMatrix<float>::size_type;
+  Grid() = delete;
 
-  DataMatrixAdapter() = delete;
-
-  DataMatrixAdapter(NFmiDataMatrix<float>& theMatrix,
-                    const Fmi::CoordinateMatrix& theCoords,
-                    const Fmi::BoolMatrix& theValidCells)
+  Grid(const NFmiDataMatrix<float>& theMatrix,
+       const Fmi::CoordinateMatrix& theCoords,
+       const Fmi::BoolMatrix& theValidCells)
       : itsCoords(theCoords),
         itsValidCells(theValidCells),
         itsMatrix(theMatrix),
@@ -44,26 +41,33 @@ class DataMatrixAdapter
 
   // Provide wrap-around capability for world data
 
-  const value_type& operator()(size_type i, size_type j) const { return itsMatrix[i % itsNX][j]; }
-  value_type& operator()(size_type i, size_type j) { return itsMatrix[i % itsNX][j]; }
+  double x(long i, long j) const override { return itsCoords.x(i, j); }
+  double y(long i, long j) const override { return itsCoords.y(i, j); }
+  double operator()(long i, long j) const override { return itsMatrix[i % itsNX][j]; }
+  void set(long i, long j, double z) override {}  // not needed
 
-  coord_type x(size_type i, size_type j) const { return itsCoords.x(i, j); }
-  coord_type y(size_type i, size_type j) const { return itsCoords.y(i, j); }
+  bool valid(long i, long j) const override
+  {
+    if (i < 0 || j < 0 || static_cast<std::size_t>(i) >= itsWidth ||
+        static_cast<std::size_t>(j) >= itsHeight)
+      return false;
+    return itsValidCells(i, j);
+  }
 
-  bool valid(size_type i, size_type j) const { return itsValidCells(i, j); }
+  std::size_t width() const override { return itsWidth; }
+  std::size_t height() const override { return itsHeight; }
 
-  size_type width() const { return itsWidth; }
-  size_type height() const { return itsHeight; }
+  std::array<std::size_t, 4> bbox() const override { return itsValidCells.bbox(); }
 
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
-  NFmiDataMatrix<float>& itsMatrix;
-  const size_type itsNX;
-  const size_type itsWidth;
-  const size_type itsHeight;
+  const NFmiDataMatrix<float>& itsMatrix;
+  const std::size_t itsNX;     // coordinates width
+  const std::size_t itsWidth;  // data width
+  const std::size_t itsHeight;
 
-};  // class DataMatrixAdapter
+};  // class Grid
 }  // namespace Contour
 }  // namespace Engine
 }  // namespace SmartMet

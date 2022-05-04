@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Options.h"
+#include <gis/Box.h>
 #include <gis/CoordinateMatrix.h>
 #include <gis/SpatialReference.h>
 #include <gis/Types.h>
@@ -42,10 +43,16 @@ class Engine : public Spine::SmartMetEngine
   // Produce vector of OGR geometries in output spatial reference
 
   std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
-                                      const Fmi::SpatialReference& theDataCRS,
                                       const Fmi::SpatialReference& theOutputCRS,
                                       const NFmiDataMatrix<float>& theMatrix,
                                       const Fmi::CoordinateMatrix& theCoordinates,
+                                      const Options& theOptions) const;
+
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
+                                      const Fmi::SpatialReference& theOutputCRS,
+                                      const NFmiDataMatrix<float>& theMatrix,
+                                      const Fmi::CoordinateMatrix& theCoordinates,
+                                      const Fmi::Box& theClipBox,
                                       const Options& theOptions) const;
 
   // Produce a cross section contour

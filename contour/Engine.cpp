@@ -6,10 +6,11 @@
 
 #include "Engine.h"
 #include "Config.h"
-#include "DataMatrixAdapter.h"
 #include "Engine.h"
 #include "GeosTools.h"
+#include "Grid.h"
 #include "Options.h"
+#include "ShiftedGrid.h"
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -20,10 +21,12 @@
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
-#include <macgyver/WorkQueue.h>
-#include <tron/FmiBuilder.h>
-#include <tron/SavitzkyGolay2D.h>
-#include <tron/Tron.h>
+#include <trax/Contour.h>
+#include <trax/Geos.h>
+#include <trax/IsobandLimits.h>
+#include <trax/IsolineValues.h>
+#include <trax/OGR.h>
+#include <trax/SavitzkyGolay2D.h>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
 #include <limits>
@@ -42,22 +45,6 @@ namespace Contour
 {
 // Contourers
 
-using MyTraits = Tron::Traits<double, double, Tron::InfMissing>;
-using MyBuilder = Tron::FmiBuilder;
-using MyHints = Tron::Hints<DataMatrixAdapter, MyTraits>;
-
-using MyLinearContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::LinearInterpolation>;
-
-using MyLogLinearContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::LogLinearInterpolation>;
-
-using MyNearestContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::NearestNeighbourInterpolation>;
-
-using MyDiscreteContourer =
-    Tron::Contourer<DataMatrixAdapter, MyBuilder, MyTraits, Tron::DiscreteInterpolation>;
-
 class Engine::Impl
 {
  public:
@@ -69,10 +56,24 @@ class Engine::Impl
   // Produce vector of OGR contours for the given spatial reference
 
   std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
-                                      const Fmi::SpatialReference &theDataCRS,
                                       const Fmi::SpatialReference &theOutputCRS,
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const Fmi::CoordinateMatrix &theCoordinates,
+                                      const Options &theOptions) const;
+
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
+                                      const Fmi::SpatialReference &theOutputCRS,
+                                      const NFmiDataMatrix<float> &theMatrix,
+                                      const Fmi::CoordinateMatrix &theCoordinates,
+                                      const Fmi::Box &theClipBox,
+                                      const Options &theOptions) const;
+
+  std::vector<OGRGeometryPtr> contour(std::size_t theDataHash,
+                                      const Fmi::SpatialReference &theOutputCRS,
+                                      const NFmiDataMatrix<float> &theMatrix,
+                                      const Fmi::CoordinateMatrix &theCoordinates,
+                                      const Fmi::BoolMatrix &theValidCells,
+                                      const Fmi::Box &theClipBox,
                                       const Options &theOptions) const;
 
   // Produce an OGR crossection for the given data
@@ -110,16 +111,14 @@ class Engine::Impl
       const Fmi::CoordinateMatrix &theCoordinates,
       const Fmi::SpatialReference &theOutputCRS) const;
 
-  GeometryPtr internal_isoline(const DataMatrixAdapter &data,
-                               const MyHints &hints,
+  GeometryPtr internal_isoline(const Trax::Grid &data,
                                double isovalue,
-                               Interpolation interpolation) const;
+                               Trax::InterpolationType interpolation) const;
 
-  GeometryPtr internal_isoband(const DataMatrixAdapter &data,
-                               const MyHints &hints,
+  GeometryPtr internal_isoband(const Trax::Grid &data,
                                const boost::optional<double> &lolimit,
                                const boost::optional<double> &hilimit,
-                               Interpolation interpolation) const;
+                               Trax::InterpolationType interpolation) const;
 };
 
 }  // namespace Contour
@@ -132,7 +131,7 @@ namespace
 {
 // ----------------------------------------------------------------------
 /*!
- * \brief Utility function for extrapolation
+ * \brief Utility class for extrapolation
  */
 // ----------------------------------------------------------------------
 
@@ -244,6 +243,70 @@ void flip(Fmi::CoordinateMatrix &coords)
       coords.set(i, j2, pt1);
     }
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Determine if a rectangular bounding box and a grid cell overlap
+ *
+ * We assume the bounding box to be much larger than grid cells, and hence
+ * do not bother with special cases which can only be resolved by calculating
+ * intersections. Knowing when an intersection is simply not possible is
+ * enough for contouring purposes.
+ */
+// ----------------------------------------------------------------------
+
+bool overlaps(double vmin, double vmax, double v1, double v2, double v3, double v4)
+{
+  // Everything to the right or above the bbox?
+  if (v1 > vmax && v2 > vmax && v3 > vmax && v4 > vmax)
+    return false;
+
+  // Everything to the left or below the bbox?
+  if (v1 < vmin && v2 < vmin && v3 < vmin && v4 < vmin)
+    return false;
+
+  // If a cell is marked as valid due to NaN coordinates, so be it. Other parts
+  // of the code are expected to handle such cases.
+  return true;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Mark cells which overlap the given bounding box
+ */
+// ----------------------------------------------------------------------
+
+Fmi::BoolMatrix mark_valid_cells(const Fmi::CoordinateMatrix &theCoordinates,
+                                 const Fmi::Box &theClipBox)
+{
+  // Assume no overlap for all cells
+  const auto ny = theCoordinates.height();
+  const auto nx = theCoordinates.width();
+
+  Fmi::BoolMatrix ret(nx - 1, ny - 1, false);
+
+  for (auto j = 0UL; j < ny - 1; j++)
+    for (auto i = 0UL; i < nx - 1; i++)
+    {
+      if (overlaps(theClipBox.xmin(),
+                   theClipBox.xmax(),
+                   theCoordinates.x(i, j),
+                   theCoordinates.x(i, j + 1),
+                   theCoordinates.x(i + 1, j + 1),
+                   theCoordinates.x(i + 1, j)) &&
+          overlaps(theClipBox.ymin(),
+                   theClipBox.ymax(),
+                   theCoordinates.y(i, j),
+                   theCoordinates.y(i, j + 1),
+                   theCoordinates.y(i + 1, j + 1),
+                   theCoordinates.y(i + 1, j)))
+      {
+        ret.set(i, j, true);
+      }
+    }
+
+  return ret;
 }
 
 }  // anonymous namespace
@@ -442,37 +505,20 @@ void Engine::Impl::clearCache()
  */
 // ----------------------------------------------------------------------
 
-GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
-                                           const MyHints &hints,
+GeometryPtr Engine::Impl::internal_isoline(const Trax::Grid &data,
                                            double isovalue,
-                                           Interpolation interpolation) const
+                                           Trax::InterpolationType interpolation) const
 {
-  // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(*itsGeomFactory);
+  Trax::IsolineValues limits;
+  limits.add(isovalue);
 
-  // isoline
-  switch (interpolation)
-  {
-    case Linear:
-    {
-      MyLinearContourer::line(builder, data, isovalue, hints);
-      break;
-    }
-    case LogLinear:
-    {
-      MyLogLinearContourer::line(builder, data, isovalue, hints);
-      break;
-    }
-    case Nearest:
-    {
-      throw std::runtime_error("Isolines not supported with nearest neighbour interpolation");
-    }
-    case Discrete:
-    {
-      throw std::runtime_error("Isolines not supported with discrete interpolation");
-    }
-  }
-  return builder.result();
+  Trax::Contour contour;
+  contour.interpolation(interpolation);
+  contour.strict(false);
+  contour.validate(false);
+
+  auto result = contour.isolines(data, limits);
+  return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
 
 // ----------------------------------------------------------------------
@@ -484,48 +530,44 @@ GeometryPtr Engine::Impl::internal_isoline(const DataMatrixAdapter &data,
  */
 // ----------------------------------------------------------------------
 
-GeometryPtr Engine::Impl::internal_isoband(const DataMatrixAdapter &data,
-                                           const MyHints &hints,
+GeometryPtr Engine::Impl::internal_isoband(const Trax::Grid &data,
                                            const boost::optional<double> &lolimit,
                                            const boost::optional<double> &hilimit,
-                                           Interpolation interpolation) const
+                                           Trax::InterpolationType interpolation) const
 {
-  // Should support multiple builders with different SRIDs
-  Tron::FmiBuilder builder(*itsGeomFactory);
+  // Change optional settings to corresponding contours. If either limit is set,
+  // the other is +-inf if not set. If neither limit is set, we're contouring
+  // missing values which for Trax is NaN...NaN. Thus if the user really wants
+  // to contour all valid values, input -Inf...Inf must be given instead of
+  // optional values.
 
   double lo = -std::numeric_limits<double>::infinity();
   double hi = +std::numeric_limits<double>::infinity();
 
-  if (lolimit)
-    lo = *lolimit;
-  if (hilimit)
-    hi = *hilimit;
-
-  switch (interpolation)
+  if (!lolimit && !hilimit)
   {
-    case Linear:
-    {
-      MyLinearContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-    case LogLinear:
-    {
-      MyLogLinearContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-    case Nearest:
-    {
-      MyNearestContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
-    case Discrete:
-    {
-      MyDiscreteContourer::fill(builder, data, lo, hi, hints);
-      break;
-    }
+    lo = std::numeric_limits<double>::quiet_NaN();
+    hi = lo;
+  }
+  else
+  {
+    if (lolimit)
+      lo = *lolimit;
+    if (hilimit)
+      hi = *hilimit;
   }
 
-  return builder.result();
+  Trax::IsobandLimits limits;
+  limits.add(lo, hi);
+
+  Trax::Contour contour;
+  contour.interpolation(interpolation);
+  contour.closed_range(true);
+  contour.strict(false);
+  contour.validate(false);
+  auto result = contour.isobands(data, limits);
+
+  return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
 
 // ----------------------------------------------------------------------
@@ -557,35 +599,6 @@ std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Change all kFloatMissing values to NaN
- */
-// ----------------------------------------------------------------------
-
-void set_missing_to_nan(NFmiDataMatrix<float> &values)
-{
-  const std::size_t nx = values.NX();
-  const std::size_t ny = values.NY();
-  if (nx == 0 || ny == 0)
-    return;
-
-  const auto nan = std::numeric_limits<float>::quiet_NaN();
-
-  // Unfortunately NFmiDataMatrix is a vector of vectors, memory
-  // access patterns are not optimal
-
-  for (std::size_t i = 0; i < nx; i++)
-  {
-    auto &tmp = values[i];
-    for (std::size_t j = 0; j < ny; j++)
-    {
-      if (tmp[j] == kFloatMissing)
-        tmp[j] = nan;
-    }
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Calculate cache keys for the contours to be calculated
  */
 // ----------------------------------------------------------------------
@@ -599,42 +612,50 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
   Fmi::hash_combine(common_hash, theOptions.filtered_data_hash_value());
   Fmi::hash_combine(common_hash, theOutputCRS.hashValue());
 
-  // results first include isolines, then isobands
-  const auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
+  if (!theOptions.isovalues.empty())
+  {
+    // isolines mode
+    const auto nresults = theOptions.isovalues.size();
+    std::vector<std::size_t> hash_values(nresults, 0);
 
+    const auto isoline_hash = Fmi::hash_value(std::string("isoline"));
+    Fmi::hash_combine(common_hash, isoline_hash);
+
+    for (auto i = 0UL; i < nresults; i++)
+    {
+      auto hash = common_hash;
+      Fmi::hash_combine(hash, Fmi::hash_value(theOptions.isovalues[i]));
+      hash_values[i] = hash;
+    }
+
+    return hash_values;
+  }
+
+  // isoband mode
+  const auto nresults = theOptions.limits.size();
   std::vector<std::size_t> hash_values(nresults, 0);
 
-  const auto isoline_hash = Fmi::hash_value(std::string("isoline"));
   const auto isoband_hash = Fmi::hash_value(std::string("isoband"));
+  Fmi::hash_combine(common_hash, isoband_hash);
 
-  for (auto icontour = 0UL; icontour < nresults; icontour++)
+  for (auto i = 0UL; i < nresults; i++)
   {
     auto hash = common_hash;
-    if (icontour < theOptions.isovalues.size())
-    {
-      Fmi::hash_combine(hash, isoline_hash);
-      Fmi::hash_combine(hash, Fmi::hash_value(theOptions.isovalues[icontour]));
-    }
+
+    // TODO: Use generic code as in wms/Hash.h
+    if (theOptions.limits[i].lolimit)
+      Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].lolimit));
     else
-    {
-      Fmi::hash_combine(hash, isoband_hash);
+      Fmi::hash_combine(hash, Fmi::hash_value(false));
 
-      auto i = icontour - theOptions.isovalues.size();
+    if (theOptions.limits[i].hilimit)
+      Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].hilimit));
+    else
+      Fmi::hash_combine(hash, Fmi::hash_value(false));
 
-      // TODO: Use generic code as in wms/Hash.h
-      if (theOptions.limits[i].lolimit)
-        Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].lolimit));
-      else
-        Fmi::hash_combine(hash, Fmi::hash_value(false));
-
-      if (theOptions.limits[i].hilimit)
-        Fmi::hash_combine(hash, Fmi::hash_value(*theOptions.limits[i].hilimit));
-      else
-        Fmi::hash_combine(hash, Fmi::hash_value(false));
-    }
-
-    hash_values[icontour] = hash;
+    hash_values[i] = hash;
   }
+
   return hash_values;
 }
 
@@ -645,10 +666,41 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
-                                                  const Fmi::SpatialReference & /*theDataCRS */,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
+                                                  const Options &theOptions) const
+{
+  // All valid cells are to be contoured
+  Fmi::BoolMatrix valid_cells(theCoordinates.width() - 1, theCoordinates.height() - 1, true);
+
+  // Dummy clipbox for generating a rectangle around the valid areas when contouring missing values
+  const double large = 1E10;
+  Fmi::Box clipbox(-large, -large, large, large, 1, 1);
+
+  return contour(
+      theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, clipbox, theOptions);
+}
+
+std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
+                                                  const Fmi::SpatialReference &theOutputCRS,
+                                                  const NFmiDataMatrix<float> &theMatrix,
+                                                  const Fmi::CoordinateMatrix &theCoordinates,
+                                                  const Fmi::Box &theClipBox,
+                                                  const Options &theOptions) const
+{
+  // Mark cells overlapping the bounding box
+  auto valid_cells = mark_valid_cells(theCoordinates, theClipBox);
+  return contour(
+      theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theClipBox, theOptions);
+}
+
+std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
+                                                  const Fmi::SpatialReference &theOutputCRS,
+                                                  const NFmiDataMatrix<float> &theMatrix,
+                                                  const Fmi::CoordinateMatrix &theCoordinates,
+                                                  const Fmi::BoolMatrix &theValidCells,
+                                                  const Fmi::Box &theClipBox,
                                                   const Options &theOptions) const
 {
   try
@@ -664,15 +716,24 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (nx == 0 || ny == 0)
       return {};
 
+    if (!theOptions.isovalues.empty() && !theOptions.limits.empty())
+      throw Fmi::Exception(BCP, "Cannot calculate isolines and isobands simultaneously");
+
+    // Boxes covering the entire grid have the same hash even if the bounding boxes might differ,
+    // same thing if the grid is not covered at all. Note that theDataHash is used later on
+    // to get the analysis for the entire grid from the cache
+    auto contour_hash = theDataHash;
+    Fmi::hash_combine(contour_hash, theValidCells.hashValue());
+
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
 
     std::vector<std::size_t> contour_cache_keys =
-        get_contour_cache_keys(theDataHash, theOutputCRS, theOptions);
+        get_contour_cache_keys(contour_hash, theOutputCRS, theOptions);
 
-    // results first include isolines, then isobands
+    // Initialize empty results
 
-    auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
+    auto nresults = std::max(theOptions.isovalues.size(), theOptions.limits.size());
     std::vector<OGRGeometryPtr> retval(nresults);
 
     // Try to extract everything from the cache first without any
@@ -680,14 +741,14 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     std::vector<std::size_t> todo_contours;
 
-    for (auto icontour = 0UL; icontour < nresults; icontour++)
+    for (auto i = 0UL; i < nresults; i++)
     {
-      auto hash = contour_cache_keys[icontour];
+      auto hash = contour_cache_keys[i];
       auto opt_geom = itsContourCache.find(hash);
       if (opt_geom)
-        retval[icontour] = *opt_geom;
+        retval[i] = *opt_geom;
       else
-        todo_contours.push_back(icontour);
+        todo_contours.push_back(i);
     }
 
     // We're done if there is nothing on the TODO-list
@@ -695,55 +756,10 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (todo_contours.empty())
       return retval;
 
-    // Otherwise we must process the data for contouring
-
-    auto values = theMatrix;
-
-    // Use NaN instead of kFloatMissing for easier arithmetic
-    set_missing_to_nan(values);
-
-    // Unit conversions
-    if (theOptions.hasTransformation())
-    {
-      double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
-      double b = (theOptions.offset ? *theOptions.offset : 0.0);
-
-      for (std::size_t j = 0; j < ny; j++)
-        for (std::size_t i = 0; i < nx; i++)
-          values[i][j] = a * values[i][j] + b;
-    }
-
-    // Extrapolate if requested
-    extrapolate(values, theOptions.extrapolation);
-
     // Get the grid analysis of the projected coordinates from
     // the cache, or do the analysis and cache it.
 
     auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS);
-
-#if 0
-    for (std::size_t j = 0; j < analysis->valid.height(); ++j)
-      for (std::size_t i = 0; i < analysis->valid.width(); ++i)
-      {
-        if ((i < 120 || i > 270) || j < 690)
-          analysis->valid.set(i, j, false);
-      }
-#endif
-
-    // Flip the data and the coordinates if necessary. We avoid an unnecessary
-    // copy of the coordinates if no flipping is needed by using a pointer.
-
-    const auto *coords = &theCoordinates;
-    std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
-
-    if (analysis->needs_flipping)
-    {
-      flip(values);
-
-      flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
-      flip(*flipped_coordinates);
-      coords = flipped_coordinates.get();
-    }
 
     /*
      * Finally we determine which grid cells are valid and have the correct winding rule
@@ -757,111 +773,156 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
      *
      * Note: Fmi::analysis could do this for us, and the result would be cached. This
      *       is very fast though.
+     *
+     * Note: Contouring may be tiled in which case 'theValidCells' marks which cell overlap
+     *       with the bouding box (expanded by clipping margin). We combine the results
+     *       here instead of optimizing the analysis by skipping cells outside the tile
+     *       since the analysis is cached for the full grid and hence there are no real
+     *       speed gains to be obtained for WMS services.
      */
 
     auto valid_cells = analysis->valid;
+    valid_cells &= theValidCells & (analysis->clockwise ^ analysis->needs_flipping);
 
-    for (std::size_t j = 0; j < valid_cells.height(); j++)
-      for (std::size_t i = 0; i < valid_cells.width(); i++)
-        if (valid_cells(i, j))
-          valid_cells.set(i, j, analysis->needs_flipping ^ analysis->clockwise(i, j));
+    // Process the data for contouring. We wish to avoid unnecessary copying of
+    // the data, hence we use the existence of an alternative unique_ptr
+    // to indicate the data has been processed.
 
-    // Helper data structure for contouring
+    std::unique_ptr<NFmiDataMatrix<float>> alt_values;
 
-    DataMatrixAdapter data(values, *coords, valid_cells);
+    const bool needs_copying =
+        (theOptions.hasTransformation() || theOptions.extrapolation > 0 ||
+         analysis->needs_flipping || theOptions.filter_size || theOptions.filter_degree);
 
-    // Savitzky-Golay assumes DataMatrix likeAdapter API, not NFmiDataMatrix like API, hence the
+    if (needs_copying)
+      alt_values.reset(new NFmiDataMatrix<float>(theMatrix));
+
+    if (theOptions.hasTransformation())
+    {
+      auto &values = *alt_values;
+
+      double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
+      double b = (theOptions.offset ? *theOptions.offset : 0.0);
+
+      for (std::size_t j = 0; j < ny; j++)
+        for (std::size_t i = 0; i < nx; i++)
+          values[i][j] = a * values[i][j] + b;
+    }
+
+    // Extrapolate if requested
+    extrapolate(*alt_values, theOptions.extrapolation);
+
+    // Flip the data and the coordinates if necessary. We avoid an unnecessary
+    // copy of the coordinates if no flipping is needed by using a pointer.
+
+    const auto *coords = &theCoordinates;
+    std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
+
+    if (analysis->needs_flipping)
+    {
+      flip(*alt_values);
+
+      flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
+      flip(*flipped_coordinates);
+      coords = flipped_coordinates.get();
+    }
+
+    // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
+    std::shared_ptr<Trax::Grid> data;
+
+    if (alt_values)
+    {
+      if (analysis->shift == 0)
+        data = std::make_shared<Grid>(*alt_values, *coords, valid_cells);
+      else
+        data = std::make_shared<ShiftedGrid>(*alt_values, *coords, valid_cells, analysis->shift);
+    }
+    else
+    {
+      if (analysis->shift == 0)
+        data = std::make_shared<Grid>(theMatrix, *coords, valid_cells);
+      else
+        data = std::make_shared<ShiftedGrid>(theMatrix, *coords, valid_cells, analysis->shift);
+    }
+
+    // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the
     // filtering is delayed until this point.
 
     if (theOptions.filter_size || theOptions.filter_degree)
     {
       size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
       size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
-      Tron::SavitzkyGolay2D::smooth(data, size, degree);
+      Trax::SavitzkyGolay2D::smooth(*data, size, degree);
     }
-
-    // 2D search structure for the final values
-
-    MyHints hints(data);
-
-    // Parallel processing of the contours uses this struct to identify the contour to be processed
-    // and the cache key with which to store it.
-
-    struct Args
-    {
-      std::size_t i;
-      std::size_t hash;
-    };
 
     // Lambda for processing a single contouring task (isoline or isoband)
 
-    const auto contourer = [&retval, this, &theOptions, &theOutputCRS, &data, &hints](Args &args)
-    {
-      try
-      {
-        // Calculate GEOS geometry result
-        GeometryPtr geom;
+    Trax::Contour contour;
+    contour.interpolation(theOptions.interpolation);
+    contour.closed_range(true);
+    contour.strict(false);
+    contour.validate(false);
 
-        if (args.i < theOptions.isovalues.size())
+    Trax::GeometryCollections results;
+
+    if (!theOptions.isovalues.empty())
+    {
+      // Calculate isolines
+      Trax::IsolineValues isovalues;
+      for (auto i : todo_contours)
+        isovalues.add(theOptions.isovalues[i]);
+
+      results = contour.isolines(*data, isovalues);
+    }
+    else
+    {
+      // Calculate isobands
+      Trax::IsobandLimits isobands;
+      for (auto i : todo_contours)
+      {
+        // Change optional settings to corresponding contours. If either limit is set,
+        // the other is +-inf if not set. If neither limit is set, we're contouring
+        // missing values which for Trax is NaN...NaN. Thus if the user really wants
+        // to contour all valid values, input -Inf...Inf must be given instead of
+        // optional values.
+        double lo = -std::numeric_limits<double>::infinity();
+        double hi = +std::numeric_limits<double>::infinity();
+        const auto &limits = theOptions.limits[i];
+
+        if (!limits.lolimit && !limits.hilimit)
         {
-          geom =
-              internal_isoline(data, hints, theOptions.isovalues[args.i], theOptions.interpolation);
+          lo = std::numeric_limits<double>::quiet_NaN();
+          hi = lo;
         }
         else
         {
-          auto iband = args.i - theOptions.isovalues.size();
-          geom = internal_isoband(data,
-                                  hints,
-                                  theOptions.limits[iband].lolimit,
-                                  theOptions.limits[iband].hilimit,
-                                  theOptions.interpolation);
+          if (limits.lolimit)
+            lo = *limits.lolimit;
+          if (limits.hilimit)
+            hi = *limits.hilimit;
         }
 
-        // Cache as OGRGeometry
-
-        if (!geom)
-        {
-          // We want to cache empty results too to save speed!
-          auto ret = OGRGeometryPtr();
-          itsContourCache.insert(args.hash, ret);
-          retval[args.i] = ret;
-          return;
-        }
-
-        // Convert to OGR object and cache the result
-
-        auto ret = geos_to_ogr(geom, theOutputCRS.get()->Clone());
-
-        // Despeckle even closed isolines (pressure curves)
-        if (theOptions.minarea)
-          ret.reset(Fmi::OGR::despeckle(*ret, *theOptions.minarea));
-
-        retval[args.i] = ret;
-        itsContourCache.insert(args.hash, ret);
+        isobands.add(lo, hi);
       }
-      catch (...)
-      {
-        // Cannot let an exception cause termination. We'll let the user get an empty result
-        // instead.
-        Fmi::Exception ex(BCP, "Contouring failed");
-        ex.printError();
-      }
-    };
 
-    // Do not use all cores until better balancing & locking is implemented
-
-    const auto max_concurrency = std::thread::hardware_concurrency();
-    const auto concurrency = std::max(1U, max_concurrency / 8);
-
-    Fmi::WorkQueue<Args> workqueue(contourer, concurrency);
-
-    for (auto icontour : todo_contours)
-    {
-      Args args{icontour, contour_cache_keys[icontour]};
-      workqueue(args);
+      results = contour.isobands(*data, isobands);
     }
 
-    workqueue.join_all();
+    // Update results and cache
+    for (auto i = 0UL; i < todo_contours.size(); i++)
+    {
+      OGRGeometryPtr tmp(Trax::to_ogr_geom(results[i]).release());
+
+      if (theOutputCRS.get() != nullptr)
+        tmp->assignSpatialReference(theOutputCRS.get()->Clone());
+
+      // Despeckle even closed isolines (pressure curves)
+      if (theOptions.minarea)
+        tmp.reset(Fmi::OGR::despeckle(*tmp, *theOptions.minarea));
+
+      retval[todo_contours[i]] = tmp;
+      itsContourCache.insert(contour_cache_keys[todo_contours[i]], tmp);
+    }
 
     return retval;
   }
@@ -963,7 +1024,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       for (std::size_t i = 0; i < coordinates.size(); i++)
       {
         const int max_minutes = 360;
-        values[i][j] = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
+
+        auto value = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
+        if (value == kFloatMissing)
+          value = std::numeric_limits<float>::quiet_NaN();
+
+        values[i][j] = value;
 
         if (theZParameter)
         {
@@ -1008,15 +1074,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       }
     }
 
-    // Make sure the values are NaN instead of kFloatMissing
-    set_missing_to_nan(values);
-
     // Don't bother analyzing the grid for cross sections, the Z coordinates
     // should always be fine.
 
     Fmi::BoolMatrix grid_is_fine(coords.width(), coords.height(), true);
-    DataMatrixAdapter data(values, coords, grid_is_fine);
-    MyHints hints(data);
+    Grid data(values, coords, grid_is_fine);
 
     // results first include isolines, then isobands
     auto nresults = theOptions.isovalues.size() + theOptions.limits.size();
@@ -1033,14 +1095,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       GeometryPtr geom;
       if (isovaluerequest)
       {
-        geom =
-            internal_isoline(data, hints, theOptions.isovalues[icontour], theOptions.interpolation);
+        geom = internal_isoline(data, theOptions.isovalues[icontour], theOptions.interpolation);
       }
       else
       {
         auto i = icontour - theOptions.isovalues.size();
         geom = internal_isoband(data,
-                                hints,
                                 theOptions.limits[i].lolimit,
                                 theOptions.limits[i].hilimit,
                                 theOptions.interpolation);
@@ -1151,6 +1211,7 @@ void Engine::shutdown()
 {
   std::cout << "  -- Shutdown requested (contour)\n";
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Contour
@@ -1158,7 +1219,6 @@ void Engine::shutdown()
 // ----------------------------------------------------------------------
 
 std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
-                                            const Fmi::SpatialReference &theDataCRS,
                                             const Fmi::SpatialReference &theOutputCRS,
                                             const NFmiDataMatrix<float> &theMatrix,
                                             const Fmi::CoordinateMatrix &theCoordinates,
@@ -1166,8 +1226,31 @@ std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
 {
   try
   {
+    return itsImpl->contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, theOptions);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Contour given Box only
+ */
+// ----------------------------------------------------------------------
+
+std::vector<OGRGeometryPtr> Engine::contour(std::size_t theDataHash,
+                                            const Fmi::SpatialReference &theOutputCRS,
+                                            const NFmiDataMatrix<float> &theMatrix,
+                                            const Fmi::CoordinateMatrix &theCoordinates,
+                                            const Fmi::Box &theClipBox,
+                                            const Options &theOptions) const
+{
+  try
+  {
     return itsImpl->contour(
-        theDataHash, theDataCRS, theOutputCRS, theMatrix, theCoordinates, theOptions);
+        theDataHash, theOutputCRS, theMatrix, theCoordinates, theClipBox, theOptions);
   }
   catch (...)
   {
