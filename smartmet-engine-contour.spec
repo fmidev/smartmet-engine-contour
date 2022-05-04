@@ -21,6 +21,7 @@ BuildRequires: gdal34-devel
 BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
+BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 22.5.4
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
 BuildRequires: smartmet-library-trax-devel >= 22.5.3
@@ -39,6 +40,7 @@ Requires: smartmet-library-macgyver >= 22.3.28
 Requires: smartmet-library-newbase >= 22.4.28
 Requires: smartmet-library-spine >= 22.4.29
 Requires: smartmet-library-timeseries >= 22.3.18
+Requires: libconfig17
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
