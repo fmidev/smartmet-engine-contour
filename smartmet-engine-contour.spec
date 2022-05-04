@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.4.29
+Version: 22.5.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,9 +21,9 @@ BuildRequires: gdal34-devel
 BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 22.4.28
+BuildRequires: smartmet-library-gis-devel >= 22.5.4
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
-BuildRequires: smartmet-library-trax-devel >= 22.4.27
+BuildRequires: smartmet-library-trax-devel >= 22.5.3
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -33,10 +33,10 @@ Requires: boost169-system
 Requires: boost169-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 22.4.28
+Requires: smartmet-library-gis >= 22.5.4
 Requires: smartmet-library-macgyver >= 22.3.28
 Requires: smartmet-library-newbase >= 22.4.28
-Requires: smartmet-library-spine >= 22.3.18
+Requires: smartmet-library-spine >= 22.4.29
 Requires: smartmet-library-timeseries >= 22.3.18
 
 Provides: %{SPECNAME}
@@ -95,10 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Fri Apr 29 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.29-1.fmi
-- Fixed contouring of missing values
-
-* Tue Apr 26 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.26-1.fmi
+* Wed May  4 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.4-1.fmi
 - Use Trax for contouring
 - Use tiled contouring by default
 
