@@ -4,7 +4,7 @@
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
 Version: 22.5.4
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -99,9 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Wed May  4 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.4-1.fmi
+* Wed May  4 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.4-2.fmi
 - Use Trax for contouring
 - Use tiled contouring by default
+- Fixed data smoothing
 
 * Fri Mar 11 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.3.11-1.fmi
 - Repackaged due to refactored library dependencies

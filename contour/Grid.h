@@ -24,7 +24,7 @@ class Grid : public Trax::Grid
  public:
   Grid() = delete;
 
-  Grid(const NFmiDataMatrix<float>& theMatrix,
+  Grid(NFmiDataMatrix<float>& theMatrix,
        const Fmi::CoordinateMatrix& theCoords,
        const Fmi::BoolMatrix& theValidCells)
       : itsCoords(theCoords),
@@ -44,7 +44,7 @@ class Grid : public Trax::Grid
   double x(long i, long j) const override { return itsCoords.x(i, j); }
   double y(long i, long j) const override { return itsCoords.y(i, j); }
   double operator()(long i, long j) const override { return itsMatrix[i % itsNX][j]; }
-  void set(long i, long j, double z) override {}  // not needed
+  void set(long i, long j, double z) override { itsMatrix[i][j] = z; }
 
   bool valid(long i, long j) const override
   {
@@ -62,7 +62,7 @@ class Grid : public Trax::Grid
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
-  const NFmiDataMatrix<float>& itsMatrix;
+  NFmiDataMatrix<float>& itsMatrix;
   const std::size_t itsNX;     // coordinates width
   const std::size_t itsWidth;  // data width
   const std::size_t itsHeight;

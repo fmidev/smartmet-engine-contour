@@ -18,7 +18,7 @@ class ShiftedGrid : public Trax::Grid
  public:
   ShiftedGrid() = delete;
 
-  ShiftedGrid(const NFmiDataMatrix<float>& theMatrix,
+  ShiftedGrid(NFmiDataMatrix<float>& theMatrix,
               const Fmi::CoordinateMatrix& theCoords,
               const Fmi::BoolMatrix& theValidCells,
               std::size_t theShift)
@@ -45,7 +45,7 @@ class ShiftedGrid : public Trax::Grid
   double x(long i, long j) const override { return itsCoords.x((i + itsShift) % itsNX, j); }
   double y(long i, long j) const override { return itsCoords.y((i + itsShift) % itsNX, j); }
   double operator()(long i, long j) const override { return itsMatrix[(i + itsShift) % itsNX][j]; }
-  void set(long i, long j, double z) override {}  // not needed
+  void set(long i, long j, double z) override { itsMatrix[i][j] = z; }
   void shift(std::size_t shift) { itsShift = shift; }
 
   bool valid(long i, long j) const override
@@ -64,7 +64,7 @@ class ShiftedGrid : public Trax::Grid
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
-  const NFmiDataMatrix<float>& itsMatrix;
+  NFmiDataMatrix<float>& itsMatrix;
   const std::size_t itsNX;  // coordinates width
   std::size_t itsWidth;     // data width
   const std::size_t itsHeight;

@@ -839,10 +839,12 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
     else
     {
+      // We're not really modifying the data, only alt_values is
+      auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
       if (analysis->shift == 0)
-        data = std::make_shared<Grid>(theMatrix, *coords, valid_cells);
+        data = std::make_shared<Grid>(tmp, *coords, valid_cells);
       else
-        data = std::make_shared<ShiftedGrid>(theMatrix, *coords, valid_cells, analysis->shift);
+        data = std::make_shared<ShiftedGrid>(tmp, *coords, valid_cells, analysis->shift);
     }
 
     // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the
@@ -854,8 +856,6 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
       Trax::SavitzkyGolay2D::smooth(*data, size, degree);
     }
-
-    // Lambda for processing a single contouring task (isoline or isoband)
 
     Trax::Contour contour;
     contour.interpolation(theOptions.interpolation);
