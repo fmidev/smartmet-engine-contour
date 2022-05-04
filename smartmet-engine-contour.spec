@@ -25,6 +25,7 @@ BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 22.5.4
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
 BuildRequires: smartmet-library-trax-devel >= 22.5.3
+BuildRequires: smartmet-library-spine-devel >= 22.4.29
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: boost169-date-time
@@ -55,7 +56,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata >= 21.1.21
 #TestRequires: smartmet-engine-querydata-devel >= 21.1.21
 #TestRequires: smartmet-library-regression >= 21.1.21
-#TestRequires: smartmet-library-spine-devel >= 22.3.18
+#TestRequires: smartmet-library-spine-devel >= 22.4.29
 #TestRequires: smartmet-library-timeseries-devel >= 22.3.18
 #TestRequires: smartmet-library-trax >= 22.5.3
 #TestRequires: smartmet-test-data >= 20.10.29
