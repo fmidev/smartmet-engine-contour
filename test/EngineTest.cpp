@@ -60,7 +60,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok = "";
@@ -79,7 +79,7 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, Box::identity(), 1);
     string ok = "";
@@ -99,14 +99,13 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
 
     string ok =
-        "M35.2 100 35.8 99.9 36.1 100"
         "M0 96.3 0.6 96.6 0.7 96.7 1.5 97.1 1.8 97.3 2.2 97.7 2.5 98 3 98.5 3.1 98.7 3.5 99.3 3.7 "
-        "100";
+        "100M35.2 100 35.8 99.9 36.1 100";
 
     if (result != ok)
       TEST_FAILED("Isovalue: 25\n\tExpected: " + ok + "\n\tObtained: " + result);
@@ -114,8 +113,8 @@ void lines()
     // test another resolution
     result = Fmi::OGR::exportToSvg(*geom, area, 2);
 
-    ok = "M35.17 100 35.82 99.93 36.06 100M0 96.31 0.63 96.64 0.75 96.71 1.49 97.12 1.78 97.32 "
-         "2.24 97.7 2.55 97.99 2.99 98.5 3.12 98.66 3.5 99.33 3.68 100";
+    ok = "M0 96.31 0.63 96.64 0.75 96.71 1.49 97.12 1.78 97.32 2.24 97.7 2.55 97.99 2.99 98.5 3.12 "
+         "98.66 3.5 99.33 3.68 100M35.17 100 35.82 99.93 36.06 100";
     if (result != ok)
       TEST_FAILED("Isovalue: 25\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
@@ -133,12 +132,12 @@ void lines()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M0 96.3 0.6 96.6 0.7 96.7 1.5 97.2 1.7 97.3 2.2 97.8 2.5 98 3 98.5 3.1 98.7 3.6 99.3 3.7 "
-        "99.6 4 100";
+        "M0 96.3 0.6 96.6 0.7 96.7 1.5 97.1 1.8 97.3 2.2 97.7 2.5 98 3 98.5 3.1 98.7 3.5 99.3 3.7 "
+        "100M35.2 100 35.8 99.9 36.1 100";
     if (result != ok)
       TEST_FAILED("Isovalue: 25 smoothed\n\tExpected: " + ok + "\n\tObtained: " + result);
   }
@@ -183,7 +182,7 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok = "";
@@ -203,7 +202,7 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok = "";
@@ -223,20 +222,20 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M0.9 98 1.5 98.6 1.6 98.7 2.2 99.3 2.2 99.4 2.6 100 2.2 100 1.5 100 0.7 100 0 100 0 99.3 "
-        "0 98.7 0 98 0 97.4 0.7 97.9Z";
+        "M0 100 0 99.3 0 98.7 0 98 0 97.4 0.7 97.9 0.9 98 1.5 98.6 1.6 98.7 2.2 99.3 2.2 99.4 2.6 "
+        "100 2.2 100 1.5 100 0.7 100Z";
+
     if (result != ok)
       TEST_FAILED("Isoband (1 decimal): 25.5-30\n\tExpected: " + ok + "\n\tObtained: " + result);
 
     // test another resolution too
     result = Fmi::OGR::exportToSvg(*geom, area, 2);
-    ok = "M0.92 97.99 1.49 98.58 1.56 98.66 2.16 99.33 2.24 99.42 2.6 100 2.24 100 1.49 "
-         "100 0.75 100 0 100 0 99.33 0 98.66 0 97.99 0 97.42 0.75 97.87Z";
-
+    ok = "M0 100 0 99.33 0 98.66 0 97.99 0 97.42 0.75 97.87 0.92 97.99 1.49 98.58 1.56 98.66 2.16 "
+         "99.33 2.24 99.42 2.6 100 2.24 100 1.49 100 0.75 100Z";
     if (result != ok)
       TEST_FAILED("Isoband (2 decimals): 25.5-30 \n\tExpected: " + ok + "\n\tObtained: " + result);
   }
@@ -255,12 +254,12 @@ void fills()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geom = *(contour->contour(qhash, crs, crs, *matrix, *coords, opt).begin());
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M0.8 98 1.5 98.6 1.6 98.7 2.1 99.3 2.2 99.5 2.6 100 2.2 100 1.5 100 0.7 100 0 100 0 99.3 "
-        "0 98.7 0 98 0 97.5 0.7 97.9Z";
+        "M0 100 0 99.3 0 98.7 0 98 0 97.4 0.7 97.9 0.9 98 1.5 98.6 1.6 98.7 2.2 99.3 2.2 99.4 2.6 "
+        "100 2.2 100 1.5 100 0.7 100Z";
 
     if (result != ok)
       TEST_FAILED("Smoothened isoband: 25.5-30\n\tExpected: " + ok + "\n\tObtained: " + result);
@@ -306,8 +305,9 @@ void crossection()
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M29.9 0 29.9 5 29.9 10 29.9 15 29.9 20 29.9 25 59.8 30 59.8 25 89.7 20 89.7 15 89.7 10 "
+        "M29.9 0 29.9 5 29.9 10 29.9 15 29.9 20 29.9 25 59.8 25 59.8 20 89.7 20 89.7 15 89.7 10 "
         "89.7 5 89.7 0 59.8 0Z";
+
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
   }
@@ -322,7 +322,7 @@ void crossection()
     auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
-    string ok = "M54.5 25 59.8 30 59.8 25 74.7 22.5 59.8 20.3Z";
+    string ok = "M54.5 25 59.8 25 59.8 20.3Z";
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
   }
@@ -376,7 +376,7 @@ void speed()
         q->selectLevel(*opt.level);
 
       auto matrix = qengine->getValues(q, valueshash, opt.time);
-      auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
+      auto geoms = contour->contour(qhash, crs, *matrix, *coords, opt);
     }
   }
   TEST_PASSED();
@@ -423,7 +423,7 @@ void speed_all_at_once()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
+    auto geoms = contour->contour(qhash, crs, *matrix, *coords, opt);
   }
   TEST_PASSED();
 }
@@ -474,7 +474,7 @@ void pressure()
         q->selectLevel(*opt.level);
 
       auto matrix = qengine->getValues(q, valueshash, opt.time);
-      auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
+      auto geoms = contour->contour(qhash, crs, *matrix, *coords, opt);
     }
   }
   TEST_PASSED();
@@ -519,182 +519,8 @@ void pressure_all_at_once()
       q->selectLevel(*opt.level);
 
     auto matrix = qengine->getValues(q, valueshash, opt.time);
-    auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
+    auto geoms = contour->contour(qhash, crs, *matrix, *coords, opt);
   }
-  TEST_PASSED();
-}
-
-// ----------------------------------------------------------------------
-
-void fillvalidation()
-{
-  using namespace SmartMet;
-  using Fmi::Box;
-
-  auto q = qengine->get("ecmwf_temperature");
-  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
-  q->param(temperature.number());
-
-  // Full data area
-
-  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
-  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
-  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
-  std::size_t qhash = Engine::Querydata::hash_value(q);
-
-  // Use native coordinates
-  auto crs = q->SpatialReference();
-  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
-
-  {
-    std::cout << std::endl;
-    boost::timer::auto_cpu_timer totaltimer(2, "\tAll contouring took %t sec CPU, %w sec real\n");
-
-    for (q->resetTime(); q->nextTime();)
-    {
-      // q->time(NFmiMetTime(2015,6,1,3,0,0));
-      std::cout << "Time: " << q->validTime() << std::endl;
-      for (int i = -50; i < 50; i += 2)
-      {
-        double lolimit = i;
-        double hilimit = i + 2;
-
-        std::string report =
-            ("\tIsoband " + boost::lexical_cast<std::string>(lolimit) + "..." +
-             boost::lexical_cast<std::string>(hilimit) + " took %t sec CPU, %w sec real\n");
-        boost::timer::auto_cpu_timer timer(2, report);
-
-        std::vector<Engine::Contour::Range> limits;
-        limits.push_back(Engine::Contour::Range(lolimit, hilimit));
-        Engine::Contour::Options opt(temperature, q->validTime(), limits);
-
-        auto valueshash = qhash;
-        Fmi::hash_combine(valueshash, opt.data_hash_value());
-        if (opt.level)
-          q->selectLevel(*opt.level);
-
-        auto matrix = qengine->getValues(q, valueshash, opt.time);
-        auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
-      }
-    }
-  }
-  TEST_PASSED();
-}
-
-// ----------------------------------------------------------------------
-
-void linevalidation()
-{
-  using namespace SmartMet;
-  using Fmi::Box;
-
-  auto q = qengine->get("ecmwf_temperature");
-  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
-  q->param(temperature.number());
-
-  // Full data area
-
-  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
-  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
-  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
-  std::size_t qhash = Engine::Querydata::hash_value(q);
-
-  // Use native coordinates
-  auto crs = q->SpatialReference();
-  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
-
-  {
-    std::cout << std::endl;
-    boost::timer::auto_cpu_timer totaltimer(2, "\tAll contouring took %t sec CPU, %w sec real\n");
-
-    for (q->resetTime(); q->nextTime();)
-    {
-      // q->time(NFmiMetTime(2015,5,31,18,0,0));
-      std::cout << "Time: " << q->validTime() << std::endl;
-      for (int i = -50; i < 50; i += 2)
-      // for(int i=-46; i<-44; i+=2)
-      {
-        double value = i;
-
-        std::string report = ("\tIsoline " + boost::lexical_cast<std::string>(value) +
-                              " took %t sec CPU, %w sec real\n");
-        boost::timer::auto_cpu_timer timer(2, report);
-
-        std::vector<double> isovalues;
-        isovalues.push_back(value);
-        Engine::Contour::Options opt(temperature, q->validTime(), isovalues);
-
-        auto valueshash = qhash;
-        Fmi::hash_combine(valueshash, opt.data_hash_value());
-        if (opt.level)
-          q->selectLevel(*opt.level);
-
-        auto matrix = qengine->getValues(q, valueshash, opt.time);
-        auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
-      }
-    }
-  }
-  TEST_PASSED();
-}
-
-// ----------------------------------------------------------------------
-
-void globalykj()
-{
-  using namespace SmartMet;
-  using Fmi::Box;
-
-  auto q = qengine->get("ecmwf_maailma_pinta");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
-  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
-  q->param(temperature.number());
-
-  // YKJ spatial reference
-
-  Fmi::SpatialReference ykj("EPSG:2393");
-
-  // Full data area
-
-  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
-  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
-  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
-  std::size_t qhash = Engine::Querydata::hash_value(q);
-  auto crs = q->SpatialReference();
-
-  std::vector<Engine::Contour::Range> limits;
-  limits.push_back(Engine::Contour::Range(-100, 0));
-  Engine::Contour::Options opt(temperature, t, limits);  // freezing temperatures
-
-  auto valueshash = qhash;
-  Fmi::hash_combine(valueshash, opt.data_hash_value());
-  if (opt.level)
-    q->selectLevel(*opt.level);
-
-  auto matrix = qengine->getValues(q, valueshash, opt.time);
-  CoordinatesPtr coords = qengine->getWorldCoordinates(q, ykj);
-  auto geom = *(contour->contour(qhash, crs, ykj, *matrix, *coords, opt).begin());
-
-  if (!geom)
-    TEST_FAILED("Failed to contour temperature interval -100...0");
-
-  OGREnvelope env;
-  geom->getEnvelope(&env);
-
-#if 0
-	std::cout << std::fixed << std::setprecision(1)
-			  << "\tX: " << env.MinX << "..." << env.MaxX
-			  << "\tY: " << env.MinY << "..." << env.MaxY
-			  << std::endl;
-#endif
-
-  if (env.MinX > -2670969)
-    TEST_FAILED("Engine::Contour MinX should be < -2670969");
-  if (env.MaxX < 11621694)
-    TEST_FAILED("Engine::Contour MaxX should be > 11621694");
-  if (env.MinY > -10003576)
-    TEST_FAILED("Engine::Contour MinY should be < -10003576");
-  if (env.MaxY < 10445033)
-    TEST_FAILED("Engine::Contour MaxY should be > 10445033");
   TEST_PASSED();
 }
 
@@ -734,7 +560,7 @@ void worldwrap()
 
   auto matrix = qengine->getValues(q, valueshash, opt.time);
 
-  auto geoms = contour->contour(qhash, crs, crs, *matrix, *coords, opt);
+  auto geoms = contour->contour(qhash, crs, *matrix, *coords, opt);
 
   if (geoms.empty())
     TEST_FAILED("Failed to contour GFS data interval 0-2");
@@ -760,7 +586,6 @@ class tests : public tframe::tests
   // Main test suite
   void test()
   {
-#if 1
     TEST(lines);
     contour->clearCache();
     TEST(fills);
@@ -777,12 +602,6 @@ class tests : public tframe::tests
     contour->clearCache();
     TEST(speed_all_at_once);
     contour->clearCache();
-#else
-    // these have been used only to make sure everything validates. Too slow for other testing
-    TEST(fillvalidation);
-    TEST(linevalidation);
-    TEST(globalykj);
-#endif
   }
 
 };  // class tests
