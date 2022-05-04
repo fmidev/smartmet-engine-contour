@@ -59,6 +59,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-spine-devel >= 22.4.29
 #TestRequires: smartmet-library-timeseries-devel >= 22.3.18
 #TestRequires: smartmet-library-trax >= 22.5.3
+#TestRequires: smartmet-library-trax-devel >= 22.5.3
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
