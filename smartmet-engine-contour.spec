@@ -34,6 +34,7 @@ Requires: boost169-thread
 Requires: gdal34-libs
 Requires: geos310
 Requires: smartmet-library-gis >= 22.5.4
+Requires: smartmet-library-trax >= 22.5.3
 Requires: smartmet-library-macgyver >= 22.3.28
 Requires: smartmet-library-newbase >= 22.4.28
 Requires: smartmet-library-spine >= 22.4.29
@@ -54,7 +55,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-regression >= 21.1.21
 #TestRequires: smartmet-library-spine-devel >= 22.3.18
 #TestRequires: smartmet-library-timeseries-devel >= 22.3.18
-#TestRequires: smartmet-library-trax >= 22.2.11
+#TestRequires: smartmet-library-trax >= 22.5.3
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
