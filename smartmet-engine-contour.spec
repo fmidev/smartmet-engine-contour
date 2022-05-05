@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.5.4
-Release: 2%{?dist}.fmi
+Version: 22.5.5
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -24,7 +24,7 @@ BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 22.5.4
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
-BuildRequires: smartmet-library-trax-devel >= 22.5.3
+BuildRequires: smartmet-library-trax-devel >= 22.5.5
 BuildRequires: smartmet-library-spine-devel >= 22.4.29
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -36,9 +36,9 @@ Requires: boost169-thread
 Requires: gdal34-libs
 Requires: geos310
 Requires: smartmet-library-gis >= 22.5.4
-Requires: smartmet-library-trax >= 22.5.3
+Requires: smartmet-library-trax >= 22.5.5
 Requires: smartmet-library-macgyver >= 22.3.28
-Requires: smartmet-library-newbase >= 22.4.28
+Requires: smartmet-library-newbase >= 22.5.4
 Requires: smartmet-library-spine >= 22.4.29
 Requires: smartmet-library-timeseries >= 22.3.18
 Requires: libconfig17
@@ -58,8 +58,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-regression >= 21.1.21
 #TestRequires: smartmet-library-spine-devel >= 22.4.29
 #TestRequires: smartmet-library-timeseries-devel >= 22.3.18
-#TestRequires: smartmet-library-trax >= 22.5.3
-#TestRequires: smartmet-library-trax-devel >= 22.5.3
+#TestRequires: smartmet-library-trax >= 22.5.5
+#TestRequires: smartmet-library-trax-devel >= 22.5.5
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -100,6 +100,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu May  5 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.5-1.fmi
+- Repackaged since Trax ABI switched from using doubles to floats
+
 * Wed May  4 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.4-2.fmi
 - Use Trax for contouring
 - Use tiled contouring by default
