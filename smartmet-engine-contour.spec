@@ -38,7 +38,7 @@ Requires: geos310
 Requires: smartmet-library-gis >= 22.5.4
 Requires: smartmet-library-trax >= 22.5.5
 Requires: smartmet-library-macgyver >= 22.3.28
-Requires: smartmet-library-newbase >= 22.5.4
+Requires: smartmet-library-newbase >= 22.4.28
 Requires: smartmet-library-spine >= 22.4.29
 Requires: smartmet-library-timeseries >= 22.3.18
 Requires: libconfig17
