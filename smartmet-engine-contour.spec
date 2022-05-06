@@ -72,6 +72,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
+Requires: smartmet-library-trax-devel >= 22.5.5
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
