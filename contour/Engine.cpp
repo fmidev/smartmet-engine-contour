@@ -1077,7 +1077,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // Don't bother analyzing the grid for cross sections, the Z coordinates
     // should always be fine.
 
-    Fmi::BoolMatrix grid_is_fine(coords.width(), coords.height(), true);
+    Fmi::BoolMatrix grid_is_fine(coords.width() - 1, coords.height() - 1, true);
     Grid data(values, coords, grid_is_fine);
 
     // results first include isolines, then isobands

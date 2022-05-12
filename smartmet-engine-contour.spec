@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.5.5
+Version: 22.5.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -101,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu May 12 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.12-1.fmi
+- Fixed cross section contouring limits to be one less than the size of the coordinate matrix
+
 * Thu May  5 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.5-1.fmi
 - Repackaged since Trax ABI switched from using doubles to floats
 
