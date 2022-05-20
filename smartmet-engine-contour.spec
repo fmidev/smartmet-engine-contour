@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.5.18
+Version: 22.5.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -38,9 +38,9 @@ Requires: geos310
 Requires: smartmet-library-gis >= 22.5.4
 Requires: smartmet-library-trax >= 22.5.18
 Requires: smartmet-library-macgyver >= 22.3.28
-Requires: smartmet-library-newbase >= 22.5.18
+Requires: smartmet-library-newbase >= 22.5.20
 Requires: smartmet-library-spine >= 22.5.16
-Requires: smartmet-library-timeseries >= 22.3.18
+Requires: smartmet-library-timeseries >= 22.5.20
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -101,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri May 20 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.20-1.fmi
+- Repackaged due to ABI changes to newbase LatLon methods
+
 * Wed May 18 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.18-1.fmi
 - Removed obsolete #ifdef WGS84
 
