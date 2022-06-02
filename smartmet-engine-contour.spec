@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.5.24
+Version: 22.6.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,9 +22,9 @@ BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 22.5.4
+BuildRequires: smartmet-library-gis-devel >= 22.6.1
 BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
-BuildRequires: smartmet-library-trax-devel >= 22.5.23
+BuildRequires: smartmet-library-trax-devel >= 22.6.2
 BuildRequires: smartmet-library-spine-devel >= 22.5.24
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -35,10 +35,10 @@ Requires: boost169-system
 Requires: boost169-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 22.5.4
-Requires: smartmet-library-trax >= 22.5.23
+Requires: smartmet-library-gis >= 22.6.1
+Requires: smartmet-library-trax >= 22.6.2
 Requires: smartmet-library-macgyver >= 22.5.24
-Requires: smartmet-library-newbase >= 22.5.24
+Requires: smartmet-library-newbase >= 22.6.1
 Requires: smartmet-library-spine >= 22.5.24
 Requires: smartmet-library-timeseries >= 22.5.24
 Requires: libconfig17
@@ -58,8 +58,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-regression >= 21.1.21
 #TestRequires: smartmet-library-spine-devel >= 22.5.24
 #TestRequires: smartmet-library-timeseries-devel >= 22.3.18
-#TestRequires: smartmet-library-trax >= 22.5.23
-#TestRequires: smartmet-library-trax-devel >= 22.5.23
+#TestRequires: smartmet-library-trax >= 22.6.2
+#TestRequires: smartmet-library-trax-devel >= 22.6.2
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -72,7 +72,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 22.5.23
+Requires: smartmet-library-trax-devel >= 22.6.2
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -101,6 +101,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Jun  2 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.6.2-1.fmi
+- Fixed implementation of contouring shifted grids
+
 * Tue May 24 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.24-1.fmi
 - Repackaged due to NFmiArea ABI changes
 

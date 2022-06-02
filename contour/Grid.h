@@ -26,13 +26,15 @@ class Grid : public Trax::Grid
 
   Grid(NFmiDataMatrix<float>& theMatrix,
        const Fmi::CoordinateMatrix& theCoords,
-       const Fmi::BoolMatrix& theValidCells)
+       const Fmi::BoolMatrix& theValidCells,
+       std::size_t theShift = 0)
       : itsCoords(theCoords),
         itsValidCells(theValidCells),
         itsMatrix(theMatrix),
         itsNX(theMatrix.NX()),
         itsWidth(theCoords.width()),
-        itsHeight(theCoords.height())
+        itsHeight(theCoords.height()),
+        itsShift(theShift)
   {
     if (theCoords.height() != theMatrix.NY() ||
         (theCoords.width() != theMatrix.NX() && theCoords.width() != theMatrix.NX() + 1))
@@ -56,6 +58,7 @@ class Grid : public Trax::Grid
 
   std::size_t width() const override { return itsWidth; }
   std::size_t height() const override { return itsHeight; }
+  std::size_t shift() const override { return itsShift; }
 
   std::array<std::size_t, 4> bbox() const override { return itsValidCells.bbox(); }
 
@@ -66,6 +69,7 @@ class Grid : public Trax::Grid
   const std::size_t itsNX;     // coordinates width
   const std::size_t itsWidth;  // data width
   const std::size_t itsHeight;
+  const std::size_t itsShift;  // horizontal shift in start position
 
 };  // class Grid
 }  // namespace Contour
