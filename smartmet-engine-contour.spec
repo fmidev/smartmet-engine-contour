@@ -10,7 +10,14 @@ Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: boost169-devel
+
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%else
+%define smartmet_boost boost
+%endif
+
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
 %if %{defined el7}
@@ -22,44 +29,44 @@ BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 22.6.1
-BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
-BuildRequires: smartmet-library-trax-devel >= 22.6.2
-BuildRequires: smartmet-library-spine-devel >= 22.5.24
+BuildRequires: smartmet-library-gis-devel >= 22.6.16
+BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
+BuildRequires: smartmet-library-trax-devel >= 22.6.16
+BuildRequires: smartmet-library-spine-devel >= 22.6.16
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
-Requires: boost169-date-time
-Requires: boost169-filesystem
-Requires: boost169-iostreams
-Requires: boost169-system
-Requires: boost169-thread
+Requires: %{smartmet_boost}-date-time
+Requires: %{smartmet_boost}-filesystem
+Requires: %{smartmet_boost}-iostreams
+Requires: %{smartmet_boost}-system
+Requires: %{smartmet_boost}-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 22.6.1
-Requires: smartmet-library-trax >= 22.6.2
-Requires: smartmet-library-macgyver >= 22.5.24
-Requires: smartmet-library-newbase >= 22.6.1
-Requires: smartmet-library-spine >= 22.5.24
-Requires: smartmet-library-timeseries >= 22.5.24
+Requires: smartmet-library-gis >= 22.6.16
+Requires: smartmet-library-trax >= 22.6.16
+Requires: smartmet-library-macgyver >= 22.6.16
+Requires: smartmet-library-newbase >= 22.6.16
+Requires: smartmet-library-spine >= 22.6.16
+Requires: smartmet-library-timeseries >= 22.6.16
 Requires: libconfig17
 
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
 Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
-#TestRequires: boost169-devel
+#TestRequires: %{smartmet_boost}-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
 #TestRequires: gdal34-devel
 #TestRequires: geos310-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
-#TestRequires: smartmet-engine-querydata >= 21.1.21
-#TestRequires: smartmet-engine-querydata-devel >= 21.1.21
+#TestRequires: smartmet-engine-querydata >= 22.6.17
+#TestRequires: smartmet-engine-querydata-devel >= 22.6.17
 #TestRequires: smartmet-library-regression >= 21.1.21
-#TestRequires: smartmet-library-spine-devel >= 22.5.24
-#TestRequires: smartmet-library-timeseries-devel >= 22.3.18
-#TestRequires: smartmet-library-trax >= 22.6.2
-#TestRequires: smartmet-library-trax-devel >= 22.6.2
+#TestRequires: smartmet-library-spine-devel >= 22.6.16
+#TestRequires: smartmet-library-timeseries-devel >= 22.6.16
+#TestRequires: smartmet-library-trax >= 22.6.16
+#TestRequires: smartmet-library-trax-devel >= 22.6.16
 #TestRequires: smartmet-test-data >= 20.10.29
 #TestRequires: zlib-devel
 
@@ -72,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 22.6.2
+Requires: smartmet-library-trax-devel >= 22.6.16
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
