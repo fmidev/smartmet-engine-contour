@@ -19,6 +19,7 @@ LIBS += \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
 	-lsmartmet-gis \
+	-lsmartmet-trax \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_filesystem \
