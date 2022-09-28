@@ -21,6 +21,7 @@ LIBS += -L$(libdir) \
 	-lboost_filesystem \
 	-lboost_iostreams \
 	-lboost_system \
+	-lfmt \
 	-lbz2 -lz \
 	-lpthread
 

@@ -10,6 +10,7 @@
 #include "GeosTools.h"
 #include "Grid.h"
 #include "Options.h"
+#include "ShiftedGrid.h"
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -826,13 +827,27 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
     std::shared_ptr<Trax::Grid> data;
 
-    if (alt_values)
-      data = std::make_shared<Grid>(*alt_values, *coords, valid_cells, analysis->shift);
+    if (analysis->shift == 0)
+    {
+      if (alt_values)
+        data = std::make_shared<Grid>(*alt_values, *coords, valid_cells);
+      else
+      {
+        // We're not really modifying the data, only alt_values is
+        auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
+        data = std::make_shared<Grid>(tmp, *coords, valid_cells);
+      }
+    }
     else
     {
-      // We're not really modifying the data, only alt_values is
-      auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
-      data = std::make_shared<Grid>(tmp, *coords, valid_cells, analysis->shift);
+      if (alt_values)
+        data = std::make_shared<ShiftedGrid>(*alt_values, *coords, valid_cells, analysis->shift);
+      else
+      {
+        // We're not really modifying the data, only alt_values is
+        auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
+        data = std::make_shared<ShiftedGrid>(tmp, *coords, valid_cells, analysis->shift);
+      }
     }
 
     // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the

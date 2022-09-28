@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fmt/format.h>
 #include <gis/BoolMatrix.h>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/Exception.h>
@@ -7,12 +8,6 @@
 #include <newbase/NFmiPoint.h>
 #include <trax/Grid.h>
 #include <limits>
-
-// Note: The values may be one column narrower than the coordinates if the data needs a wraparound
-// to fill the globe. In this case the last coordinate is the projected metric coordinate with
-// different value to column zero, but essentially the same location on earth in geographic
-// coordinates. The values have not been wrapped similarly, hence an extra test is needed when
-// fetching values.
 
 namespace SmartMet
 {
@@ -27,27 +22,25 @@ class Grid : public Trax::Grid
 
   Grid(NFmiDataMatrix<float>& theMatrix,
        const Fmi::CoordinateMatrix& theCoords,
-       const Fmi::BoolMatrix& theValidCells,
-       std::size_t theShift = 0)
+       const Fmi::BoolMatrix& theValidCells)
       : itsCoords(theCoords),
         itsValidCells(theValidCells),
         itsMatrix(theMatrix),
         itsNX(theMatrix.NX()),
         itsWidth(theCoords.width()),
-        itsHeight(theCoords.height()),
-        itsShift(theShift)
+        itsHeight(theCoords.height())
   {
-    if (theCoords.height() != theMatrix.NY() ||
-        (theCoords.width() != theMatrix.NX() && theCoords.width() != theMatrix.NX() + 1))
-      throw Fmi::Exception(BCP, "Contoured data and coordinate dimensions mismatch");
+    if (theCoords.height() != theMatrix.NY() || theCoords.width() != theMatrix.NX())
+      throw Fmi::Exception(
+          BCP,
+          fmt::format("Contoured data {}x{} and coordinate dimensions {}x{} mismatch",
+                      theMatrix.NX(),
+                      theMatrix.NY(),
+                      theCoords.width(),
+                      theCoords.height()));
   }
 
-  void shell(double maxcoord) { itsMaxCoord = maxcoord; }
-
-  long mini() const { return static_cast<long>(itsValidCells.bbox()[0]); }
-  long minj() const { return static_cast<long>(itsValidCells.bbox()[1]); }
-  long maxi() const { return static_cast<long>(itsValidCells.bbox()[2] + 2); }
-  long maxj() const { return static_cast<long>(itsValidCells.bbox()[3] + 2); }
+  void shell(double value) { itsMaxCoord = value; }
 
   // Provide wrap-around capability for world data
 
@@ -59,7 +52,11 @@ class Grid : public Trax::Grid
     else if (i >= maxi() + 1)
       ret = itsMaxCoord;
     else
-      ret = itsCoords.x(i - 1, std::min(std::max(1L, j), maxj() - 1) - 1);
+    {
+      auto pos = std::min(std::max(0L, j), maxj());
+      ret = itsCoords.x(i, pos);
+    }
+
     return ret;
   }
 
@@ -71,7 +68,10 @@ class Grid : public Trax::Grid
     else if (j >= maxj() + 1)
       ret = itsMaxCoord;
     else
-      ret = itsCoords.y(std::min(std::max(1L, i), maxi() - 2), j - 1);
+    {
+      auto pos = std::min(std::max(0L, i), maxi());
+      ret = itsCoords.y(pos, j);
+    }
     return ret;
   }
 
@@ -81,43 +81,48 @@ class Grid : public Trax::Grid
     if (i <= mini() || i >= maxi() + 1 || j <= minj() || j >= maxj() + 1)
       ret = std::numeric_limits<double>::quiet_NaN();
     else
-      ret = itsMatrix[(i - 1) % itsNX][j - 1];
+      ret = itsMatrix[i % itsNX][j];
     return ret;
   }
 
-  // When creating data we do not use shifts
   void set(long i, long j, double z) override { itsMatrix[i][j] = z; }
 
   bool valid(long i, long j) const override
   {
     bool flag = false;
 
-    if (i <= mini() || i >= maxi() + 1 || j <= minj() || j >= maxj() + 1)
+    if (i <= mini() || i >= maxi() || j <= minj() || j >= maxj())
       flag = true;  // but full of NaN
     else
-      flag = itsValidCells(i - 1, j - 1);
+      flag = itsValidCells(i, j);
     return flag;
   }
 
   std::size_t width() const override { return itsWidth; }
   std::size_t height() const override { return itsHeight; }
-  std::size_t shift() const override { return itsShift; }
 
   // We expand the grid by one cell in all directions to surround the data with missing values
-  std::array<std::size_t, 4> bbox() const override
+  std::array<long, 4> bbox() const override
   {
     const auto& box = itsValidCells.bbox();
-    return {box[0], box[1], box[2] + 2, box[3] + 2};
+    return {static_cast<long>(box[0]) - 1,
+            static_cast<long>(box[1]) - 1,
+            static_cast<long>(box[2]) + 1,
+            static_cast<long>(box[3]) + 1};
   }
 
  private:
+  long mini() const { return static_cast<long>(itsValidCells.bbox()[0]) - 1; }
+  long minj() const { return static_cast<long>(itsValidCells.bbox()[1]) - 1; }
+  long maxi() const { return static_cast<long>(itsValidCells.bbox()[2]) + 1; }
+  long maxj() const { return static_cast<long>(itsValidCells.bbox()[3]) + 1; }
+
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
   const std::size_t itsNX;     // coordinates width
   const std::size_t itsWidth;  // data width
   const std::size_t itsHeight;
-  const std::size_t itsShift;  // horizontal shift in start position
 
   double itsMaxCoord = 1e10;
 

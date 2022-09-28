@@ -30,7 +30,7 @@ void normal()
 
   // Contouring API
   SmartMet::Engine::Contour::Grid grid(values, coords, analysis->valid);
-  grid.shell(100);  // external shell for missing values
+  grid.shell(50);  // external shell for missing values
 
   // Isoband for missing values
   Trax::IsobandLimits limits;
