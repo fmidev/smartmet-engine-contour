@@ -30,7 +30,9 @@ class Grid : public Trax::Grid
         itsWidth(theCoords.width()),
         itsHeight(theCoords.height())
   {
-    if (theCoords.height() != theMatrix.NY() || theCoords.width() != theMatrix.NX())
+    if (theCoords.height() != theMatrix.NY() ||
+        (theCoords.width() != theMatrix.NX() && theCoords.width() != theMatrix.NX() + 1))
+    {
       throw Fmi::Exception(
           BCP,
           fmt::format("Contoured data {}x{} and coordinate dimensions {}x{} mismatch",
@@ -38,6 +40,14 @@ class Grid : public Trax::Grid
                       theMatrix.NY(),
                       theCoords.width(),
                       theCoords.height()));
+    }
+
+    // Expand bbox by one cell of NaN values in all directions for missing value isobands
+    const auto bbox = itsValidCells.bbox();
+    itsBBox[0] = bbox[0] - 1;
+    itsBBox[1] = bbox[1] - 1;
+    itsBBox[2] = bbox[2] + 1;
+    itsBBox[3] = bbox[3] + 1;
   }
 
   void shell(double value) { itsMaxCoord = value; }
@@ -102,20 +112,13 @@ class Grid : public Trax::Grid
   std::size_t height() const override { return itsHeight; }
 
   // We expand the grid by one cell in all directions to surround the data with missing values
-  std::array<long, 4> bbox() const override
-  {
-    const auto& box = itsValidCells.bbox();
-    return {static_cast<long>(box[0]) - 1,
-            static_cast<long>(box[1]) - 1,
-            static_cast<long>(box[2]) + 1,
-            static_cast<long>(box[3]) + 1};
-  }
+  std::array<long, 4> bbox() const override { return itsBBox; }
 
  private:
-  long mini() const { return static_cast<long>(itsValidCells.bbox()[0]) - 1; }
-  long minj() const { return static_cast<long>(itsValidCells.bbox()[1]) - 1; }
-  long maxi() const { return static_cast<long>(itsValidCells.bbox()[2]) + 1; }
-  long maxj() const { return static_cast<long>(itsValidCells.bbox()[3]) + 1; }
+  long mini() const { return itsBBox[0]; }
+  long minj() const { return itsBBox[1]; }
+  long maxi() const { return itsBBox[2]; }
+  long maxj() const { return itsBBox[3]; }
 
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
@@ -123,6 +126,8 @@ class Grid : public Trax::Grid
   const std::size_t itsNX;     // coordinates width
   const std::size_t itsWidth;  // data width
   const std::size_t itsHeight;
+
+  std::array<long, 4> itsBBox;  // limits for cell iteration
 
   double itsMaxCoord = 1e10;
 

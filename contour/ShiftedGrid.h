@@ -49,6 +49,13 @@ class ShiftedGrid : public Trax::Grid
                       theCoords.height()));
     if (theShift == 0)
       throw Fmi::Exception(BCP, "Cannot create shifted grid with shift=0");
+
+    // Convert limits to long as expected by Trax API
+    const auto bbox = itsValidCells.bbox();
+    itsBBox[0] = bbox[0];
+    itsBBox[1] = bbox[1];
+    itsBBox[2] = bbox[2];
+    itsBBox[3] = bbox[3];
   }
 
   // Provide wrap-around capability for world data
@@ -68,19 +75,14 @@ class ShiftedGrid : public Trax::Grid
   std::size_t height() const override { return itsHeight; }
   std::size_t shift() const override { return itsShift; }
 
-  std::array<long, 4> bbox() const override
-  {
-    const auto& box = itsValidCells.bbox();
-    return {static_cast<long>(box[0]),
-            static_cast<long>(box[1]),
-            static_cast<long>(box[2]),
-            static_cast<long>(box[3])};
-  }
+  std::array<long, 4> bbox() const override { return itsBBox; }
 
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
+  std::array<long, 4> itsBBox;
+
   const std::size_t itsNX;     // coordinates width
   const std::size_t itsWidth;  // data width
   const std::size_t itsHeight;
