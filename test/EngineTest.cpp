@@ -305,7 +305,7 @@ void crossection()
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
     string ok =
-        "M29.9 0 29.9 5 29.9 10 29.9 15 29.9 20 29.9 25 59.8 25 59.8 20 89.7 20 89.7 15 89.7 10 "
+        "M29.9 0 29.9 5 29.9 10 29.9 15 29.9 20 29.9 25 59.8 30 59.8 25 89.7 20 89.7 15 89.7 10 "
         "89.7 5 89.7 0 59.8 0Z";
 
     if (result != ok)
@@ -322,7 +322,7 @@ void crossection()
     auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
     auto result = Fmi::OGR::exportToSvg(*geom, area, 1);
-    string ok = "M54.5 25 59.8 25 59.8 20.3Z";
+    string ok = "M54.5 25 59.8 30 59.8 25 74.7 22.5 59.8 20.3Z";
     if (result != ok)
       TEST_FAILED("Expected: " + ok + "\n\tObtained: " + result);
   }
