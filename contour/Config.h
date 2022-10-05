@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/utility.hpp>
 #include <libconfig.h++>
 
 namespace SmartMet
@@ -9,10 +8,12 @@ namespace Engine
 {
 namespace Contour
 {
-class Config : private boost::noncopyable
+class Config
 {
  public:
   Config() = delete;
+  Config(const Config& other) = delete;
+  Config& operator=(const Config& other) = delete;
   Config(const std::string& theFilename);
 
   int getMaxContourCacheSize() const { return itsMaxContourCacheSize; }
