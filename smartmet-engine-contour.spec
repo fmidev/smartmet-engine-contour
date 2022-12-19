@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.10.5
+Version: 22.12.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 22.9.28
-BuildRequires: smartmet-library-macgyver-devel >= 22.8.23
-BuildRequires: smartmet-library-trax-devel >= 22.10.3
-BuildRequires: smartmet-library-spine-devel >= 22.9.5
+BuildRequires: smartmet-library-gis-devel >= 22.12.14
+BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
+BuildRequires: smartmet-library-trax-devel >= 22.12.19
+BuildRequires: smartmet-library-spine-devel >= 22.12.2
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -42,12 +42,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 22.9.28
-Requires: smartmet-library-trax >= 22.10.3
-Requires: smartmet-library-macgyver >= 22.8.23
-Requires: smartmet-library-newbase >= 22.8.29
-Requires: smartmet-library-spine >= 22.9.5
-Requires: smartmet-library-timeseries >= 22.10.4
+Requires: smartmet-library-gis >= 22.12.14
+Requires: smartmet-library-trax >= 22.12.19
+Requires: smartmet-library-macgyver >= 22.12.16
+Requires: smartmet-library-newbase >= 22.11.14
+Requires: smartmet-library-spine >= 22.12.2
+Requires: smartmet-library-timeseries >= 22.10.25
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -79,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 22.10.3
+Requires: smartmet-library-trax-devel >= 22.12.19
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Dec 19 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.19-1.fmi
+- Added a Grid::shell method to fix midpoint interpolation problems in extrapolating too far outside the grid
+
 * Wed Oct  5 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.10.5-1.fmi
 - Do not use boost::noncopyable
 

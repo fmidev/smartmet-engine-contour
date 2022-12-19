@@ -51,6 +51,7 @@ class Grid : public Trax::Grid
   }
 
   void shell(double value) { itsMaxCoord = value; }
+  double shell() const override { return itsMaxCoord; }
 
   // Provide wrap-around capability for world data
 
