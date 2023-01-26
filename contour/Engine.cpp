@@ -6,7 +6,6 @@
 
 #include "Engine.h"
 #include "Config.h"
-#include "Engine.h"
 #include "GeosTools.h"
 #include "Grid.h"
 #include "Options.h"
@@ -48,7 +47,7 @@ namespace Contour
 class Engine::Impl
 {
  public:
-  Impl(const std::string &theFileName);
+  Impl(std::string theFileName);
   Impl() = delete;
 
   void init();
@@ -138,7 +137,7 @@ namespace
 class Extrapolation
 {
  public:
-  bool ok() { return count > 0; }
+  bool ok() const { return count > 0; }
   float result() const { return sum / count; }
   void operator()(float value)
   {
@@ -389,7 +388,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
   try
   {
     if (!theGeom)
-      return OGRGeometryPtr();
+      return {};
 
     // Convert to WKB
 
@@ -400,7 +399,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
 
     // Read to OGR using as hideous casts as is required
 
-    unsigned char *cwkb = reinterpret_cast<unsigned char *>(const_cast<char *>(wkb.c_str()));
+    auto *cwkb = reinterpret_cast<unsigned char *>(const_cast<char *>(wkb.c_str()));
 
     OGRGeometry *ogeom;
     OGRErr err = OGRGeometryFactory::createFromWkb(cwkb, theSR, &ogeom);
@@ -432,8 +431,8 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
  */
 // ----------------------------------------------------------------------
 
-Engine::Impl::Impl(const std::string &theFileName)
-    : itsConfigFile(theFileName), itsGeomFactory(geos::geom::GeometryFactory::create())
+Engine::Impl::Impl(std::string theFileName)
+    : itsConfigFile(std::move(theFileName)), itsGeomFactory(geos::geom::GeometryFactory::create())
 {
 }
 

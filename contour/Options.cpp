@@ -20,10 +20,10 @@ namespace Contour
  */
 // ----------------------------------------------------------------------
 
-Options::Options(const Spine::Parameter& theParam,
+Options::Options(Spine::Parameter theParam,
                  const boost::posix_time::ptime& theTime,
-                 const std::vector<double>& theIsoValues)
-    : parameter(theParam), time(theTime), isovalues(theIsoValues)
+                 std::vector<double> theIsoValues)
+    : parameter(std::move(theParam)), time(theTime), isovalues(std::move(theIsoValues))
 {
 }
 
@@ -33,10 +33,10 @@ Options::Options(const Spine::Parameter& theParam,
  */
 // ----------------------------------------------------------------------
 
-Options::Options(const Spine::Parameter& theParam,
+Options::Options(Spine::Parameter theParam,
                  const boost::posix_time::ptime& theTime,
-                 const std::vector<Range>& theLimits)
-    : parameter(theParam), time(theTime), limits(theLimits)
+                 std::vector<Range> theLimits)
+    : parameter(std::move(theParam)), time(theTime), limits(std::move(theLimits))
 {
 }
 

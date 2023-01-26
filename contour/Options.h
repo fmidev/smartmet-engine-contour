@@ -38,13 +38,13 @@ struct Options
 {
  public:
   Options() = delete;
-  Options(const Spine::Parameter& theParam,
+  Options(Spine::Parameter theParam,
           const boost::posix_time::ptime& theTime,
-          const std::vector<double>& theIsoValues);
+          std::vector<double> theIsoValues);
 
-  Options(const Spine::Parameter& theParam,
+  Options(Spine::Parameter theParam,
           const boost::posix_time::ptime& theTime,
-          const std::vector<Range>& theLimits);
+          std::vector<Range> theLimits);
 
   std::size_t data_hash_value() const;
   std::size_t filtered_data_hash_value() const;

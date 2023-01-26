@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 22.12.19
+Version: 23.1.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 22.12.14
+BuildRequires: smartmet-library-gis-devel >= 23.1.5
 BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
-BuildRequires: smartmet-library-trax-devel >= 22.12.19
-BuildRequires: smartmet-library-spine-devel >= 22.12.2
+BuildRequires: smartmet-library-trax-devel >= 22.12.22
+BuildRequires: smartmet-library-spine-devel >= 23.1.16
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -42,11 +42,11 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 22.12.14
-Requires: smartmet-library-trax >= 22.12.19
+Requires: smartmet-library-gis >= 23.1.5
+Requires: smartmet-library-trax >= 22.12.22
 Requires: smartmet-library-macgyver >= 22.12.16
 Requires: smartmet-library-newbase >= 22.11.14
-Requires: smartmet-library-spine >= 22.12.2
+Requires: smartmet-library-spine >= 23.1.16
 Requires: smartmet-library-timeseries >= 22.10.25
 Requires: libconfig17
 
@@ -79,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 22.12.19
+Requires: smartmet-library-trax-devel >= 22.12.22
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Jan 26 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.1.26-1.fmi
+- Silenced CodeChecker warnings
+
 * Mon Dec 19 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.19-1.fmi
 - Added a Grid::shell method to fix midpoint interpolation problems in extrapolating too far outside the grid
 
