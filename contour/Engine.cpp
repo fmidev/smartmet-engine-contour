@@ -163,39 +163,44 @@ class Extrapolation
  */
 // ----------------------------------------------------------------------
 
-void extrapolate(NFmiDataMatrix<float> &theValues, int theAmount)
+void extrapolate(std::unique_ptr<NFmiDataMatrix<float>> &theValues, int theAmount)
 {
   if (theAmount <= 0)
     return;
 
+  if (!theValues)
+    throw Fmi::Exception(BCP, "Cannot extrapolate an empty matrix");
+
+  auto &values = *theValues;
+
   const auto nan = std::numeric_limits<float>::quiet_NaN();
 
-  auto tmp = theValues;
+  auto tmp = values;
   for (int i = 0; i < theAmount; i++)
   {
-    for (unsigned int j = 0; j < theValues.NY(); j++)
-      for (unsigned int i = 0; i < theValues.NX(); i++)
+    for (unsigned int j = 0; j < values.NY(); j++)
+      for (unsigned int i = 0; i < values.NX(); i++)
       {
         if (std::isnan(tmp[i][j]))
         {
           Extrapolation ext;
-          ext(theValues.At(i - 1, j, nan));
-          ext(theValues.At(i + 1, j, nan));
-          ext(theValues.At(i, j - 1, nan));
-          ext(theValues.At(i, j + 1, nan));
+          ext(values.At(i - 1, j, nan));
+          ext(values.At(i + 1, j, nan));
+          ext(values.At(i, j - 1, nan));
+          ext(values.At(i, j + 1, nan));
           if (!ext.ok())
           {
-            ext(theValues.At(i - 1, j - 1, nan));
-            ext(theValues.At(i - 1, j + 1, nan));
-            ext(theValues.At(i + 1, j - 1, nan));
-            ext(theValues.At(i + 1, j + 1, nan));
+            ext(values.At(i - 1, j - 1, nan));
+            ext(values.At(i - 1, j + 1, nan));
+            ext(values.At(i + 1, j - 1, nan));
+            ext(values.At(i + 1, j + 1, nan));
           }
           if (ext.ok())
             tmp[i][j] = ext.result();
         }
       }
 
-    std::swap(tmp, theValues);
+    std::swap(tmp, values);
   }
 }
 
@@ -806,7 +811,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
 
     // Extrapolate if requested
-    extrapolate(*alt_values, theOptions.extrapolation);
+    extrapolate(alt_values, theOptions.extrapolation);
 
     // Flip the data and the coordinates if necessary. We avoid an unnecessary
     // copy of the coordinates if no flipping is needed by using a pointer.

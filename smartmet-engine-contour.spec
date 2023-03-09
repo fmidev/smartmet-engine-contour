@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.1.26
+Version: 23.3.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -30,9 +30,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 23.1.5
-BuildRequires: smartmet-library-macgyver-devel >= 22.12.16
+BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
 BuildRequires: smartmet-library-trax-devel >= 22.12.22
-BuildRequires: smartmet-library-spine-devel >= 23.1.16
+BuildRequires: smartmet-library-spine-devel >= 23.3.7
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -44,10 +44,10 @@ Requires: gdal34-libs
 Requires: geos310
 Requires: smartmet-library-gis >= 23.1.5
 Requires: smartmet-library-trax >= 22.12.22
-Requires: smartmet-library-macgyver >= 22.12.16
-Requires: smartmet-library-newbase >= 22.11.14
-Requires: smartmet-library-spine >= 23.1.16
-Requires: smartmet-library-timeseries >= 22.10.25
+Requires: smartmet-library-macgyver >= 23.3.3
+Requires: smartmet-library-newbase >= 23.2.9
+Requires: smartmet-library-spine >= 23.3.7
+Requires: smartmet-library-timeseries >= 23.2.16
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -67,7 +67,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 20.12.1
+#TestRequires: smartmet-test-data >= 23.2.9
 #TestRequires: zlib-devel
 
 
@@ -108,6 +108,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Mar  9 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.9-1.fmi
+- Fixed destructors not to throw
+- Fixed extrapolation not to dereference an empty unique_ptr
+
 * Thu Jan 26 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.1.26-1.fmi
 - Silenced CodeChecker warnings
 

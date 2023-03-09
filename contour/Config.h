@@ -11,6 +11,7 @@ namespace Contour
 class Config
 {
  public:
+  ~Config() = default;
   Config(const std::string& theFilename);
 
   Config() = delete;
