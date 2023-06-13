@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.3.9
+Version: 23.6.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: geos310-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 23.1.5
-BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
-BuildRequires: smartmet-library-trax-devel >= 22.12.22
-BuildRequires: smartmet-library-spine-devel >= 23.3.7
+BuildRequires: smartmet-library-gis-devel >= 23.6.7
+BuildRequires: smartmet-library-macgyver-devel >= 23.6.6
+BuildRequires: smartmet-library-trax-devel >= 23.6.9
+BuildRequires: smartmet-library-spine-devel >= 23.6.13
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -42,12 +42,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal34-libs
 Requires: geos310
-Requires: smartmet-library-gis >= 23.1.5
-Requires: smartmet-library-trax >= 22.12.22
-Requires: smartmet-library-macgyver >= 23.3.3
+Requires: smartmet-library-gis >= 23.6.7
+Requires: smartmet-library-trax >= 23.6.9
+Requires: smartmet-library-macgyver >= 23.6.6
 Requires: smartmet-library-newbase >= 23.2.9
-Requires: smartmet-library-spine >= 23.3.7
-Requires: smartmet-library-timeseries >= 23.2.16
+Requires: smartmet-library-spine >= 23.6.13
+Requires: smartmet-library-timeseries >= 23.3.15
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -67,7 +67,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 23.2.9
+#TestRequires: smartmet-test-data >= 23.5.15
 #TestRequires: zlib-devel
 
 
@@ -79,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 22.12.22
+Requires: smartmet-library-trax-devel >= 23.6.9
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Jun 13 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.13-1.fmi
+- Support internal and environment variables in configuration files
+
 * Thu Mar  9 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.9-1.fmi
 - Fixed destructors not to throw
 - Fixed extrapolation not to dereference an empty unique_ptr
