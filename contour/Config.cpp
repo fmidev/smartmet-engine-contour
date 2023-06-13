@@ -1,6 +1,7 @@
 #include "Config.h"
 #include <boost/filesystem/path.hpp>
 #include <macgyver/Exception.h>
+#include <spine/ConfigTools.h>
 #include <stdexcept>
 
 namespace SmartMet
@@ -28,6 +29,7 @@ Config::Config(const std::string& theFileName)
     itsConfig.setIncludeDir(p.c_str());
 
     itsConfig.readFile(theFileName.c_str());
+    Spine::expandVariables(itsConfig);
 
     if (!itsConfig.exists("cache.max_contours"))
       throw Fmi::Exception(BCP, "cache.max_contours not set in '" + theFileName + "'");
