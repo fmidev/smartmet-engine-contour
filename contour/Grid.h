@@ -43,11 +43,11 @@ class Grid : public Trax::Grid
     }
 
     // Expand bbox by one cell of NaN values in all directions for missing value isobands
-    const auto bbox = itsValidCells.bbox();
-    itsBBox[0] = bbox[0] - 1;
-    itsBBox[1] = bbox[1] - 1;
-    itsBBox[2] = bbox[2] + 1;
-    itsBBox[3] = bbox[3] + 1;
+    const auto box = itsValidCells.bbox();
+    itsBBox[0] = box[0] - 1;
+    itsBBox[1] = box[1] - 1;
+    itsBBox[2] = box[2] + 1;
+    itsBBox[3] = box[3] + 1;
   }
 
   void shell(double value) { itsMaxCoord = value; }
