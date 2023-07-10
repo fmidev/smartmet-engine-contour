@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.6.13
+Version: 23.7.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -30,9 +30,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 23.6.7
-BuildRequires: smartmet-library-macgyver-devel >= 23.6.6
+BuildRequires: smartmet-library-macgyver-devel >= 23.6.15
 BuildRequires: smartmet-library-trax-devel >= 23.6.9
-BuildRequires: smartmet-library-spine-devel >= 23.6.13
+BuildRequires: smartmet-library-spine-devel >= 23.6.21
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -44,10 +44,10 @@ Requires: gdal34-libs
 Requires: geos310
 Requires: smartmet-library-gis >= 23.6.7
 Requires: smartmet-library-trax >= 23.6.9
-Requires: smartmet-library-macgyver >= 23.6.6
-Requires: smartmet-library-newbase >= 23.2.9
-Requires: smartmet-library-spine >= 23.6.13
-Requires: smartmet-library-timeseries >= 23.3.15
+Requires: smartmet-library-macgyver >= 23.6.15
+Requires: smartmet-library-newbase >= 23.6.15
+Requires: smartmet-library-spine >= 23.6.21
+Requires: smartmet-library-timeseries >= 23.6.15
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Jul 10 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.10-1.fmi
+- Silenced compiler warnings
+
 * Tue Jun 13 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.13-1.fmi
 - Support internal and environment variables in configuration files
 
