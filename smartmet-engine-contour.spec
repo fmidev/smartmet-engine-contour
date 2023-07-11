@@ -24,15 +24,15 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: gdal34-devel
-BuildRequires: geos310-devel
+BuildRequires: gdal35-devel
+BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 23.6.7
+BuildRequires: smartmet-library-gis-devel >= 23.7.10
 BuildRequires: smartmet-library-macgyver-devel >= 23.6.6
-BuildRequires: smartmet-library-trax-devel >= 23.6.9
-BuildRequires: smartmet-library-spine-devel >= 23.6.13
+BuildRequires: smartmet-library-trax-devel >= 23.7.10
+BuildRequires: smartmet-library-spine-devel >= 23.7.10
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -40,14 +40,14 @@ Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal34-libs
-Requires: geos310
-Requires: smartmet-library-gis >= 23.6.7
-Requires: smartmet-library-trax >= 23.6.9
+Requires: gdal35-libs
+Requires: geos311
+Requires: smartmet-library-gis >= 23.7.10
+Requires: smartmet-library-trax >= 23.7.10
 Requires: smartmet-library-macgyver >= 23.6.6
-Requires: smartmet-library-newbase >= 23.2.9
-Requires: smartmet-library-spine >= 23.6.13
-Requires: smartmet-library-timeseries >= 23.3.15
+Requires: smartmet-library-newbase >= 23.7.10
+Requires: smartmet-library-spine >= 23.7.10
+Requires: smartmet-library-timeseries >= 23.7.10
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -56,8 +56,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
-#TestRequires: gdal34-devel
-#TestRequires: geos310-devel
+#TestRequires: gdal35-devel
+#TestRequires: geos311-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
 #TestRequires: smartmet-engine-querydata
