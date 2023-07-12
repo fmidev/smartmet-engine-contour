@@ -12,7 +12,7 @@ class Config
 {
  public:
   ~Config() = default;
-  Config(const std::string& theFilename);
+  explicit Config(const std::string& theFilename);
 
   Config() = delete;
   Config(const Config& other) = delete;

@@ -47,7 +47,7 @@ namespace Contour
 class Engine::Impl
 {
  public:
-  Impl(std::string theFileName);
+  explicit Impl(std::string theFileName);
   Impl() = delete;
 
   void init();
@@ -163,7 +163,7 @@ class Extrapolation
  */
 // ----------------------------------------------------------------------
 
-void extrapolate(std::unique_ptr<NFmiDataMatrix<float>> &theValues, int theAmount)
+void extrapolate(const std::unique_ptr<NFmiDataMatrix<float>> &theValues, int theAmount)
 {
   if (theAmount <= 0)
     return;
@@ -176,7 +176,7 @@ void extrapolate(std::unique_ptr<NFmiDataMatrix<float>> &theValues, int theAmoun
   const auto nan = std::numeric_limits<float>::quiet_NaN();
 
   auto tmp = values;
-  for (int i = 0; i < theAmount; i++)
+  for (int k = 0; k < theAmount; k++)
   {
     for (unsigned int j = 0; j < values.NY(); j++)
       for (unsigned int i = 0; i < values.NX(); i++)
@@ -513,12 +513,12 @@ GeometryPtr Engine::Impl::internal_isoline(const Trax::Grid &data,
   Trax::IsolineValues limits;
   limits.add(isovalue);
 
-  Trax::Contour contour;
-  contour.interpolation(interpolation);
-  contour.strict(false);
-  contour.validate(false);
+  Trax::Contour contourer;
+  contourer.interpolation(interpolation);
+  contourer.strict(false);
+  contourer.validate(false);
 
-  auto result = contour.isolines(data, limits);
+  auto result = contourer.isolines(data, limits);
   return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
 
@@ -561,12 +561,12 @@ GeometryPtr Engine::Impl::internal_isoband(const Trax::Grid &data,
   Trax::IsobandLimits limits;
   limits.add(lo, hi);
 
-  Trax::Contour contour;
-  contour.interpolation(interpolation);
-  contour.closed_range(true);
-  contour.strict(false);
-  contour.validate(false);
-  auto result = contour.isobands(data, limits);
+  Trax::Contour contourer;
+  contourer.interpolation(interpolation);
+  contourer.closed_range(true);
+  contourer.strict(false);
+  contourer.validate(false);
+  auto result = contourer.isobands(data, limits);
 
   return Trax::to_geos_geom(result[0], itsGeomFactory);
 }
@@ -696,12 +696,13 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theClipBox, theOptions);
 }
 
+// TODO: Why is 'theClipBox' unused?
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
                                                   const Fmi::BoolMatrix &theValidCells,
-                                                  const Fmi::Box &theClipBox,
+                                                  const Fmi::Box & /* theClipBox */,
                                                   const Options &theOptions) const
 {
   try
@@ -864,11 +865,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       Trax::SavitzkyGolay2D::smooth(*data, size, degree);
     }
 
-    Trax::Contour contour;
-    contour.interpolation(theOptions.interpolation);
-    contour.closed_range(true);
-    contour.strict(false);
-    contour.validate(false);
+    Trax::Contour contourer;
+    contourer.interpolation(theOptions.interpolation);
+    contourer.closed_range(true);
+    contourer.strict(false);
+    contourer.validate(false);
 
     Trax::GeometryCollections results;
 
@@ -879,7 +880,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       for (auto i : todo_contours)
         isovalues.add(theOptions.isovalues[i]);
 
-      results = contour.isolines(*data, isovalues);
+      results = contourer.isolines(*data, isovalues);
     }
     else
     {
@@ -912,7 +913,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
         isobands.add(lo, hi);
       }
 
-      results = contour.isobands(*data, isobands);
+      results = contourer.isobands(*data, isobands);
     }
 
     // Update results and cache
@@ -923,7 +924,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       if (theOutputCRS.get() != nullptr)
       {
         std::shared_ptr<OGRSpatialReference> crs(theOutputCRS.get()->Clone(),
-            [](OGRSpatialReference* sr) { sr->Release(); });
+                                                 [](OGRSpatialReference *sr) { sr->Release(); });
 
         tmp->assignSpatialReference(crs.get());
       }

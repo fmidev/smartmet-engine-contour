@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.6.13
+Version: 23.7.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -30,7 +30,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 23.7.10
-BuildRequires: smartmet-library-macgyver-devel >= 23.6.6
+BuildRequires: smartmet-library-macgyver-devel >= 23.6.15
 BuildRequires: smartmet-library-trax-devel >= 23.7.10
 BuildRequires: smartmet-library-spine-devel >= 23.7.10
 BuildRequires: sparsehash-devel
@@ -44,7 +44,7 @@ Requires: gdal35-libs
 Requires: geos311
 Requires: smartmet-library-gis >= 23.7.10
 Requires: smartmet-library-trax >= 23.7.10
-Requires: smartmet-library-macgyver >= 23.6.6
+Requires: smartmet-library-macgyver >= 23.6.15
 Requires: smartmet-library-newbase >= 23.7.10
 Requires: smartmet-library-spine >= 23.7.10
 Requires: smartmet-library-timeseries >= 23.7.10
@@ -88,7 +88,7 @@ SmartMet %{SPECNAME} development headers.
 rm -rf $RPM_BUILD_ROOT
 
 %setup -q -n %{SPECNAME}
- 
+
 %build -q -n %{SPECNAME}
 make %{_smp_mflags}
 
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Jul 10 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.10-1.fmi
+- Silenced compiler warnings
+
 * Tue Jun 13 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.13-1.fmi
 - Support internal and environment variables in configuration files
 

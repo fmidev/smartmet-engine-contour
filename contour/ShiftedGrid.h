@@ -51,11 +51,11 @@ class ShiftedGrid : public Trax::Grid
       throw Fmi::Exception(BCP, "Cannot create shifted grid with shift=0");
 
     // Convert limits to long as expected by Trax API
-    const auto bbox = itsValidCells.bbox();
-    itsBBox[0] = bbox[0];
-    itsBBox[1] = bbox[1];
-    itsBBox[2] = bbox[2];
-    itsBBox[3] = bbox[3];
+    const auto box = itsValidCells.bbox();
+    itsBBox[0] = box[0];
+    itsBBox[1] = box[1];
+    itsBBox[2] = box[2];
+    itsBBox[3] = box[3];
   }
 
   // Provide wrap-around capability for world data

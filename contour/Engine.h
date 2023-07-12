@@ -38,7 +38,7 @@ class Engine : public Spine::SmartMetEngine
   // constructor is available only with a libconfig configuration file
 
   Engine() = delete;
-  Engine(const std::string& theFileName);
+  explicit Engine(const std::string& theFileName);
 
   // Produce vector of OGR geometries in output spatial reference
 
