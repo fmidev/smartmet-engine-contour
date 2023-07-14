@@ -499,7 +499,7 @@ void Engine::Impl::clearCache()
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Low level contouring utility
+ * \brief Low level contouring utility for cross sections
  *
  * Note: We intentionally copy the values to be able to filter the data.
  *       We cache the data values, hence modifying the input is not OK.
@@ -524,7 +524,7 @@ GeometryPtr Engine::Impl::internal_isoline(const Trax::Grid &data,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Low level contouring utility
+ * \brief Low level contouring utility for cross sections
  *
  * Note: We intentionally copy the values to be able to filter the data.
  *       We cache the data values, hence modifying the input is not OK.
@@ -867,9 +867,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     Trax::Contour contourer;
     contourer.interpolation(theOptions.interpolation);
-    contourer.closed_range(true);
-    contourer.strict(false);
-    contourer.validate(false);
+    contourer.closed_range(theOptions.closed_range);
+    contourer.strict(theOptions.strict);
+    contourer.validate(theOptions.validate);
 
     Trax::GeometryCollections results;
 
