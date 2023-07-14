@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.7.12
+Version: 23.7.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -30,9 +30,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 23.7.10
-BuildRequires: smartmet-library-macgyver-devel >= 23.6.15
-BuildRequires: smartmet-library-trax-devel >= 23.7.10
-BuildRequires: smartmet-library-spine-devel >= 23.7.10
+BuildRequires: smartmet-library-macgyver-devel >= 23.7.10
+BuildRequires: smartmet-library-trax-devel >= 23.7.14
+BuildRequires: smartmet-library-spine-devel >= 23.7.12
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -43,10 +43,10 @@ Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
 Requires: smartmet-library-gis >= 23.7.10
-Requires: smartmet-library-trax >= 23.7.10
-Requires: smartmet-library-macgyver >= 23.6.15
+Requires: smartmet-library-trax >= 23.7.14
+Requires: smartmet-library-macgyver >= 23.7.10
 Requires: smartmet-library-newbase >= 23.7.10
-Requires: smartmet-library-spine >= 23.7.10
+Requires: smartmet-library-spine >= 23.7.12
 Requires: smartmet-library-timeseries >= 23.7.10
 Requires: libconfig17
 
@@ -67,7 +67,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 23.5.15
+#TestRequires: smartmet-test-data >= 23.7.14
 #TestRequires: zlib-devel
 
 
@@ -79,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 23.6.9
+Requires: smartmet-library-trax-devel >= 23.7.14
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Jul 14 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.14-1.fmi
+- Enabled modifying closed_range/validate/strict settings for contouring
+
 * Wed Jul 12 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.12-1.fmi
 - Use postgresql 15, gdal 3.5, geos 3.11 and proj-9.0
 
