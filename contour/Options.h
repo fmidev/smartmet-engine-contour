@@ -75,6 +75,7 @@ struct Options
   bool closed_range = true;  // is last isoband actually 90 <= x <= 100 instead of 90 <= x < 100
   bool validate = false;     // validate the contours according to OGC rules?
   bool strict = false;       // require strict success in contouring, and if validation fails error
+  bool desliver = true;      // remove slivers
 
 };  // class Options
 

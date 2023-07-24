@@ -97,6 +97,10 @@ std::size_t hash_value(const Options& theOptions)
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.filter_size));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.filter_degree));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.minarea));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.closed_range));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.validate));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.strict));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.desliver));
   return seed;
 }
 

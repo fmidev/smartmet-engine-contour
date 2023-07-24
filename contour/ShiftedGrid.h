@@ -64,10 +64,10 @@ class ShiftedGrid : public Trax::Grid
 
   double y(long i, long j) const override { return itsCoords.y(i, j); }
 
-  double operator()(long i, long j) const override { return itsMatrix[i % itsNX][j]; }
+  float operator()(long i, long j) const override { return itsMatrix[i % itsNX][j]; }
 
   // When creating data we do not use shifts
-  void set(long i, long j, double z) override { itsMatrix[i][j] = z; }
+  void set(long i, long j, float z) override { itsMatrix[i][j] = z; }
 
   bool valid(long i, long j) const override { return itsValidCells(i, j); }
 

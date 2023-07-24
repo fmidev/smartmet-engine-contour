@@ -86,9 +86,9 @@ class Grid : public Trax::Grid
     return ret;
   }
 
-  double operator()(long i, long j) const override
+  float operator()(long i, long j) const override
   {
-    double ret = 666.0;
+    float ret = 666.0;
     if (i <= mini() || i >= maxi() + 1 || j <= minj() || j >= maxj() + 1)
       ret = std::numeric_limits<double>::quiet_NaN();
     else
@@ -96,7 +96,7 @@ class Grid : public Trax::Grid
     return ret;
   }
 
-  void set(long i, long j, double z) override { itsMatrix[i][j] = z; }
+  void set(long i, long j, float z) override { itsMatrix[i][j] = z; }
 
   bool valid(long i, long j) const override
   {

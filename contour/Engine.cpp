@@ -870,6 +870,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     contourer.closed_range(theOptions.closed_range);
     contourer.strict(theOptions.strict);
     contourer.validate(theOptions.validate);
+    contourer.desliver(theOptions.desliver);
 
     Trax::GeometryCollections results;
 
