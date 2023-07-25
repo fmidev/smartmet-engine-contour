@@ -28,6 +28,7 @@
 #include <trax/SavitzkyGolay2D.h>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
+#include <future>
 #include <limits>
 #include <memory>
 #include <ogr_core.h>
@@ -102,13 +103,13 @@ class Engine::Impl
 
   // Cached grid analyses
 
-  using AnalysisCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<Fmi::CoordinateAnalysis>>;
+  using CoordinateAnalysisPtr = std::shared_ptr<Fmi::CoordinateAnalysis>;
+  using AnalysisCache = Fmi::Cache::Cache<std::size_t, std::shared_future<CoordinateAnalysisPtr>>;
   mutable AnalysisCache itsAnalysisCache;
 
-  std::shared_ptr<Fmi::CoordinateAnalysis> get_analysis(
-      std::size_t theDataHash,
-      const Fmi::CoordinateMatrix &theCoordinates,
-      const Fmi::SpatialReference &theOutputCRS) const;
+  CoordinateAnalysisPtr get_analysis(std::size_t theDataHash,
+                                     const Fmi::CoordinateMatrix &theCoordinates,
+                                     const Fmi::SpatialReference &theOutputCRS) const;
 
   GeometryPtr internal_isoline(const Trax::Grid &data,
                                double isovalue,
@@ -587,15 +588,21 @@ std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
   Fmi::hash_combine(hash, theOutputCRS.hashValue());
 
   // See if the result has already been cached
-
   auto cached = itsAnalysisCache.find(hash);
   if (cached)
-    return *cached;
+    return cached->get();
 
-  auto analysis = std::make_shared<Fmi::CoordinateAnalysis>(Fmi::analysis(theCoordinates));
+  // Calculate the analysis asynchronously
+  auto ftr =
+      std::async(
+          [&] { return std::make_shared<Fmi::CoordinateAnalysis>(Fmi::analysis(theCoordinates)); })
+          .share();
 
-  itsAnalysisCache.insert(hash, analysis);
-  return analysis;
+  // Cache the future analysis to block other simlultaneous requests
+  itsAnalysisCache.insert(hash, ftr);
+
+  // And return the result when the async analysis finishes
+  return ftr.get();
 }
 
 // ----------------------------------------------------------------------
@@ -761,7 +768,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Get the grid analysis of the projected coordinates from
     // the cache, or do the analysis and cache it.
 
-    auto analysis = get_analysis(theDataHash, theCoordinates, theOutputCRS);
+    auto analysis = get_analysis(theCoordinates.hashValue(), theCoordinates, theOutputCRS);
 
     /*
      * Finally we determine which grid cells are valid and have the correct winding rule
