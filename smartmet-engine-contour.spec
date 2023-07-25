@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.7.24
+Version: 23.7.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -31,7 +31,7 @@ BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 23.7.10
 BuildRequires: smartmet-library-macgyver-devel >= 23.7.10
-BuildRequires: smartmet-library-trax-devel >= 23.7.24
+BuildRequires: smartmet-library-trax-devel >= 23.7.25
 BuildRequires: smartmet-library-spine-devel >= 23.7.14
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -43,7 +43,7 @@ Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
 Requires: smartmet-library-gis >= 23.7.10
-Requires: smartmet-library-trax >= 23.7.24
+Requires: smartmet-library-trax >= 23.7.25
 Requires: smartmet-library-macgyver >= 23.7.10
 Requires: smartmet-library-newbase >= 23.7.10
 Requires: smartmet-library-spine >= 23.7.14
@@ -79,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 23.7.24
+Requires: smartmet-library-trax-devel >= 23.7.25
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Jul 25 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.25-1.fmi
+- Changed sliver removal to be off by default for backward compatibility
+
 * Mon Jul 24 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.24-1.fmi
 - Use floating point precision for data to avoid rounding issues
 - Added sliver removal options
