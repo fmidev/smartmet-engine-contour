@@ -4,7 +4,7 @@
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
 Version: 23.7.25
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -108,6 +108,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Jul 25 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.25-2.fmi
+- Fixed coordinate analysis caching to be grid based instead of data based
+- Calculate coordinate analysis asynchronously to block the same analysis request from many tiles
+
 * Tue Jul 25 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.7.25-1.fmi
 - Changed sliver removal to be off by default for backward compatibility
 
