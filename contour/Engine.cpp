@@ -5,10 +5,11 @@
 // ======================================================================
 
 #include "Engine.h"
+#include "BaseGrid.h"
 #include "Config.h"
 #include "GeosTools.h"
-#include "Grid.h"
 #include "Options.h"
+#include "PaddedGrid.h"
 #include "ShiftedGrid.h"
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
@@ -25,7 +26,6 @@
 #include <trax/IsobandLimits.h>
 #include <trax/IsolineValues.h>
 #include <trax/OGR.h>
-#include <trax/SavitzkyGolay2D.h>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
 #include <future>
@@ -837,17 +837,17 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
 
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
-    std::shared_ptr<Trax::Grid> data;
+    std::shared_ptr<BaseGrid> data;
 
     if (analysis->shift == 0)
     {
       if (alt_values)
-        data = std::make_shared<Grid>(*alt_values, *coords, valid_cells);
+        data = std::make_shared<PaddedGrid>(*alt_values, *coords, valid_cells);
       else
       {
         // We're not really modifying the data, only alt_values is
         auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
-        data = std::make_shared<Grid>(tmp, *coords, valid_cells);
+        data = std::make_shared<PaddedGrid>(tmp, *coords, valid_cells);
       }
     }
     else
@@ -869,7 +869,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     {
       size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
       size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
-      Trax::SavitzkyGolay2D::smooth(*data, size, degree);
+      data->smooth(size, degree);
     }
 
     Trax::Contour contourer;
@@ -1099,7 +1099,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // should always be fine.
 
     Fmi::BoolMatrix grid_is_fine(coords.width() - 1, coords.height() - 1, true);
-    Grid data(values, coords, grid_is_fine);
+    PaddedGrid data(values, coords, grid_is_fine);
 
     // results first include isolines, then isobands
     auto nresults = theOptions.isovalues.size() + theOptions.limits.size();

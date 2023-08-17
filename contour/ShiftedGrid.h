@@ -1,12 +1,11 @@
 #pragma once
 
-#include <fmt/format.h>
+#include "BaseGrid.h"
 #include <gis/BoolMatrix.h>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/Exception.h>
 #include <newbase/NFmiDataMatrix.h>
 #include <newbase/NFmiPoint.h>
-#include <trax/Grid.h>
 #include <limits>
 
 // Note: The values may be one column narrower than the coordinates if the data needs a wraparound
@@ -21,42 +20,16 @@ namespace Engine
 {
 namespace Contour
 {
-class ShiftedGrid : public Trax::Grid
+class ShiftedGrid : public BaseGrid
 {
  public:
+  virtual ~ShiftedGrid() = default;
   ShiftedGrid() = delete;
 
   ShiftedGrid(NFmiDataMatrix<float>& theMatrix,
               const Fmi::CoordinateMatrix& theCoords,
               const Fmi::BoolMatrix& theValidCells,
-              std::size_t theShift)
-      : itsCoords(theCoords),
-        itsValidCells(theValidCells),
-        itsMatrix(theMatrix),
-        itsNX(theMatrix.NX()),
-        itsWidth(theCoords.width()),
-        itsHeight(theCoords.height()),
-        itsShift(theShift)
-  {
-    if (theCoords.height() != theMatrix.NY() ||
-        (theCoords.width() != theMatrix.NX() && theCoords.width() != theMatrix.NX() + 1))
-      throw Fmi::Exception(
-          BCP,
-          fmt::format("Contoured data {}x{} and coordinate dimensions {}x{} mismatch",
-                      theMatrix.NX(),
-                      theMatrix.NY(),
-                      theCoords.width(),
-                      theCoords.height()));
-    if (theShift == 0)
-      throw Fmi::Exception(BCP, "Cannot create shifted grid with shift=0");
-
-    // Convert limits to long as expected by Trax API
-    const auto box = itsValidCells.bbox();
-    itsBBox[0] = box[0];
-    itsBBox[1] = box[1];
-    itsBBox[2] = box[2];
-    itsBBox[3] = box[3];
-  }
+              std::size_t theShift);
 
   // Provide wrap-around capability for world data
 
@@ -77,6 +50,8 @@ class ShiftedGrid : public Trax::Grid
 
   std::array<long, 4> bbox() const override { return itsBBox; }
 
+  void smooth(std::size_t size, std::size_t degree) override;
+
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
@@ -88,7 +63,7 @@ class ShiftedGrid : public Trax::Grid
   const std::size_t itsHeight;
   const std::size_t itsShift;  // horizontal shift in start position
 
-};  // class Grid
+};  // class ShiftedGrid
 }  // namespace Contour
 }  // namespace Engine
 }  // namespace SmartMet

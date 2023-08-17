@@ -1,4 +1,4 @@
-#include "Grid.h"
+#include "PaddedGrid.h"
 #include <gis/CoordinateMatrix.h>
 #include <gis/CoordinateMatrixAnalysis.h>
 #include <newbase/NFmiDataMatrix.h>
@@ -29,7 +29,7 @@ void normal()
   auto analysis = std::make_shared<Fmi::CoordinateAnalysis>(Fmi::analysis(coords));
 
   // Contouring API
-  SmartMet::Engine::Contour::Grid grid(values, coords, analysis->valid);
+  SmartMet::Engine::Contour::PaddedGrid grid(values, coords, analysis->valid);
   grid.shell(50);  // external shell for missing values
 
   // Isoband for missing values
@@ -69,7 +69,7 @@ void valid()
   auto analysis = std::make_shared<Fmi::CoordinateAnalysis>(Fmi::analysis(coords));
 
   // Contouring API
-  SmartMet::Engine::Contour::Grid grid(values, coords, analysis->valid);
+  SmartMet::Engine::Contour::PaddedGrid grid(values, coords, analysis->valid);
   grid.shell(10);  // external shell for missing values
 
   // Isoband for missing values
@@ -109,7 +109,7 @@ void missing()
   auto analysis = std::make_shared<Fmi::CoordinateAnalysis>(Fmi::analysis(coords));
 
   // Contouring API
-  SmartMet::Engine::Contour::Grid grid(values, coords, analysis->valid);
+  SmartMet::Engine::Contour::PaddedGrid grid(values, coords, analysis->valid);
   grid.shell(2);  // external shell for missing values
 
   // Isoband for missing values
@@ -149,7 +149,7 @@ class tests : public tframe::tests
 
 int main()
 {
-  cout << "\nGrid tester\n===========\n";
+  cout << "\nPaddedGrid tester\n=================\n";
   Tests::tests t;
   return t.run();
 }

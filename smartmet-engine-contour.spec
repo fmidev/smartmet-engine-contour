@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.7.28
+Version: 23.8.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 23.7.10
-BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
-BuildRequires: smartmet-library-trax-devel >= 23.7.25
-BuildRequires: smartmet-library-spine-devel >= 23.7.28
+BuildRequires: smartmet-library-gis-devel >= 23.8.4
+BuildRequires: smartmet-library-macgyver-devel >= 23.8.9
+BuildRequires: smartmet-library-trax-devel >= 23.8.17
+BuildRequires: smartmet-library-spine-devel >= 23.8.8
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -42,12 +42,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
-Requires: smartmet-library-gis >= 23.7.10
-Requires: smartmet-library-trax >= 23.7.25
-Requires: smartmet-library-macgyver >= 23.7.28
-Requires: smartmet-library-newbase >= 23.7.28
-Requires: smartmet-library-spine >= 23.7.28
-Requires: smartmet-library-timeseries >= 23.7.10
+Requires: smartmet-library-gis >= 23.8.4
+Requires: smartmet-library-trax >= 23.8.17
+Requires: smartmet-library-macgyver >= 23.8.9
+Requires: smartmet-library-newbase >= 23.7.31
+Requires: smartmet-library-spine >= 23.8.8
+Requires: smartmet-library-timeseries >= 23.7.28
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -79,7 +79,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 23.7.25
+Requires: smartmet-library-trax-devel >= 23.8.17
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -108,6 +108,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Thu Aug 17 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.8.17-1.fmi
+- Moved Savitzky-Golay filtering from Trax library
+- Smoothen only the required area for each WMS tile
+
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
 - Repackage due to bulk ABI changes in macgyver/newbase/spine
 
