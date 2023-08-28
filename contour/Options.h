@@ -15,6 +15,7 @@
 
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
+#include <gis/BBox.h>
 #include <spine/Parameter.h>
 #include <trax/InterpolationType.h>
 #include <vector>
@@ -63,6 +64,8 @@ struct Options
   std::vector<double> isovalues;  // for isolines
 
   std::vector<Range> limits;  // for fills
+
+  boost::optional<Fmi::BBox> bbox;  // user specified WMS file bbox
 
   boost::optional<double> multiplier;  // for unit conversion
   boost::optional<double> offset;

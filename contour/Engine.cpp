@@ -11,11 +11,13 @@
 #include "Options.h"
 #include "PaddedGrid.h"
 #include "ShiftedGrid.h"
+#include <boost/optional.hpp>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
 #include <geos/version.h>
 #include <gis/CoordinateMatrixAnalysis.h>
+#include <gis/EPSGInfo.h>
 #include <gis/OGR.h>
 #include <macgyver/Cache.h>
 #include <macgyver/Exception.h>
@@ -72,8 +74,8 @@ class Engine::Impl
                                       const Fmi::SpatialReference &theOutputCRS,
                                       const NFmiDataMatrix<float> &theMatrix,
                                       const Fmi::CoordinateMatrix &theCoordinates,
-                                      const Fmi::BoolMatrix &theValidCells,
                                       const Fmi::Box &theClipBox,
+                                      bool all_valid,
                                       const Options &theOptions) const;
 
   // Produce an OGR crossection for the given data
@@ -311,6 +313,95 @@ Fmi::BoolMatrix mark_valid_cells(const Fmi::CoordinateMatrix &theCoordinates,
       }
     }
 
+  return ret;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief What coordinates to shift and by how much
+ */
+// ----------------------------------------------------------------------
+
+struct GlobeShift
+{
+  GlobeShift() = delete;
+  GlobeShift(double w, double e, double s) : west(w), east(e), shift(s) {}
+  double west;
+  double east;
+  double shift;
+  std::size_t hashValue() const
+  {
+    auto hash = Fmi::hash_value(west);
+    Fmi::hash_combine(hash, Fmi::hash_value(east));
+    Fmi::hash_combine(hash, Fmi::hash_value(shift));
+    return hash;
+  }
+};
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Determine if the coordinates should be shifted to get a Pacific view
+ */
+// ----------------------------------------------------------------------
+
+boost::optional<GlobeShift> get_globe_shift(const Fmi::CoordinateMatrix &theCoordinates,
+                                            const Fmi::SpatialReference &theOutputCRS,
+                                            const boost::optional<Fmi::BBox> &theBBox)
+{
+  // If there is a user requested BBOX, we need to check whether it is within the BBOX of the CRS.
+  // If not, we will shift the coordinates by the width of the CRS BBOX to get for example a
+  // Pacific view of the data. However, this only really works for global CRSs. Hence we also need
+  // to verify the CRS WGS84 BBOX is global (-180...180, latitude does not matter). We could also
+  // limit the shift to WebMercator (3857), but this solution is more general.
+
+  if (!theBBox)
+    return {};
+
+  const auto epsg = theOutputCRS.getEPSG();
+  if (!epsg)
+    return {};
+
+  auto info = Fmi::EPSGInfo::getInfo(*epsg);
+  if (!info)
+    return {};
+
+  const auto &bbox = info->bbox;
+
+  bool is_global = (bbox.west == -180 && bbox.east == 180);
+  if (!is_global)
+    return {};
+
+  // Now we need to check the overlap. We allow for some tolerance due to
+  // possible rounding errors in projection calculations due to software
+  // differences. 0.05 degrees ~ 5000 meters, no need to be exact here.
+
+  const double tolerance = (theOutputCRS.isGeographic() ? 0.05 : 5000.0);
+
+  const auto &bounds = info->bounds;
+  const auto bounds_width = bounds.east - bounds.west;
+  const auto bounds_center = (bounds.west + bounds.east) / 2;
+
+  if (theBBox->west < bounds.west - tolerance)
+    return GlobeShift{bounds_center, bounds.east, -bounds_width};  // right side of globe to left
+
+  if (theBBox->east > bounds.east + tolerance)
+    return GlobeShift{bounds.west, bounds_center, bounds_width};  // left side of globe to right
+
+  return {};
+}
+
+std::unique_ptr<Fmi::CoordinateMatrix> shift_globe(const Fmi::CoordinateMatrix &coords,
+                                                   const GlobeShift &globe_shift)
+{
+  std::unique_ptr<Fmi::CoordinateMatrix> ret(new Fmi::CoordinateMatrix(coords));
+
+  for (auto j = 0UL; j < coords.height(); j++)
+    for (auto i = 0UL; i < coords.width(); i++)
+    {
+      const auto x = coords.x(i, j);
+      if (x >= globe_shift.west && x < globe_shift.east)
+        ret->set(i, j, x + globe_shift.shift, coords.y(i, j));  // x,y --> x+width,y
+    }
   return ret;
 }
 
@@ -679,6 +770,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
                                                   const Options &theOptions) const
 {
+#if 0  
   // All valid cells are to be contoured
   Fmi::BoolMatrix valid_cells(theCoordinates.width() - 1, theCoordinates.height() - 1, true);
 
@@ -686,8 +778,14 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
   const double large = 1E10;
   Fmi::Box clipbox(-large, -large, large, large, 1, 1);
 
-  return contour(
-      theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, clipbox, theOptions);
+  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
+#else
+  // Dummy clipbox for generating a rectangle around the valid areas when contouring missing values
+  const double large = 1E10;
+  Fmi::Box clipbox(-large, -large, large, large, 1, 1);
+
+  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, clipbox, false, theOptions);
+#endif
 }
 
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
@@ -697,19 +795,22 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::Box &theClipBox,
                                                   const Options &theOptions) const
 {
+#if 0
   // Mark cells overlapping the bounding box
   auto valid_cells = mark_valid_cells(theCoordinates, theClipBox);
+  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
+#else
   return contour(
-      theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theClipBox, theOptions);
+      theDataHash, theOutputCRS, theMatrix, theCoordinates, theClipBox, true, theOptions);
+#endif
 }
 
-// TODO: Why is 'theClipBox' unused?
 std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::SpatialReference &theOutputCRS,
                                                   const NFmiDataMatrix<float> &theMatrix,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
-                                                  const Fmi::BoolMatrix &theValidCells,
-                                                  const Fmi::Box & /* theClipBox */,
+                                                  const Fmi::Box &theClipBox,
+                                                  bool all_valid,
                                                   const Options &theOptions) const
 {
   try
@@ -728,11 +829,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (!theOptions.isovalues.empty() && !theOptions.limits.empty())
       throw Fmi::Exception(BCP, "Cannot calculate isolines and isobands simultaneously");
 
-    // Boxes covering the entire grid have the same hash even if the bounding boxes might differ,
-    // same thing if the grid is not covered at all. Note that theDataHash is used later on
-    // to get the analysis for the entire grid from the cache
     auto contour_hash = theDataHash;
-    Fmi::hash_combine(contour_hash, theValidCells.hashValue());
+    Fmi::hash_combine(contour_hash, theClipBox.hashValue());
 
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
@@ -765,10 +863,26 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (todo_contours.empty())
       return retval;
 
+    // See if the global data needs to be shifted
+
+    auto *coordinates = &theCoordinates;                     // assuming not
+    std::unique_ptr<Fmi::CoordinateMatrix> alt_coordinates;  // holder for shifted coordinates
+    auto coordinates_hash = theCoordinates.hashValue();      // hash value for coordinates
+
+    auto globe_shift = get_globe_shift(theCoordinates, theOutputCRS, theOptions.bbox);
+
+    if (globe_shift)
+    {
+      alt_coordinates = shift_globe(theCoordinates, *globe_shift);    // shifted coordinates
+      coordinates = alt_coordinates.get();                            // new active coordinates
+      Fmi::hash_combine(coordinates_hash, globe_shift->hashValue());  // new active hash
+    }
+    // From now on we use coordinates* instead of theCoordinates
+
     // Get the grid analysis of the projected coordinates from
     // the cache, or do the analysis and cache it.
 
-    auto analysis = get_analysis(theCoordinates.hashValue(), theCoordinates, theOutputCRS);
+    auto analysis = get_analysis(coordinates_hash, *coordinates, theOutputCRS);
 
     /*
      * Finally we determine which grid cells are valid and have the correct winding rule
@@ -791,7 +905,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
      */
 
     auto valid_cells = analysis->valid;
-    valid_cells &= theValidCells & (analysis->clockwise ^ analysis->needs_flipping);
+    valid_cells &= (analysis->clockwise ^ analysis->needs_flipping);
+    if (!all_valid)
+      valid_cells &= mark_valid_cells(*coordinates, theClipBox);
 
     // Process the data for contouring. We wish to avoid unnecessary copying of
     // the data, hence we use the existence of an alternative unique_ptr
@@ -824,16 +940,14 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Flip the data and the coordinates if necessary. We avoid an unnecessary
     // copy of the coordinates if no flipping is needed by using a pointer.
 
-    const auto *coords = &theCoordinates;
     std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
 
     if (analysis->needs_flipping)
     {
       flip(*alt_values);
-
-      flipped_coordinates.reset(new Fmi::CoordinateMatrix(theCoordinates));
+      alt_coordinates.reset(new Fmi::CoordinateMatrix(*coordinates));
       flip(*flipped_coordinates);
-      coords = flipped_coordinates.get();
+      coordinates = alt_coordinates.get();
     }
 
     // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
@@ -842,23 +956,24 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (analysis->shift == 0)
     {
       if (alt_values)
-        data = std::make_shared<PaddedGrid>(*alt_values, *coords, valid_cells);
+        data = std::make_shared<PaddedGrid>(*alt_values, *coordinates, valid_cells);
       else
       {
         // We're not really modifying the data, only alt_values is
         auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
-        data = std::make_shared<PaddedGrid>(tmp, *coords, valid_cells);
+        data = std::make_shared<PaddedGrid>(tmp, *coordinates, valid_cells);
       }
     }
     else
     {
       if (alt_values)
-        data = std::make_shared<ShiftedGrid>(*alt_values, *coords, valid_cells, analysis->shift);
+        data =
+            std::make_shared<ShiftedGrid>(*alt_values, *coordinates, valid_cells, analysis->shift);
       else
       {
         // We're not really modifying the data, only alt_values is
         auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
-        data = std::make_shared<ShiftedGrid>(tmp, *coords, valid_cells, analysis->shift);
+        data = std::make_shared<ShiftedGrid>(tmp, *coordinates, valid_cells, analysis->shift);
       }
     }
 
