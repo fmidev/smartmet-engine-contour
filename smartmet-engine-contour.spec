@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.8.17
+Version: 23.8.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,8 +29,8 @@ BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 23.8.4
-BuildRequires: smartmet-library-macgyver-devel >= 23.8.9
+BuildRequires: smartmet-library-gis-devel >= 23.8.28
+BuildRequires: smartmet-library-macgyver-devel >= 23.8.21
 BuildRequires: smartmet-library-trax-devel >= 23.8.17
 BuildRequires: smartmet-library-spine-devel >= 23.8.8
 BuildRequires: sparsehash-devel
@@ -42,10 +42,10 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
-Requires: smartmet-library-gis >= 23.8.4
+Requires: smartmet-library-gis >= 23.8.28
 Requires: smartmet-library-trax >= 23.8.17
-Requires: smartmet-library-macgyver >= 23.8.9
-Requires: smartmet-library-newbase >= 23.7.31
+Requires: smartmet-library-macgyver >= 23.8.21
+Requires: smartmet-library-newbase >= 23.8.21
 Requires: smartmet-library-spine >= 23.8.8
 Requires: smartmet-library-timeseries >= 23.7.28
 Requires: libconfig17
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Aug 28 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.8.28-1.fmi
+- Added detection for WebMercator BBOX requests requiring a shift to a Pacific view (generic solution used)
+
 * Thu Aug 17 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.8.17-1.fmi
 - Moved Savitzky-Golay filtering from Trax library
 - Smoothen only the required area for each WMS tile
