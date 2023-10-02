@@ -344,8 +344,7 @@ struct GlobeShift
  */
 // ----------------------------------------------------------------------
 
-boost::optional<GlobeShift> get_globe_shift(const Fmi::CoordinateMatrix &theCoordinates,
-                                            const Fmi::SpatialReference &theOutputCRS,
+boost::optional<GlobeShift> get_globe_shift(const Fmi::SpatialReference &theOutputCRS,
                                             const boost::optional<Fmi::BBox> &theBBox)
 {
   // If there is a user requested BBOX, we need to check whether it is within the BBOX of the CRS.
@@ -865,11 +864,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     // See if the global data needs to be shifted
 
-    auto *coordinates = &theCoordinates;                     // assuming not
+    const auto *coordinates = &theCoordinates;               // assuming not
     std::unique_ptr<Fmi::CoordinateMatrix> alt_coordinates;  // holder for shifted coordinates
     auto coordinates_hash = theCoordinates.hashValue();      // hash value for coordinates
 
-    auto globe_shift = get_globe_shift(theCoordinates, theOutputCRS, theOptions.bbox);
+    auto globe_shift = get_globe_shift(theOutputCRS, theOptions.bbox);
 
     if (globe_shift)
     {
@@ -940,13 +939,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Flip the data and the coordinates if necessary. We avoid an unnecessary
     // copy of the coordinates if no flipping is needed by using a pointer.
 
-    std::unique_ptr<Fmi::CoordinateMatrix> flipped_coordinates;
-
     if (analysis->needs_flipping)
     {
       flip(*alt_values);
       alt_coordinates.reset(new Fmi::CoordinateMatrix(*coordinates));
-      flip(*flipped_coordinates);
+      flip(*alt_coordinates);
       coordinates = alt_coordinates.get();
     }
 

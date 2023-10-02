@@ -11,8 +11,13 @@ namespace Contour
 class BaseGrid : public Trax::Grid
 {
  public:
-  virtual ~BaseGrid() = default;
+  ~BaseGrid() override;
   BaseGrid() = default;
+
+  BaseGrid(const BaseGrid &) = delete;
+  BaseGrid(BaseGrid &&) = delete;
+  BaseGrid &operator=(const BaseGrid &) = delete;
+  BaseGrid &operator=(BaseGrid &&) = delete;
 
   virtual void smooth(std::size_t size, std::size_t degree) = 0;
 };

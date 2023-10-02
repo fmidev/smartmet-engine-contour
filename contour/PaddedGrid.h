@@ -22,8 +22,13 @@ namespace Contour
 class PaddedGrid : public BaseGrid
 {
  public:
-  virtual ~PaddedGrid() = default;
+  ~PaddedGrid() override = default;
   PaddedGrid() = delete;
+
+  PaddedGrid(const PaddedGrid&) = delete;
+  PaddedGrid(PaddedGrid&&) = delete;
+  PaddedGrid& operator=(const PaddedGrid&) = delete;
+  PaddedGrid& operator=(PaddedGrid&&) = delete;
 
   PaddedGrid(NFmiDataMatrix<float>& theMatrix,
              const Fmi::CoordinateMatrix& theCoords,

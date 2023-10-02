@@ -37,7 +37,7 @@ namespace Contour
 class MirrorGrid
 {
  public:
-  MirrorGrid(const NormalGrid& theMatrix)
+  explicit MirrorGrid(const NormalGrid& theMatrix)
       : M(theMatrix), W(theMatrix.width()), H(theMatrix.height())
   {
   }

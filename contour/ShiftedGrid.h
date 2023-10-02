@@ -23,8 +23,13 @@ namespace Contour
 class ShiftedGrid : public BaseGrid
 {
  public:
-  virtual ~ShiftedGrid() = default;
+  ~ShiftedGrid() override = default;
   ShiftedGrid() = delete;
+
+  ShiftedGrid(const ShiftedGrid&) = delete;
+  ShiftedGrid(ShiftedGrid&&) = delete;
+  ShiftedGrid& operator=(const ShiftedGrid&) = delete;
+  ShiftedGrid& operator=(ShiftedGrid&&) = delete;
 
   ShiftedGrid(NFmiDataMatrix<float>& theMatrix,
               const Fmi::CoordinateMatrix& theCoords,
