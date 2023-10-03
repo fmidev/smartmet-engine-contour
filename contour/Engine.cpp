@@ -340,11 +340,59 @@ struct GlobeShift
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Get data box
+ */
+// ----------------------------------------------------------------------
+
+Fmi::BBox get_bbox(const Fmi::CoordinateMatrix &theCoordinates)
+{
+  try
+  {
+    if (theCoordinates.width() == 0 || theCoordinates.height() == 0)
+      throw Fmi::Exception(BCP, "Trying to extract BBOX of an empty grid");
+
+    Fmi::BBox bbox;
+    bool first = true;
+    for (auto j = 0UL; j <= theCoordinates.height(); j++)
+      for (auto i = 0UL; i <= theCoordinates.width(); i++)
+      {
+        const auto x = theCoordinates.x(i, j);
+        const auto y = theCoordinates.y(i, j);
+        if (!std::isnan(x) && !std::isnan(y))
+        {
+          if (first)
+          {
+            bbox.west = x;
+            bbox.east = x;
+            bbox.north = y;
+            bbox.south = y;
+            first = false;
+          }
+          else
+          {
+            bbox.west = std::min(bbox.west, x);
+            bbox.east = std::max(bbox.east, x);
+            bbox.south = std::min(bbox.south, y);
+            bbox.north = std::max(bbox.north, y);
+          }
+        }
+      }
+    return bbox;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Determine if the coordinates should be shifted to get a Pacific view
  */
 // ----------------------------------------------------------------------
 
-boost::optional<GlobeShift> get_globe_shift(const Fmi::SpatialReference &theOutputCRS,
+boost::optional<GlobeShift> get_globe_shift(const Fmi::CoordinateMatrix &theCoordinates,
+                                            const Fmi::SpatialReference &theOutputCRS,
                                             const boost::optional<Fmi::BBox> &theBBox)
 {
   // If there is a user requested BBOX, we need to check whether it is within the BBOX of the CRS.
@@ -373,12 +421,26 @@ boost::optional<GlobeShift> get_globe_shift(const Fmi::SpatialReference &theOutp
   // Now we need to check the overlap. We allow for some tolerance due to
   // possible rounding errors in projection calculations due to software
   // differences. 0.05 degrees ~ 5000 meters, no need to be exact here.
+  // We do this check first because calculating the bbox of the data takes time.
 
   const double tolerance = (theOutputCRS.isGeographic() ? 0.05 : 5000.0);
 
   const auto &bounds = info->bounds;
   const auto bounds_width = bounds.east - bounds.west;
   const auto bounds_center = (bounds.west + bounds.east) / 2;
+
+  if (theBBox->west >= bounds.west - tolerance && theBBox->east <= bounds.east + tolerance)
+    return {};
+
+  // If the requested bbox fully contains the data, there is no need to shift anything.
+  // For example we may have zoomed out so that the 180th meridian is crossed, but the
+  // data might cover only Scandinavia and is hence still fully covered.
+
+  const auto data_bbox = get_bbox(theCoordinates);
+  if (data_bbox.west >= theBBox->west && data_bbox.east <= theBBox->east)
+    return {};
+
+  // Finally we actually generate a shift if necessary
 
   if (theBBox->west < bounds.west - tolerance)
     return GlobeShift{bounds_center, bounds.east, -bounds_width};  // right side of globe to left
@@ -868,7 +930,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     std::unique_ptr<Fmi::CoordinateMatrix> alt_coordinates;  // holder for shifted coordinates
     auto coordinates_hash = theCoordinates.hashValue();      // hash value for coordinates
 
-    auto globe_shift = get_globe_shift(theOutputCRS, theOptions.bbox);
+    auto globe_shift = get_globe_shift(theCoordinates, theOutputCRS, theOptions.bbox);
 
     if (globe_shift)
     {
