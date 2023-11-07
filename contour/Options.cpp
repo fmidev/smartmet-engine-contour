@@ -21,7 +21,7 @@ namespace Contour
 // ----------------------------------------------------------------------
 
 Options::Options(Spine::Parameter theParam,
-                 const boost::posix_time::ptime& theTime,
+                 const Fmi::DateTime& theTime,
                  std::vector<double> theIsoValues)
     : parameter(std::move(theParam)), time(theTime), isovalues(std::move(theIsoValues))
 {
@@ -34,7 +34,7 @@ Options::Options(Spine::Parameter theParam,
 // ----------------------------------------------------------------------
 
 Options::Options(Spine::Parameter theParam,
-                 const boost::posix_time::ptime& theTime,
+                 const Fmi::DateTime& theTime,
                  std::vector<Range> theLimits)
     : parameter(std::move(theParam)), time(theTime), limits(std::move(theLimits))
 {

@@ -30,7 +30,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 23.9.12
-BuildRequires: smartmet-library-macgyver-devel >= 23.8.31
+BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
 BuildRequires: smartmet-library-trax-devel >= 23.8.17
 BuildRequires: smartmet-library-spine-devel >= 23.8.31
 BuildRequires: sparsehash-devel
@@ -44,7 +44,7 @@ Requires: gdal35-libs
 Requires: geos311
 Requires: smartmet-library-gis >= 23.9.12
 Requires: smartmet-library-trax >= 23.8.17
-Requires: smartmet-library-macgyver >= 23.8.31
+Requires: smartmet-library-macgyver >= 23.11.8
 Requires: smartmet-library-newbase >= 23.8.30
 Requires: smartmet-library-spine >= 23.8.31
 Requires: smartmet-library-timeseries >= 23.9.18

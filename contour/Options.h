@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <boost/date_time/posix_time/ptime.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/optional.hpp>
 #include <gis/BBox.h>
 #include <spine/Parameter.h>
@@ -40,11 +40,11 @@ struct Options
  public:
   Options() = delete;
   Options(Spine::Parameter theParam,
-          const boost::posix_time::ptime& theTime,
+          const Fmi::DateTime& theTime,
           std::vector<double> theIsoValues);
 
   Options(Spine::Parameter theParam,
-          const boost::posix_time::ptime& theTime,
+          const Fmi::DateTime& theTime,
           std::vector<Range> theLimits);
 
   std::size_t data_hash_value() const;
@@ -58,7 +58,7 @@ struct Options
   Trax::InterpolationType interpolation = Trax::InterpolationType::Linear;
   int extrapolation = 0;
   Spine::Parameter parameter;
-  boost::posix_time::ptime time;
+  Fmi::DateTime time;
   boost::optional<double> level;
 
   std::vector<double> isovalues;  // for isolines

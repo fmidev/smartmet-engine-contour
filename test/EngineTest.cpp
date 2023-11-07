@@ -1,5 +1,5 @@
 #include "Engine.h"
-#include <boost/date_time/posix_time/ptime.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/timer/timer.hpp>
 #include <engines/querydata/Engine.h>
@@ -31,7 +31,7 @@ void lines()
   using Fmi::Box;
 
   auto q = qengine->get("pal_skandinavia");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2008-08-06 12:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2008-08-06 12:00");
   Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
@@ -153,7 +153,7 @@ void fills()
   using Fmi::Box;
 
   auto q = qengine->get("pal_skandinavia");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2008-08-06 12:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2008-08-06 12:00");
   Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
@@ -275,7 +275,7 @@ void crossection()
   using Fmi::Box;
 
   auto q = qengine->get("hbm");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2014-07-28 02:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2014-07-28 02:00");
   Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("TemperatureSea");
   q->param(temperature.number());
 
@@ -337,7 +337,7 @@ void speed()
   using Fmi::Box;
 
   auto q = qengine->get("ecmwf_maailma_pinta");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2015-03-13 12:00");
   Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
@@ -388,7 +388,7 @@ void speed_all_at_once()
   using Fmi::Box;
 
   auto q = qengine->get("ecmwf_maailma_pinta");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2015-03-13 12:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2015-03-13 12:00");
   Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
@@ -436,7 +436,7 @@ void pressure()
   using Fmi::Box;
 
   auto q = qengine->get("ecmwf_pressure");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2016-04-25 09:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2016-04-25 09:00");
   Spine::Parameter pressure = TimeSeries::ParameterFactory::instance().parse("Pressure");
   q->param(pressure.number());
 
@@ -486,7 +486,7 @@ void pressure_all_at_once()
   using Fmi::Box;
 
   auto q = qengine->get("ecmwf_pressure");
-  boost::posix_time::ptime t = boost::posix_time::time_from_string("2016-04-25 09:00");
+  Fmi::DateTime t = boost::posix_time::time_from_string("2016-04-25 09:00");
   Spine::Parameter pressure = TimeSeries::ParameterFactory::instance().parse("Pressure");
   q->param(pressure.number());
 
@@ -533,7 +533,7 @@ void worldwrap()
 
   auto q = qengine->get("gfs");
   q->firstTime();
-  boost::posix_time::ptime t = q->validTime();
+  Fmi::DateTime t = q->validTime();
   Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
   q->param(temperature.number());
 
