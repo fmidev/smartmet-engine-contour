@@ -69,6 +69,33 @@ bool Options::hasTransformation() const
 {
   return multiplier || offset;
 }
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Transform contouring limits to match data without unit transformation
+ */
+// ----------------------------------------------------------------------
+
+void Options::transform()
+{
+  if (!hasTransformation())
+    return;
+
+  double a = (multiplier ? *multiplier : 1.0);
+  double b = (offset ? *offset : 0.0);
+
+  for (auto i = 0UL; i < isovalues.size(); i++)
+    isovalues[i] = isovalues[i] / a - b;  // reverse transform
+
+  for (auto& range : limits)
+  {
+    if (range.lolimit)
+      range.lolimit = *range.lolimit / a - b;
+    if (range.hilimit)
+      range.hilimit = *range.hilimit / a - b;
+  }
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Calculate a hash for the request

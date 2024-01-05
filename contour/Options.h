@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include <macgyver/DateTime.h>
 #include <boost/optional.hpp>
 #include <gis/BBox.h>
+#include <macgyver/DateTime.h>
 #include <spine/Parameter.h>
 #include <trax/InterpolationType.h>
 #include <vector>
@@ -43,9 +43,7 @@ struct Options
           const Fmi::DateTime& theTime,
           std::vector<double> theIsoValues);
 
-  Options(Spine::Parameter theParam,
-          const Fmi::DateTime& theTime,
-          std::vector<Range> theLimits);
+  Options(Spine::Parameter theParam, const Fmi::DateTime& theTime, std::vector<Range> theLimits);
 
   std::size_t data_hash_value() const;
   std::size_t filtered_data_hash_value() const;
@@ -53,7 +51,7 @@ struct Options
   friend std::size_t hash_value(const Options& theOptions);
 
   void transformation(double theMultiplier, double theOffset);
-  bool hasTransformation() const;
+  void transform();
 
   Trax::InterpolationType interpolation = Trax::InterpolationType::Linear;
   int extrapolation = 0;
@@ -79,6 +77,9 @@ struct Options
   bool validate = false;     // validate the contours according to OGC rules?
   bool strict = false;       // require strict success in contouring, and if validation fails error
   bool desliver = false;     // remove slivers
+
+ private:
+  bool hasTransformation() const;
 
 };  // class Options
 

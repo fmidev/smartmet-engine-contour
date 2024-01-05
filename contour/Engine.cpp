@@ -76,7 +76,7 @@ class Engine::Impl
                                       const Fmi::CoordinateMatrix &theCoordinates,
                                       const Fmi::Box &theClipBox,
                                       bool all_valid,
-                                      const Options &theOptions) const;
+                                      Options theOptions) const;
 
   // Produce an OGR crossection for the given data
   std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo &theQInfo,
@@ -872,7 +872,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
                                                   const Fmi::CoordinateMatrix &theCoordinates,
                                                   const Fmi::Box &theClipBox,
                                                   bool all_valid,
-                                                  const Options &theOptions) const
+                                                  Options theOptions) const
 {
   try
   {
@@ -890,14 +890,19 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     if (!theOptions.isovalues.empty() && !theOptions.limits.empty())
       throw Fmi::Exception(BCP, "Cannot calculate isolines and isobands simultaneously");
 
-    auto contour_hash = theDataHash;
-    Fmi::hash_combine(contour_hash, theClipBox.hashValue());
+    // Change the contour limits with reverse unit conversion if required. This must be done
+    // before the contour cache keys are calculated below, or the unit conversion has no
+    // effect on the cache key.
+
+    theOptions.transform();
 
     // Calculate the cache keys for all the contours. This enables us to test
     // if everything is cached already without doing any data processing.
 
-    std::vector<std::size_t> contour_cache_keys =
-        get_contour_cache_keys(contour_hash, theOutputCRS, theOptions);
+    auto contour_hash = theDataHash;
+    Fmi::hash_combine(contour_hash, theClipBox.hashValue());
+
+    auto contour_cache_keys = get_contour_cache_keys(contour_hash, theOutputCRS, theOptions);
 
     // Initialize empty results
 
@@ -976,24 +981,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     std::unique_ptr<NFmiDataMatrix<float>> alt_values;
 
-    const bool needs_copying =
-        (theOptions.hasTransformation() || theOptions.extrapolation > 0 ||
-         analysis->needs_flipping || theOptions.filter_size || theOptions.filter_degree);
+    const bool needs_copying = (theOptions.extrapolation > 0 || analysis->needs_flipping ||
+                                theOptions.filter_size || theOptions.filter_degree);
 
     if (needs_copying)
       alt_values.reset(new NFmiDataMatrix<float>(theMatrix));
-
-    if (theOptions.hasTransformation())
-    {
-      auto &values = *alt_values;
-
-      double a = (theOptions.multiplier ? *theOptions.multiplier : 1.0);
-      double b = (theOptions.offset ? *theOptions.offset : 0.0);
-
-      for (std::size_t j = 0; j < ny; j++)
-        for (std::size_t i = 0; i < nx; i++)
-          values[i][j] = a * values[i][j] + b;
-    }
 
     // Extrapolate if requested
     extrapolate(alt_values, theOptions.extrapolation);
