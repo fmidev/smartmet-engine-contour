@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 23.10.3
+Version: 24.1.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 23.9.12
-BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
+BuildRequires: smartmet-library-gis-devel >= 24.1.3
+BuildRequires: smartmet-library-macgyver-devel >= 23.11.21
 BuildRequires: smartmet-library-trax-devel >= 23.8.17
-BuildRequires: smartmet-library-spine-devel >= 23.8.31
+BuildRequires: smartmet-library-spine-devel >= 23.12.5
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -42,12 +42,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
-Requires: smartmet-library-gis >= 23.9.12
+Requires: smartmet-library-gis >= 24.1.3
 Requires: smartmet-library-trax >= 23.8.17
-Requires: smartmet-library-macgyver >= 23.11.8
-Requires: smartmet-library-newbase >= 23.8.30
-Requires: smartmet-library-spine >= 23.8.31
-Requires: smartmet-library-timeseries >= 23.9.18
+Requires: smartmet-library-macgyver >= 23.11.21
+Requires: smartmet-library-newbase >= 23.11.21
+Requires: smartmet-library-spine >= 23.12.5
+Requires: smartmet-library-timeseries >= 24.1.4
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -67,7 +67,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 23.7.14
+#TestRequires: smartmet-test-data >= 23.11.8
 #TestRequires: zlib-devel
 
 
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Jan  5 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.1.5-1.fmi
+- Faster unit conversions by transforming the limits instead of the data
+
 * Tue Oct  3 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.10.3-1.fmi
 - Improved shifting of data when 180th parallel crossings are detected (BRAINSTORM-2734)
 - Silenced compiler warnings
