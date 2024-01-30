@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 24.1.5
+Version: 24.1.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Jan 30 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.1.30-1.fmi
+- Repackaged due to newbase ABI changes
+
 * Fri Jan  5 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.1.5-1.fmi
 - Faster unit conversions by transforming the limits instead of the data
 
