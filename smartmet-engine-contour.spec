@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 24.2.23
-Release: 2%{?dist}.fmi
+Version: 24.4.17
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -29,10 +29,10 @@ BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 24.1.3
+BuildRequires: smartmet-library-gis-devel >= 24.3.25
 BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
 BuildRequires: smartmet-library-trax-devel >= 23.8.17
-BuildRequires: smartmet-library-spine-devel >= 24.2.8
+BuildRequires: smartmet-library-spine-devel >= 24.4.5
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-date-time
@@ -42,12 +42,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
-Requires: smartmet-library-gis >= 24.1.3
+Requires: smartmet-library-gis >= 24.3.25
 Requires: smartmet-library-trax >= 23.8.17
 Requires: smartmet-library-macgyver >= 24.1.17
-Requires: smartmet-library-newbase >= 24.2.23
-Requires: smartmet-library-spine >= 24.2.8
-Requires: smartmet-library-timeseries >= 24.2.23
+Requires: smartmet-library-newbase >= 24.3.11
+Requires: smartmet-library-spine >= 24.4.5
+Requires: smartmet-library-timeseries >= 24.4.5
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -67,7 +67,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 23.11.8
+#TestRequires: smartmet-test-data >= 24.4.5
 #TestRequires: zlib-devel
 
 
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Apr 17 2024 Mika Heiskanen <mheiskan@rhel8.dev.fmi.fi> - 24.4.17-1.fmi
+- Avoid unnecessary OGRSpatialReference::Clone which can crash with PROJ 9.0
+
 * Fri Feb 23 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> 24.2.23-2.fmi
 - Full repackaging
 
