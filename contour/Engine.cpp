@@ -1096,12 +1096,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       OGRGeometryPtr tmp(Trax::to_ogr_geom(results[i]).release());
 
       if (theOutputCRS.get() != nullptr)
-      {
-        std::shared_ptr<OGRSpatialReference> crs(theOutputCRS.get()->Clone(),
-                                                 [](OGRSpatialReference *sr) { sr->Release(); });
-
-        tmp->assignSpatialReference(crs.get());
-      }
+	tmp->assignSpatialReference(theOutputCRS.get()); // increments ref count
 
       // Despeckle even closed isolines (pressure curves)
       if (theOptions.minarea)
