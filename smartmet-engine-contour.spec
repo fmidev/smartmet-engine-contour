@@ -44,10 +44,10 @@ Requires: gdal35-libs
 Requires: geos311
 Requires: smartmet-library-gis >= 24.3.25
 Requires: smartmet-library-trax >= 23.8.17
-Requires: smartmet-library-macgyver >= 24.1.17
-Requires: smartmet-library-newbase >= 24.3.11
-Requires: smartmet-library-spine >= 24.4.5
-Requires: smartmet-library-timeseries >= 24.4.5
+Requires: smartmet-library-macgyver >= 24.5.6
+Requires: smartmet-library-newbase >= 24.5.6
+Requires: smartmet-library-spine >= 24.5.6
+Requires: smartmet-library-timeseries >= 24.5.6
 Requires: libconfig17
 
 Provides: %{SPECNAME}
