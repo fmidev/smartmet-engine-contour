@@ -35,7 +35,6 @@ BuildRequires: smartmet-library-trax-devel >= 23.8.17
 BuildRequires: smartmet-library-spine-devel >= 24.4.5
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
-Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
