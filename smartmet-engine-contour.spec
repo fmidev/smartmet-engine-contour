@@ -24,8 +24,8 @@ BuildRequires: gcc-c++
 BuildRequires: devtoolset-7-gcc-c++
 #TestRequires: devtoolset-7-gcc-c++
 %endif
-BuildRequires: gdal35-devel
-BuildRequires: geos311-devel
+BuildRequires: gdal38-devel
+BuildRequires: geos312-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
@@ -39,8 +39,8 @@ Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal35-libs
-Requires: geos311
+Requires: gdal38-libs
+Requires: geos312
 Requires: smartmet-library-gis >= 24.3.25
 Requires: smartmet-library-trax >= 23.8.17
 Requires: smartmet-library-macgyver >= 24.5.6
@@ -55,8 +55,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
-#TestRequires: gdal35-devel
-#TestRequires: geos311-devel
+#TestRequires: gdal38-devel
+#TestRequires: geos312-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
 #TestRequires: smartmet-engine-querydata
