@@ -39,8 +39,8 @@ Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal35-libs
-Requires: geos311
+Requires: gdal38-libs
+Requires: geos312
 Requires: smartmet-library-gis >= 24.5.27
 Requires: smartmet-library-trax >= 24.5.24
 Requires: smartmet-library-macgyver >= 24.5.28
