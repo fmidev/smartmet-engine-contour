@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 24.5.16
+Version: 24.5.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,24 +29,24 @@ BuildRequires: geos312-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 24.3.25
-BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
-BuildRequires: smartmet-library-trax-devel >= 23.8.17
-BuildRequires: smartmet-library-spine-devel >= 24.4.5
+BuildRequires: smartmet-library-gis-devel >= 24.5.27
+BuildRequires: smartmet-library-macgyver-devel >= 24.5.28
+BuildRequires: smartmet-library-trax-devel >= 24.5.24
+BuildRequires: smartmet-library-spine-devel >= 24.5.27
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal38-libs
-Requires: geos312
-Requires: smartmet-library-gis >= 24.3.25
-Requires: smartmet-library-trax >= 23.8.17
-Requires: smartmet-library-macgyver >= 24.5.6
-Requires: smartmet-library-newbase >= 24.5.6
-Requires: smartmet-library-spine >= 24.5.6
-Requires: smartmet-library-timeseries >= 24.5.6
+Requires: gdal35-libs
+Requires: geos311
+Requires: smartmet-library-gis >= 24.5.27
+Requires: smartmet-library-trax >= 24.5.24
+Requires: smartmet-library-macgyver >= 24.5.28
+Requires: smartmet-library-newbase >= 24.5.17
+Requires: smartmet-library-spine >= 24.5.27
+Requires: smartmet-library-timeseries >= 24.5.28
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -66,7 +66,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 24.4.5
+#TestRequires: smartmet-test-data >= 24.5.22
 #TestRequires: zlib-devel
 
 
@@ -78,7 +78,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 23.8.17
+Requires: smartmet-library-trax-devel >= 24.5.24
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -107,6 +107,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed May 29 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.5.29-1.fmi
+- Repackaged due to Fmi::DateTime hash_value changes
+
 * Thu May 16 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.16-1.fmi
 - Clean up boost date-time uses
 
