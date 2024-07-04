@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <gis/BBox.h>
 #include <macgyver/DateTime.h>
 #include <spine/Parameter.h>
@@ -28,10 +28,10 @@ namespace Contour
 {
 struct Range
 {
-  boost::optional<double> lolimit;
-  boost::optional<double> hilimit;
+  std::optional<double> lolimit;
+  std::optional<double> hilimit;
 
-  Range(boost::optional<double> lo, boost::optional<double> hi) : lolimit(lo), hilimit(hi) {}
+  Range(std::optional<double> lo, std::optional<double> hi) : lolimit(lo), hilimit(hi) {}
   Range(double lo, double hi) : lolimit(lo), hilimit(hi) {}
 };
 
@@ -57,21 +57,21 @@ struct Options
   int extrapolation = 0;
   Spine::Parameter parameter;
   Fmi::DateTime time;
-  boost::optional<double> level;
+  std::optional<double> level;
 
   std::vector<double> isovalues;  // for isolines
 
   std::vector<Range> limits;  // for fills
 
-  boost::optional<Fmi::BBox> bbox;  // user specified WMS file bbox
+  std::optional<Fmi::BBox> bbox;  // user specified WMS file bbox
 
-  boost::optional<double> multiplier;  // for unit conversion
-  boost::optional<double> offset;
+  std::optional<double> multiplier;  // for unit conversion
+  std::optional<double> offset;
 
-  boost::optional<std::size_t> filter_size;  // 2D Savitzky-Golay smoother
-  boost::optional<std::size_t> filter_degree;
+  std::optional<std::size_t> filter_size;  // 2D Savitzky-Golay smoother
+  std::optional<std::size_t> filter_degree;
 
-  boost::optional<double> minarea;  // km^2
+  std::optional<double> minarea;  // km^2
 
   bool closed_range = true;  // is last isoband actually 90 <= x <= 100 instead of 90 <= x < 100
   bool validate = false;     // validate the contours according to OGC rules?

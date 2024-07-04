@@ -299,7 +299,7 @@ void crossection()
     limits.push_back(Engine::Contour::Range(0, 30));
     Engine::Contour::Options opt(temperature, t, limits);
 
-    boost::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
+    std::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
 
     auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
@@ -317,7 +317,7 @@ void crossection()
     std::vector<Engine::Contour::Range> limits;
     limits.push_back(Engine::Contour::Range(0, 5.0));
     Engine::Contour::Options opt(temperature, t, limits);
-    boost::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
+    std::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
 
     auto geom = *(contour->crossection(*qInfo, opt, lon1, lat1, lon2, lat2, steps).begin());
 
