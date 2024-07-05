@@ -1,5 +1,5 @@
 #include "Config.h"
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <macgyver/Exception.h>
 #include <spine/ConfigTools.h>
 #include <stdexcept>
@@ -24,7 +24,7 @@ Config::Config(const std::string& theFileName)
       throw Fmi::Exception(BCP, "Contour-engine config filename is empty");
 
     // Enable sensible relative include paths
-    boost::filesystem::path p = theFileName;
+    std::filesystem::path p = theFileName;
     p.remove_filename();
     itsConfig.setIncludeDir(p.c_str());
 
