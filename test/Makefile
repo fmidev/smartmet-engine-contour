@@ -21,7 +21,6 @@ LIBS += \
 	-lsmartmet-gis \
 	-lsmartmet-trax \
 	-lboost_thread \
-	-lboost_filesystem \
 	-lboost_regex \
 	-lboost_iostreams \
 	-lboost_timer \
