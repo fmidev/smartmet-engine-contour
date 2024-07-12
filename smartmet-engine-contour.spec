@@ -29,10 +29,10 @@ BuildRequires: geos311-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 24.5.27
-BuildRequires: smartmet-library-macgyver-devel >= 24.5.28
-BuildRequires: smartmet-library-trax-devel >= 24.5.24
-BuildRequires: smartmet-library-spine-devel >= 24.5.27
+BuildRequires: smartmet-library-gis-devel >= 24.7.12
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
+BuildRequires: smartmet-library-trax-devel >= 24.7.12
+BuildRequires: smartmet-library-spine-devel >= 24.7.12
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -40,12 +40,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: geos311
-Requires: smartmet-library-gis >= 24.5.27
-Requires: smartmet-library-trax >= 24.5.24
-Requires: smartmet-library-macgyver >= 24.5.28
-Requires: smartmet-library-newbase >= 24.5.17
-Requires: smartmet-library-spine >= 24.5.27
-Requires: smartmet-library-timeseries >= 24.5.28
+Requires: smartmet-library-gis >= 24.7.12
+Requires: smartmet-library-trax >= 24.7.12
+Requires: smartmet-library-macgyver >= 24.7.12
+Requires: smartmet-library-newbase >= 24.7.12
+Requires: smartmet-library-spine >= 24.7.12
+Requires: smartmet-library-timeseries >= 24.7.12
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -77,7 +77,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 24.5.24
+Requires: smartmet-library-trax-devel >= 24.7.12
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
