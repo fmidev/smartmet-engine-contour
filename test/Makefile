@@ -12,6 +12,7 @@ INCLUDES += \
 
 LIBS += \
 	../contour.so \
+	$(PREFIX_LDFLAGS) \
 	/usr/share/smartmet/engines/querydata.so \
 	$(REQUIRED_LIBS) \
 	-lsmartmet-timeseries \

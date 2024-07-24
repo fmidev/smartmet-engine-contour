@@ -8,7 +8,7 @@ include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
 DEFINES = -DUNIX -D_REENTRANT -DUSE_UNSTABLE_GEOS_CPP_API
 
-LIBS += -L$(libdir) \
+LIBS += $(PREFIX_LDFLAGS) \
 	$(REQUIRED_LIBS) \
 	-lsmartmet-spine \
 	-lsmartmet-newbase \
@@ -60,6 +60,7 @@ $(LIBFILE): $(OBJS)
 
 clean:
 	rm -f $(LIBFILE) obj/* *~ $(SUBNAME)/*~
+	$(MAKE) -C test $@
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
