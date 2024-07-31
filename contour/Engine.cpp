@@ -11,7 +11,6 @@
 #include "Options.h"
 #include "PaddedGrid.h"
 #include "ShiftedGrid.h"
-#include <optional>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -36,6 +35,7 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
+#include <optional>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
@@ -353,8 +353,8 @@ Fmi::BBox get_bbox(const Fmi::CoordinateMatrix &theCoordinates)
 
     Fmi::BBox bbox;
     bool first = true;
-    for (auto j = 0UL; j <= theCoordinates.height(); j++)
-      for (auto i = 0UL; i <= theCoordinates.width(); i++)
+    for (auto j = 0UL; j < theCoordinates.height(); j++)
+      for (auto i = 0UL; i < theCoordinates.width(); i++)
       {
         const auto x = theCoordinates.x(i, j);
         const auto y = theCoordinates.y(i, j);
@@ -392,8 +392,8 @@ Fmi::BBox get_bbox(const Fmi::CoordinateMatrix &theCoordinates)
 // ----------------------------------------------------------------------
 
 std::optional<GlobeShift> get_globe_shift(const Fmi::CoordinateMatrix &theCoordinates,
-                                            const Fmi::SpatialReference &theOutputCRS,
-                                            const std::optional<Fmi::BBox> &theBBox)
+                                          const Fmi::SpatialReference &theOutputCRS,
+                                          const std::optional<Fmi::BBox> &theBBox)
 {
   // If there is a user requested BBOX, we need to check whether it is within the BBOX of the CRS.
   // If not, we will shift the coordinates by the width of the CRS BBOX to get for example a
@@ -1096,7 +1096,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       OGRGeometryPtr tmp(Trax::to_ogr_geom(results[i]).release());
 
       if (theOutputCRS.get() != nullptr)
-	tmp->assignSpatialReference(theOutputCRS.get()); // increments ref count
+        tmp->assignSpatialReference(theOutputCRS.get());  // increments ref count
 
       // Despeckle even closed isolines (pressure curves)
       if (theOptions.minarea)
