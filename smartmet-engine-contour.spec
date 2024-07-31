@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 24.7.12
+Version: 24.7.31
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -30,9 +30,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 24.7.12
-BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.22
 BuildRequires: smartmet-library-trax-devel >= 24.7.12
-BuildRequires: smartmet-library-spine-devel >= 24.7.12
+BuildRequires: smartmet-library-spine-devel >= 24.7.22
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -42,10 +42,10 @@ Requires: gdal35-libs
 Requires: geos311
 Requires: smartmet-library-gis >= 24.7.12
 Requires: smartmet-library-trax >= 24.7.12
-Requires: smartmet-library-macgyver >= 24.7.12
+Requires: smartmet-library-macgyver >= 24.7.22
 Requires: smartmet-library-newbase >= 24.7.12
-Requires: smartmet-library-spine >= 24.7.12
-Requires: smartmet-library-timeseries >= 24.7.12
+Requires: smartmet-library-spine >= 24.7.22
+Requires: smartmet-library-timeseries >= 24.7.22
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -106,6 +106,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Jul 31 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.7.31-1.fmi
+- Fixed index overflow in grid BBOX calculations
+
 * Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
 - Replace many boost library types with C++ standard library ones
 
