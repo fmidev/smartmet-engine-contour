@@ -11,7 +11,6 @@
 #include "Options.h"
 #include "PaddedGrid.h"
 #include "ShiftedGrid.h"
-#include <boost/optional.hpp>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
@@ -36,6 +35,7 @@
 #include <ogr_core.h>
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
+#include <optional>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
@@ -81,7 +81,7 @@ class Engine::Impl
   // Produce an OGR crossection for the given data
   std::vector<OGRGeometryPtr> crossection(NFmiFastQueryInfo &theQInfo,
                                           const Options &theOptions,
-                                          const boost::optional<Spine::Parameter> &theZParameter,
+                                          const std::optional<Spine::Parameter> &theZParameter,
                                           double theLon1,
                                           double theLat1,
                                           double theLon2,
@@ -118,8 +118,8 @@ class Engine::Impl
                                Trax::InterpolationType interpolation) const;
 
   GeometryPtr internal_isoband(const Trax::Grid &data,
-                               const boost::optional<double> &lolimit,
-                               const boost::optional<double> &hilimit,
+                               const std::optional<double> &lolimit,
+                               const std::optional<double> &hilimit,
                                Trax::InterpolationType interpolation) const;
 };
 
@@ -353,8 +353,8 @@ Fmi::BBox get_bbox(const Fmi::CoordinateMatrix &theCoordinates)
 
     Fmi::BBox bbox;
     bool first = true;
-    for (auto j = 0UL; j <= theCoordinates.height(); j++)
-      for (auto i = 0UL; i <= theCoordinates.width(); i++)
+    for (auto j = 0UL; j < theCoordinates.height(); j++)
+      for (auto i = 0UL; i < theCoordinates.width(); i++)
       {
         const auto x = theCoordinates.x(i, j);
         const auto y = theCoordinates.y(i, j);
@@ -391,9 +391,9 @@ Fmi::BBox get_bbox(const Fmi::CoordinateMatrix &theCoordinates)
  */
 // ----------------------------------------------------------------------
 
-boost::optional<GlobeShift> get_globe_shift(const Fmi::CoordinateMatrix &theCoordinates,
-                                            const Fmi::SpatialReference &theOutputCRS,
-                                            const boost::optional<Fmi::BBox> &theBBox)
+std::optional<GlobeShift> get_globe_shift(const Fmi::CoordinateMatrix &theCoordinates,
+                                          const Fmi::SpatialReference &theOutputCRS,
+                                          const std::optional<Fmi::BBox> &theBBox)
 {
   // If there is a user requested BBOX, we need to check whether it is within the BBOX of the CRS.
   // If not, we will shift the coordinates by the width of the CRS BBOX to get for example a
@@ -685,8 +685,8 @@ GeometryPtr Engine::Impl::internal_isoline(const Trax::Grid &data,
 // ----------------------------------------------------------------------
 
 GeometryPtr Engine::Impl::internal_isoband(const Trax::Grid &data,
-                                           const boost::optional<double> &lolimit,
-                                           const boost::optional<double> &hilimit,
+                                           const std::optional<double> &lolimit,
+                                           const std::optional<double> &hilimit,
                                            Trax::InterpolationType interpolation) const
 {
   // Change optional settings to corresponding contours. If either limit is set,
@@ -1096,7 +1096,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       OGRGeometryPtr tmp(Trax::to_ogr_geom(results[i]).release());
 
       if (theOutputCRS.get() != nullptr)
-	tmp->assignSpatialReference(theOutputCRS.get()); // increments ref count
+        tmp->assignSpatialReference(theOutputCRS.get());  // increments ref count
 
       // Despeckle even closed isolines (pressure curves)
       if (theOptions.minarea)
@@ -1123,7 +1123,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     NFmiFastQueryInfo &theQInfo,
     const Options &theOptions,
-    const boost::optional<Spine::Parameter> &theZParameter,
+    const std::optional<Spine::Parameter> &theZParameter,
     double theLon1,
     double theLat1,
     double theLon2,
@@ -1456,7 +1456,7 @@ std::vector<OGRGeometryPtr> Engine::crossection(NFmiFastQueryInfo &theQInfo,
 {
   try
   {
-    boost::optional<Spine::Parameter> zparam;
+    std::optional<Spine::Parameter> zparam;
     return itsImpl->crossection(
         theQInfo, theOptions, zparam, theLon1, theLat1, theLon2, theLat2, theSteps);
   }
@@ -1483,7 +1483,7 @@ std::vector<OGRGeometryPtr> Engine::crossection(NFmiFastQueryInfo &theQInfo,
 {
   try
   {
-    boost::optional<Spine::Parameter> zparam(theZParameter);
+    std::optional<Spine::Parameter> zparam(theZParameter);
     return itsImpl->crossection(
         theQInfo, theOptions, zparam, theLon1, theLat1, theLon2, theLat2, theSteps);
   }

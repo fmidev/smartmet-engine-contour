@@ -12,6 +12,7 @@ INCLUDES += \
 
 LIBS += \
 	../contour.so \
+	$(PREFIX_LDFLAGS) \
 	/usr/share/smartmet/engines/querydata.so \
 	$(REQUIRED_LIBS) \
 	-lsmartmet-timeseries \
@@ -21,7 +22,6 @@ LIBS += \
 	-lsmartmet-gis \
 	-lsmartmet-trax \
 	-lboost_thread \
-	-lboost_filesystem \
 	-lboost_regex \
 	-lboost_iostreams \
 	-lboost_timer \
