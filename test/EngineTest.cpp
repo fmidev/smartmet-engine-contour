@@ -6,6 +6,7 @@
 #include <gis/Box.h>
 #include <gis/OGR.h>
 #include <macgyver/Hash.h>
+#include <macgyver/StringConversion.h>
 #include <regression/tframe.h>
 #include <spine/Options.h>
 #include <spine/Reactor.h>
@@ -362,8 +363,8 @@ void speed()
       double hilimit = i + 2;
 
       std::string report =
-          ("\tIsoband " + boost::lexical_cast<std::string>(lolimit) + "..." +
-           boost::lexical_cast<std::string>(hilimit) + " took %t sec CPU, %w sec real\n");
+          ("\tIsoband " + Fmi::to_string(lolimit) + "..." +
+           Fmi::to_string(hilimit) + " took %t sec CPU, %w sec real\n");
       boost::timer::auto_cpu_timer timer(2, report);
 
       std::vector<Engine::Contour::Range> limits;
@@ -460,7 +461,7 @@ void pressure()
     {
       double value = i;
 
-      std::string report = ("\tIsoline " + boost::lexical_cast<std::string>(value) +
+      std::string report = ("\tIsoline " + Fmi::to_string(value) +
                             " took %t sec CPU, %w sec real\n");
       boost::timer::auto_cpu_timer timer(2, report);
 
