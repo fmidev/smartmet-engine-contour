@@ -1033,8 +1033,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     if (theOptions.filter_size || theOptions.filter_degree)
     {
-      size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
-      size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
+      std::size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
+      std::size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
       data->smooth(size, degree);
     }
 
