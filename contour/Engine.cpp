@@ -862,7 +862,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
   return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
 #else
   return contour(
-      theDataHash, theOutputCRS, theMatrix, theCoordinates, theClipBox, true, theOptions);
+      theDataHash, theOutputCRS, theMatrix, theCoordinates, theClipBox, false, theOptions);
 #endif
 }
 
