@@ -26,9 +26,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 24.8.7
-BuildRequires: smartmet-library-macgyver-devel >= 24.10.15
+BuildRequires: smartmet-library-macgyver-devel >= 24.10.28
 BuildRequires: smartmet-library-trax-devel >= 24.8.7
-BuildRequires: smartmet-library-spine-devel >= 24.10.15
+BuildRequires: smartmet-library-spine-devel >= 24.11.8
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -38,10 +38,10 @@ Requires: gdal38-libs
 Requires: geos312
 Requires: smartmet-library-gis >= 24.8.7
 Requires: smartmet-library-trax >= 24.8.7
-Requires: smartmet-library-macgyver >= 24.10.15
+Requires: smartmet-library-macgyver >= 24.10.28
 Requires: smartmet-library-newbase >= 24.10.15
-Requires: smartmet-library-spine >= 24.10.15
-Requires: smartmet-library-timeseries >= 24.10.15
+Requires: smartmet-library-spine >= 24.11.8
+Requires: smartmet-library-timeseries >= 24.11.8
 Requires: libconfig17
 
 Provides: %{SPECNAME}
