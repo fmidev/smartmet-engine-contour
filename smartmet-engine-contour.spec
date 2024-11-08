@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 24.10.30
+Version: 24.11.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -102,6 +102,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Nov  8 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.11.8-1.fmi
+- Repackage due to smartmet-library-spine ABI changes
+
 * Wed Oct 30 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.30-1.fmi
 - Fixed tiled contouring to use minimal data
 
