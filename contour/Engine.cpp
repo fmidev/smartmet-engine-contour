@@ -284,26 +284,30 @@ bool overlaps(double vmin, double vmax, double v1, double v2, double v3, double 
  */
 // ----------------------------------------------------------------------
 
-Fmi::BoolMatrix mark_valid_cells(const Fmi::CoordinateMatrix &theCoordinates,
-                                 const Fmi::Box &theClipBox)
+Fmi::BoolMatrix mark_overlapping_cells(const Fmi::CoordinateMatrix &theCoordinates,
+                                       const Fmi::Box &theClipBox)
 {
   // Assume no overlap for all cells
   const auto ny = theCoordinates.height();
   const auto nx = theCoordinates.width();
+  const auto xmin = theClipBox.xmin();
+  const auto xmax = theClipBox.xmax();
+  const auto ymin = theClipBox.ymin();
+  const auto ymax = theClipBox.ymax();
 
   Fmi::BoolMatrix ret(nx - 1, ny - 1, false);
 
   for (auto j = 0UL; j < ny - 1; j++)
     for (auto i = 0UL; i < nx - 1; i++)
     {
-      if (overlaps(theClipBox.xmin(),
-                   theClipBox.xmax(),
+      if (overlaps(xmin,
+                   xmax,
                    theCoordinates.x(i, j),
                    theCoordinates.x(i, j + 1),
                    theCoordinates.x(i + 1, j + 1),
                    theCoordinates.x(i + 1, j)) &&
-          overlaps(theClipBox.ymin(),
-                   theClipBox.ymax(),
+          overlaps(ymin,
+                   ymax,
                    theCoordinates.y(i, j),
                    theCoordinates.y(i, j + 1),
                    theCoordinates.y(i + 1, j + 1),
@@ -858,7 +862,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 {
 #if 0
   // Mark cells overlapping the bounding box
-  auto valid_cells = mark_valid_cells(theCoordinates, theClipBox);
+  auto valid_cells = mark_overlapping_cells(theCoordinates, theClipBox);
   return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, valid_cells, theOptions);
 #else
   return contour(
@@ -973,7 +977,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     auto valid_cells = analysis->valid;
     valid_cells &= (analysis->clockwise ^ analysis->needs_flipping);
     if (!all_valid)
-      valid_cells &= mark_valid_cells(*coordinates, theClipBox);
+      valid_cells &= mark_overlapping_cells(*coordinates, theClipBox);
 
     // Process the data for contouring. We wish to avoid unnecessary copying of
     // the data, hence we use the existence of an alternative unique_ptr
