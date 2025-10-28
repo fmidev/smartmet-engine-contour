@@ -18,7 +18,6 @@ LIBS += $(PREFIX_LDFLAGS) \
 	-lboost_regex \
 	-lboost_thread \
 	-lboost_iostreams \
-	-lboost_system \
 	-lfmt \
 	-lbz2 -lz \
 	-lpthread
