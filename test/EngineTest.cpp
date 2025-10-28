@@ -17,8 +17,8 @@
 
 using namespace std;
 
-SmartMet::Engine::Querydata::Engine *qengine;
-SmartMet::Engine::Contour::Engine *contour;
+std::shared_ptr<SmartMet::Engine::Querydata::Engine> qengine;
+std::shared_ptr<SmartMet::Engine::Contour::Engine> contour;
 
 // Note: pal_skandinavia = stereographic,20,90,60:6,51.3,49,70.2
 
@@ -617,10 +617,8 @@ int main(void)
 
   SmartMet::Spine::Reactor reactor(opts);
   reactor.init();
-  qengine = reinterpret_cast<SmartMet::Engine::Querydata::Engine *>(
-      reactor.getSingleton("Querydata", nullptr));
-  contour =
-      reinterpret_cast<SmartMet::Engine::Contour::Engine *>(reactor.getSingleton("Contour", nullptr));
+  qengine = reactor.getEngine<SmartMet::Engine::Querydata::Engine>("Querydata", nullptr);
+  contour = reactor.getEngine<SmartMet::Engine::Contour::Engine>("Contour", nullptr);
 
   cout << endl << "Engine tester" << endl << "=============" << endl;
   Tests::tests t;
