@@ -622,5 +622,9 @@ int main(void)
 
   cout << endl << "Engine tester" << endl << "=============" << endl;
   Tests::tests t;
-  return t.run();
+  auto result = t.run();
+  qengine.reset();
+  contour.reset();
+  reactor.shutdown();
+  return result;
 }
