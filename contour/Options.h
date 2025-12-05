@@ -13,11 +13,11 @@
 
 #pragma once
 
-#include <optional>
 #include <gis/BBox.h>
 #include <macgyver/DateTime.h>
 #include <spine/Parameter.h>
 #include <trax/InterpolationType.h>
+#include <optional>
 #include <vector>
 
 namespace SmartMet

@@ -22,7 +22,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#define GEOS_VERSION_ID (100*GEOS_VERSION_MAJOR + GEOS_VERSION_MINOR)
+#define GEOS_VERSION_ID (100 * GEOS_VERSION_MAJOR + GEOS_VERSION_MINOR)
 
 using geos::geom::Geometry;
 using geos::geom::GeometryCollection;
