@@ -1153,8 +1153,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     {
       if (!theQInfo.Param(theZParameter->number()))
       {
-        std::cerr << "CSection: ZParameter " << theZParameter->name() << " is not available"
-                  << std::endl;
+        std::cerr << "CSection: ZParameter " << theZParameter->name() << " is not available\n";
         // TODO: Give good error message
         return {};
       }
@@ -1165,8 +1164,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
 
     if (!theQInfo.Param(theOptions.parameter.number()))
     {
-      std::cerr << "CSection: Parameter " << theOptions.parameter.name() << " is not available"
-                << std::endl;
+      std::cerr << "CSection: Parameter " << theOptions.parameter.name() << " is not available\n";
       // TODO: Give good error message
       return {};
     }
