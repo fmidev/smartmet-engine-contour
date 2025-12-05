@@ -1,8 +1,8 @@
 #include "GeosTools.h"
-#include <memory>
 #include <geos/io/WKTReader.h>
 #include <geos/version.h>
 #include <regression/tframe.h>
+#include <memory>
 
 using namespace std;
 

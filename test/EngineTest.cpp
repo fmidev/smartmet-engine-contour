@@ -1,10 +1,10 @@
 #include "Engine.h"
-#include <macgyver/DateTime.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/timer/timer.hpp>
 #include <engines/querydata/Engine.h>
 #include <gis/Box.h>
 #include <gis/OGR.h>
+#include <macgyver/DateTime.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <regression/tframe.h>
@@ -362,9 +362,8 @@ void speed()
       double lolimit = i;
       double hilimit = i + 2;
 
-      std::string report =
-          ("\tIsoband " + Fmi::to_string(lolimit) + "..." +
-           Fmi::to_string(hilimit) + " took %t sec CPU, %w sec real\n");
+      std::string report = ("\tIsoband " + Fmi::to_string(lolimit) + "..." +
+                            Fmi::to_string(hilimit) + " took %t sec CPU, %w sec real\n");
       boost::timer::auto_cpu_timer timer(2, report);
 
       std::vector<Engine::Contour::Range> limits;
@@ -461,8 +460,8 @@ void pressure()
     {
       double value = i;
 
-      std::string report = ("\tIsoline " + Fmi::to_string(value) +
-                            " took %t sec CPU, %w sec real\n");
+      std::string report =
+          ("\tIsoline " + Fmi::to_string(value) + " took %t sec CPU, %w sec real\n");
       boost::timer::auto_cpu_timer timer(2, report);
 
       std::vector<double> isolines;
