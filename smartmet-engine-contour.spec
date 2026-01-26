@@ -23,7 +23,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal310-devel
+BuildRequires: gdal312-devel
 BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
@@ -37,7 +37,7 @@ BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal310-libs
+Requires: gdal312-libs
 Requires: geos313
 Requires: smartmet-library-gis >= 25.2.18
 Requires: smartmet-library-trax >= 25.2.18
@@ -53,7 +53,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
-#TestRequires: gdal310-devel
+#TestRequires: gdal312-devel
 #TestRequires: geos313-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
