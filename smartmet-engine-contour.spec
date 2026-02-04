@@ -23,28 +23,28 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal310-devel
+BuildRequires: gdal312-devel
 BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 25.2.18
-BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
-BuildRequires: smartmet-library-trax-devel >= 25.2.18
-BuildRequires: smartmet-library-spine-devel >= 25.2.18
+BuildRequires: smartmet-library-gis-devel >= 26.2.4
+BuildRequires: smartmet-library-macgyver-devel >= 26.2.4
+BuildRequires: smartmet-library-trax-devel >= 26.2.4
+BuildRequires: smartmet-library-spine-devel >= 26.2.4
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal310-libs
+Requires: gdal312-libs
 Requires: geos313
-Requires: smartmet-library-gis >= 25.2.18
-Requires: smartmet-library-trax >= 25.2.18
-Requires: smartmet-library-macgyver >= 25.2.18
-Requires: smartmet-library-newbase >= 25.2.18
-Requires: smartmet-library-spine >= 25.2.18
-Requires: smartmet-library-timeseries >= 25.2.18
+Requires: smartmet-library-gis >= 26.2.4
+Requires: smartmet-library-trax >= 26.2.4
+Requires: smartmet-library-macgyver >= 26.2.4
+Requires: smartmet-library-newbase >= 26.2.4
+Requires: smartmet-library-spine >= 26.2.4
+Requires: smartmet-library-timeseries >= 26.2.4
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -53,7 +53,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
-#TestRequires: gdal310-devel
+#TestRequires: gdal312-devel
 #TestRequires: geos313-devel
 #TestRequires: libjpeg-turbo-devel
 #TestRequires: libpng-devel
@@ -76,7 +76,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 25.2.18
+Requires: smartmet-library-trax-devel >= 26.2.4
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
