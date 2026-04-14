@@ -30,7 +30,7 @@ BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 26.4.13
 BuildRequires: smartmet-library-macgyver-devel >= 26.4.13
-BuildRequires: smartmet-library-trax-devel >= 26.4.13
+BuildRequires: smartmet-library-trax-devel >= 26.4.133
 BuildRequires: smartmet-library-spine-devel >= 26.4.13
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
@@ -76,7 +76,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 26.4.13
+Requires: smartmet-library-trax-devel >= 26.4.133
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
