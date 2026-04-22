@@ -194,6 +194,7 @@ std::size_t Options::filtered_data_hash_value() const
     Fmi::hash_combine(seed, Fmi::hash_value(filter_size));
     Fmi::hash_combine(seed, Fmi::hash_value(filter_degree));
     Fmi::hash_combine(seed, Fmi::hash_value(minarea));
+    Fmi::hash_combine(seed, Fmi::hash_value(subdivide));
     return seed;
   }
   catch (...)
