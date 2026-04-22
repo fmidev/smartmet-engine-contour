@@ -1048,6 +1048,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     contourer.strict(theOptions.strict);
     contourer.validate(theOptions.validate);
     contourer.desliver(theOptions.desliver);
+    contourer.subdivide(theOptions.subdivide);
 
     Trax::GeometryCollections results;
 

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.4.13
+Version: 26.4.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -30,8 +30,8 @@ BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 26.4.13
 BuildRequires: smartmet-library-macgyver-devel >= 26.4.13
-BuildRequires: smartmet-library-trax-devel >= 26.4.133
-BuildRequires: smartmet-library-spine-devel >= 26.4.13
+BuildRequires: smartmet-library-trax-devel >= 26.4.22
+BuildRequires: smartmet-library-spine-devel >= 26.4.14
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -40,10 +40,10 @@ Requires: %{smartmet_boost}-thread
 Requires: gdal312-libs
 Requires: geos313
 Requires: smartmet-library-gis >= 26.4.13
-Requires: smartmet-library-trax >= 26.4.13
+Requires: smartmet-library-trax >= 26.4.22
 Requires: smartmet-library-macgyver >= 26.4.13
 Requires: smartmet-library-newbase >= 26.2.4
-Requires: smartmet-library-spine >= 26.4.13
+Requires: smartmet-library-spine >= 26.4.14
 Requires: smartmet-library-timeseries >= 26.4.13
 Requires: libconfig17
 
@@ -76,7 +76,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 26.4.133
+Requires: smartmet-library-trax-devel >= 26.4.22
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -105,6 +105,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Apr 22 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.22-1.fmi
+- Add subdivide option for contouoring to smoothen contours by bilinear interpolation
+
 * Mon Apr 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.13-1.fmi
 - Repackaged due to API changes
 
