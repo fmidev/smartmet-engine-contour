@@ -128,6 +128,7 @@ std::size_t hash_value(const Options& theOptions)
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.validate));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.strict));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.desliver));
+  Fmi::hash_combine(seed, Fmi::hash_value(theOptions.subdivide));
   return seed;
 }
 

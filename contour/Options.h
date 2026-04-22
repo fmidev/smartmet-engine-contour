@@ -78,6 +78,11 @@ struct Options
   bool strict = false;       // require strict success in contouring, and if validation fails error
   bool desliver = false;     // remove slivers
 
+  // Bilinear cell subdivision: insert N-1 interior samples on the bilinear level curve
+  // between consecutive edge intersections. 0 (default) disables, max 4. Reduces
+  // diamond-like artifacts from peak-in-zeros patterns (e.g. lone radar pixels).
+  int subdivide = 0;
+
  private:
   bool hasTransformation() const;
 
