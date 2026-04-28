@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.4.22
+Version: 26.4.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -105,6 +105,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Tue Apr 28 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.28-1.fmi
+- Link explicitly against smartmet-library-timeseries (was relying on transitive linking)
+
 * Wed Apr 22 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.22-1.fmi
 - Add subdivide option for contouoring to smoothen contours by bilinear interpolation
 

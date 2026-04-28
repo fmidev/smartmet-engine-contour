@@ -11,6 +11,7 @@ DEFINES = -DUNIX -D_REENTRANT -DUSE_UNSTABLE_GEOS_CPP_API
 LIBS += $(PREFIX_LDFLAGS) \
 	$(REQUIRED_LIBS) \
 	-lsmartmet-spine \
+	-lsmartmet-timeseries \
 	-lsmartmet-newbase \
 	-lsmartmet-macgyver \
 	-lsmartmet-trax \
