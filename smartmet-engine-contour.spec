@@ -50,7 +50,11 @@ Requires: libconfig17
 Provides: %{SPECNAME}
 Obsoletes: smartmet-brainstorm-contour < 16.11.1
 Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
-#TestRequires: %{smartmet_boost}-devel
+%if 0%{?rhel} && 0%{rhel} < 9
+#TestRequires: boost169-devel
+%else
+#TestRequires: boost-devel
+%endif
 #TestRequires: bzip2-devel
 #TestRequires: gcc-c++
 #TestRequires: gdal312-devel
