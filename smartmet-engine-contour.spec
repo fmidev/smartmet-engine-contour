@@ -4,7 +4,7 @@
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
 Version: 26.4.28
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -110,7 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Tue Apr 28 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.28-1.fmi
+* Tue Apr 28 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.28-2.fmi
 - Link explicitly against smartmet-library-timeseries (was relying on transitive linking)
 
 * Wed Apr 22 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.22-1.fmi
