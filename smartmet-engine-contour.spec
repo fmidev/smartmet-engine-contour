@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.5.5.1
-Release: 1%{?dist}.fmi
+Version: 26.5.5
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -32,6 +32,7 @@ BuildRequires: smartmet-library-gis-devel >= 26.4.13
 BuildRequires: smartmet-library-macgyver-devel >= 26.4.13
 BuildRequires: smartmet-library-trax-devel >= 26.4.22
 BuildRequires: smartmet-library-spine-devel >= 26.4.27
+BuildRequires: smartmet-library-timeseries-devel >= 26.4.13
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -110,7 +111,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Tue May  5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.5.5-1.fmi
+* Tue May  5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.5.5-2.fmi
 - Fixed RPM dependencies
 
 * Tue Apr 28 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.28-2.fmi
