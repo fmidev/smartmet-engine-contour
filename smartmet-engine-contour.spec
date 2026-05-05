@@ -65,6 +65,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-library-spine-devel
+#TestRequires: smartmet-library-timeseries
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
