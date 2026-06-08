@@ -1,5 +1,4 @@
 #include "NormalGrid.h"
-#include "SavitzkyGolay2D.h"
 
 namespace SmartMet
 {
@@ -66,12 +65,6 @@ float NormalGrid::operator()(long i, long j) const
         BCP, fmt::format("NormalGrid accessing coordinates {},{} outside original grid", i, j));
 
   return itsMatrix[i % itsNX][j];
-}
-
-void NormalGrid::smooth(std::size_t size, std::size_t degree)
-{
-  NormalGrid normalgrid(itsMatrix, itsCoords, itsValidCells);
-  SavitzkyGolay2D::smooth(normalgrid, size, degree);
 }
 
 }  // namespace Contour

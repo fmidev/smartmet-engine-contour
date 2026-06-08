@@ -1,6 +1,4 @@
 #include "ShiftedGrid.h"
-#include "NormalGrid.h"
-#include "SavitzkyGolay2D.h"
 #include <fmt/format.h>
 
 // Note: The values may be one column narrower than the coordinates if the data needs a wraparound
@@ -45,12 +43,6 @@ ShiftedGrid::ShiftedGrid(NFmiDataMatrix<float>& theMatrix,
   itsBBox[1] = box[1];
   itsBBox[2] = box[2];
   itsBBox[3] = box[3];
-}
-
-void ShiftedGrid::smooth(std::size_t size, std::size_t degree)
-{
-  NormalGrid normalgrid(itsMatrix, itsCoords, itsValidCells);
-  SavitzkyGolay2D::smooth(normalgrid, size, degree);
 }
 
 }  // namespace Contour

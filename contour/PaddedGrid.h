@@ -52,8 +52,6 @@ class PaddedGrid : public BaseGrid
   // We expand the grid by one cell in all directions to surround the data with missing values
   std::array<long, 4> bbox() const override { return itsBBox; }
 
-  void smooth(std::size_t size, std::size_t degree) override;
-
  private:
   long mini() const { return itsBBox[0]; }
   long minj() const { return itsBBox[1]; }

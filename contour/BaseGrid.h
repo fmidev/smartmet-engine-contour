@@ -18,8 +18,6 @@ class BaseGrid : public Trax::Grid
   BaseGrid(BaseGrid &&) = delete;
   BaseGrid &operator=(const BaseGrid &) = delete;
   BaseGrid &operator=(BaseGrid &&) = delete;
-
-  virtual void smooth(std::size_t size, std::size_t degree) = 0;
 };
 
 }  // namespace Contour

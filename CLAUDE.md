@@ -35,13 +35,15 @@ Tests compile with `-O0 -g` and link against the locally built `contour.so` plus
 
 **Options** (`Options.h/.cpp`) — All contouring parameters. Constructed with either `std::vector<double>` (isovalues for isolines) or `std::vector<Range>` (lo/hi limits for isobands). Includes data transformation (multiplier/offset), Savitzky-Golay smoothing (filter_size/filter_degree), minimum area filtering, OGC validation, and desliver options.
 
-**Grid hierarchy** — Four grid implementations, all inheriting `BaseGrid` (which inherits `Trax::Grid`):
+**Grid hierarchy** — Three grid implementations, all inheriting `BaseGrid` (which inherits `Trax::Grid`):
 - `NormalGrid` — regular matrix with optional world-data wraparound
 - `PaddedGrid` — surrounded by NaN-filled cells for missing-data isobands outside grid bounds
 - `ShiftedGrid` — handles globe data with column wraparound shift
-- `MirrorGrid` — extends grid at borders by mirroring trends (used by Savitzky-Golay filter)
 
-**SavitzkyGolay2D** — 2D smoothing filter applied to grids before contouring. Size range 0-6, degree range 0-5.
+**Smoothing** — Two paths, both producing a new grid via `Trax::smooth` (see `Engine::contour`):
+the `Options::smoother` path (box / median / morphology) takes precedence; otherwise the legacy
+`filter_size`/`filter_degree` options drive `Trax`'s `SavitzkyGolay` method (size 1-6, degree 1-5).
+The engine's own 2D Savitzky-Golay implementation was moved into Trax for reuse.
 
 **GeosTools** — Utility for converting GEOS geometries to SVG path format with precision control.
 

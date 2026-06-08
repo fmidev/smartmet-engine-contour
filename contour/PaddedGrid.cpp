@@ -1,6 +1,4 @@
 #include "PaddedGrid.h"
-#include "NormalGrid.h"
-#include "SavitzkyGolay2D.h"
 
 namespace SmartMet
 {
@@ -74,12 +72,6 @@ bool PaddedGrid::valid(long i, long j) const
   if (i <= mini() || i >= maxi() || j <= minj() || j >= maxj())
     return true;  // but full of NaN
   return itsValidCells(i, j);
-}
-
-void PaddedGrid::smooth(std::size_t size, std::size_t degree)
-{
-  NormalGrid normalgrid(itsMatrix, itsCoords, itsValidCells);
-  SavitzkyGolay2D::smooth(normalgrid, size, degree);
 }
 
 }  // namespace Contour

@@ -1034,15 +1034,16 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
 
     // Smoothing is delayed until this point. Two independent paths are
-    // supported; the grid handed to the contourer is the smoothed one.
+    // supported; the grid handed to the contourer is the smoothed one. Neither
+    // mutates the data: Trax::smooth returns a new grid that shares this grid's
+    // geometry but holds smoothed values.
     //
     //  1. The Trax smoother (box / median / morphology), when set and active,
-    //     takes precedence. It does not mutate the data: Trax::smooth returns a
-    //     new grid that shares this grid's geometry but holds smoothed values.
+    //     takes precedence.
     //  2. Otherwise the legacy 2D Savitzky-Golay filter, driven by
-    //     filter_size/filter_degree, smooths the data matrix in place. (It
-    //     assumes a DataMatrix-like API rather than NFmiDataMatrix, which is
-    //     why the filtering is delayed until the grid wrapper exists.)
+    //     filter_size/filter_degree. This is now served by Trax's ported
+    //     SavitzkyGolay method (filter_size is its window half-width, clamped
+    //     to 1..6; filter_degree its polynomial degree, clamped to 1..5).
 
     std::shared_ptr<const Trax::Grid> contour_input = data;
 
@@ -1052,9 +1053,11 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     }
     else if (theOptions.filter_size || theOptions.filter_degree)
     {
-      std::size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
-      std::size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
-      data->smooth(size, degree);
+      Trax::SmoothOptions sg;
+      sg.method = Trax::SmoothMethod::SavitzkyGolay;
+      sg.radius = static_cast<int>(theOptions.filter_size ? *theOptions.filter_size : 1);
+      sg.degree = static_cast<int>(theOptions.filter_degree ? *theOptions.filter_degree : 1);
+      contour_input = Trax::smooth(data, sg);
     }
 
     Trax::Contour contourer;

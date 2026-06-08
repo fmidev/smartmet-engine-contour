@@ -61,8 +61,6 @@ class ShiftedGrid : public BaseGrid
 
   std::array<long, 4> bbox() const override { return itsBBox; }
 
-  void smooth(std::size_t size, std::size_t degree) override;
-
  private:
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
