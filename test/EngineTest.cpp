@@ -270,6 +270,89 @@ void fills()
 
 // ----------------------------------------------------------------------
 
+// Exercise the Trax grid smoother path (Options::smoother), independent of the
+// legacy Savitzky-Golay filter_size/filter_degree path.
+
+void trax_smoother()
+{
+  using namespace SmartMet;
+  using Fmi::Box;
+
+  auto q = qengine->get("pal_skandinavia");
+  Fmi::DateTime t = Fmi::DateTime::from_string("2008-08-06 12:00");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
+
+  auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
+  auto world2 = q->area().XYToWorldXY(q->area().TopRight());
+  Box area(world1.X(), world1.Y(), world2.X(), world2.Y(), 100, 100);
+  std::size_t qhash = Engine::Querydata::hash_value(q);
+
+  auto crs = q->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q);
+
+  auto svg_isoband = [&](const std::optional<Trax::SmoothOptions> &smoother) -> string
+  {
+    std::vector<Engine::Contour::Range> limits;
+    limits.push_back(Engine::Contour::Range(25.5, 30.0));
+    Engine::Contour::Options opt(temperature, t, limits);
+    opt.smoother = smoother;
+
+    auto valueshash = qhash;
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
+    if (opt.level)
+      q->selectLevel(*opt.level);
+
+    auto matrix = qengine->getValues(q, valueshash, opt.time);
+    auto geom = *(contour->contour(qhash, crs, *matrix, *coords, opt).begin());
+    return Fmi::OGR::exportToSvg(*geom, area, 1);
+  };
+
+  // A box smoother (radius 1, single pass) must change the contour, and the
+  // result is anchored as a regression golden value.
+  {
+    Trax::SmoothOptions box;
+    box.method = Trax::SmoothMethod::Box;
+    box.radius = 1;
+    box.passes = 1;
+
+    auto plain = svg_isoband(std::nullopt);
+    auto smoothed = svg_isoband(box);
+
+    if (smoothed == plain)
+      TEST_FAILED("Box smoother did not change the isoband 25.5-30:\n\t" + smoothed);
+
+    string ok =
+        "M0 100 0 99.3 0 98.7 0 98 0 97.7 0.7 97.9 0.8 98 1.5 98.6 1.6 98.7 2.1 99.3 2.2 99.6 2.4 "
+        "100 2.2 100 1.5 100 0.7 100Z";
+    if (smoothed != ok)
+      TEST_FAILED("Box-smoothed isoband 25.5-30\n\tExpected: " + ok + "\n\tObtained: " + smoothed);
+  }
+
+  // An inactive smoother (radius 0) must be a no-op: identical to no smoother.
+  {
+    Trax::SmoothOptions inactive;
+    inactive.method = Trax::SmoothMethod::Box;
+    inactive.radius = 0;
+    if (svg_isoband(inactive) != svg_isoband(std::nullopt))
+      TEST_FAILED("Inactive box smoother changed the result");
+  }
+
+  // The median smoother must also run and produce a non-empty contour.
+  {
+    Trax::SmoothOptions median;
+    median.method = Trax::SmoothMethod::Median;
+    median.radius = 1;
+    median.passes = 1;
+    if (svg_isoband(median).empty())
+      TEST_FAILED("Median smoother produced an empty isoband 25.5-30");
+  }
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
 void crossection()
 {
   using namespace SmartMet;
@@ -589,6 +672,8 @@ class tests : public tframe::tests
     TEST(lines);
     contour->clearCache();
     TEST(fills);
+    contour->clearCache();
+    TEST(trax_smoother);
     contour->clearCache();
     TEST(crossection);
     contour->clearCache();

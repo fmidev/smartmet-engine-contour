@@ -123,6 +123,8 @@ std::size_t hash_value(const Options& theOptions)
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.offset));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.filter_size));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.filter_degree));
+  if (theOptions.smoother)
+    Fmi::hash_combine(seed, theOptions.smoother->hash());
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.minarea));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.closed_range));
   Fmi::hash_combine(seed, Fmi::hash_value(theOptions.validate));
@@ -193,6 +195,8 @@ std::size_t Options::filtered_data_hash_value() const
     Fmi::hash_combine(seed, Fmi::hash_value(offset));
     Fmi::hash_combine(seed, Fmi::hash_value(filter_size));
     Fmi::hash_combine(seed, Fmi::hash_value(filter_degree));
+    if (smoother)
+      Fmi::hash_combine(seed, smoother->hash());
     Fmi::hash_combine(seed, Fmi::hash_value(minarea));
     Fmi::hash_combine(seed, Fmi::hash_value(subdivide));
     return seed;

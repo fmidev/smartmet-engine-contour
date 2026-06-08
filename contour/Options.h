@@ -17,6 +17,7 @@
 #include <macgyver/DateTime.h>
 #include <spine/Parameter.h>
 #include <trax/InterpolationType.h>
+#include <trax/SmoothOptions.h>
 #include <optional>
 #include <vector>
 
@@ -70,6 +71,11 @@ struct Options
 
   std::optional<std::size_t> filter_size;  // 2D Savitzky-Golay smoother
   std::optional<std::size_t> filter_degree;
+
+  // Trax grid smoother (box / median / morphology). When set and active() it
+  // takes precedence over the Savitzky-Golay filter_size/filter_degree above;
+  // the two are independent smoothing paths and only one runs per request.
+  std::optional<Trax::SmoothOptions> smoother;
 
   std::optional<double> minarea;  // km^2
 

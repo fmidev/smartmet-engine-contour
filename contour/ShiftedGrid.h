@@ -53,6 +53,12 @@ class ShiftedGrid : public BaseGrid
   std::size_t height() const override { return itsHeight; }
   std::size_t shift() const override { return itsShift; }
 
+  // Number of distinct longitude columns: the period for Trax::smooth's x-wrap.
+  // operator() reads itsMatrix[i % itsNX], so wrapping by itsNX equals physical
+  // adjacency. When the coordinates carry a duplicate wrap column (itsWidth ==
+  // itsNX + 1) this is width()-1, otherwise it equals width(); Trax handles both.
+  std::size_t xperiod() const override { return itsNX; }
+
   std::array<long, 4> bbox() const override { return itsBBox; }
 
   void smooth(std::size_t size, std::size_t degree) override;

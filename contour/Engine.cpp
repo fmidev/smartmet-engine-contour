@@ -27,6 +27,7 @@
 #include <trax/IsobandLimits.h>
 #include <trax/IsolineValues.h>
 #include <trax/OGR.h>
+#include <trax/Smoother.h>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
 #include <future>
@@ -1032,10 +1033,24 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       }
     }
 
-    // Savitzky-Golay assumes DataMatrix like Adapter API, not NFmiDataMatrix like API, hence the
-    // filtering is delayed until this point.
+    // Smoothing is delayed until this point. Two independent paths are
+    // supported; the grid handed to the contourer is the smoothed one.
+    //
+    //  1. The Trax smoother (box / median / morphology), when set and active,
+    //     takes precedence. It does not mutate the data: Trax::smooth returns a
+    //     new grid that shares this grid's geometry but holds smoothed values.
+    //  2. Otherwise the legacy 2D Savitzky-Golay filter, driven by
+    //     filter_size/filter_degree, smooths the data matrix in place. (It
+    //     assumes a DataMatrix-like API rather than NFmiDataMatrix, which is
+    //     why the filtering is delayed until the grid wrapper exists.)
 
-    if (theOptions.filter_size || theOptions.filter_degree)
+    std::shared_ptr<const Trax::Grid> contour_input = data;
+
+    if (theOptions.smoother && theOptions.smoother->active())
+    {
+      contour_input = Trax::smooth(data, *theOptions.smoother);
+    }
+    else if (theOptions.filter_size || theOptions.filter_degree)
     {
       std::size_t size = (theOptions.filter_size ? *theOptions.filter_size : 1);
       std::size_t degree = (theOptions.filter_degree ? *theOptions.filter_degree : 1);
@@ -1059,7 +1074,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       for (auto i : todo_contours)
         isovalues.add(theOptions.isovalues[i]);
 
-      results = contourer.isolines(*data, isovalues);
+      results = contourer.isolines(*contour_input, isovalues);
     }
     else
     {
@@ -1092,7 +1107,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
         isobands.add(lo, hi);
       }
 
-      results = contourer.isobands(*data, isobands);
+      results = contourer.isobands(*contour_input, isobands);
     }
 
     // Update results and cache
@@ -1145,6 +1160,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
       throw Fmi::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
     if (theOptions.filter_degree)
       throw Fmi::Exception(BCP, "Using the filter_degree option is meaningless for cross-sections");
+    if (theOptions.smoother && theOptions.smoother->active())
+      throw Fmi::Exception(BCP, "Using the smoother option is meaningless for cross-sections");
 
     // Verify height parameter is available
 
