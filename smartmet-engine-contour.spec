@@ -28,11 +28,11 @@ BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 26.4.13
-BuildRequires: smartmet-library-macgyver-devel >= 26.4.13
-BuildRequires: smartmet-library-trax-devel >= 26.4.22
-BuildRequires: smartmet-library-spine-devel >= 26.4.27
-BuildRequires: smartmet-library-timeseries-devel >= 26.4.13
+BuildRequires: smartmet-library-gis-devel >= 26.6.15
+BuildRequires: smartmet-library-macgyver-devel >= 26.6.15
+BuildRequires: smartmet-library-trax-devel >= 26.6.23
+BuildRequires: smartmet-library-spine-devel >= 26.6.24
+BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -40,12 +40,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal312-libs
 Requires: geos313
-Requires: smartmet-library-gis >= 26.4.13
-Requires: smartmet-library-trax >= 26.4.22
-Requires: smartmet-library-macgyver >= 26.4.13
-Requires: smartmet-library-newbase >= 26.2.4
-Requires: smartmet-library-spine >= 26.4.27
-Requires: smartmet-library-timeseries >= 26.4.13
+Requires: smartmet-library-gis >= 26.6.15
+Requires: smartmet-library-trax >= 26.6.23
+Requires: smartmet-library-macgyver >= 26.6.15
+Requires: smartmet-library-newbase >= 26.6.24
+Requires: smartmet-library-spine >= 26.6.24
+Requires: smartmet-library-timeseries >= 26.5.5
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -70,7 +70,7 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
-#TestRequires: smartmet-test-data >= 26.4.1
+#TestRequires: smartmet-test-data >= 26.6.16
 #TestRequires: zlib-devel
 
 
@@ -82,7 +82,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 26.4.22
+Requires: smartmet-library-trax-devel >= 26.6.23
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
