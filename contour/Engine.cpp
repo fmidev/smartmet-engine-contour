@@ -28,6 +28,7 @@
 #include <trax/IsolineValues.h>
 #include <trax/OGR.h>
 #include <trax/Smoother.h>
+#include <algorithm>
 #include <cmath>
 #include <cpl_conv.h>  // For configuring GDAL
 #include <future>
@@ -37,6 +38,7 @@
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
 #include <optional>
+#include <thread>
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 
@@ -122,6 +124,10 @@ class Engine::Impl
                                const std::optional<double> &lolimit,
                                const std::optional<double> &hilimit,
                                Trax::InterpolationType interpolation) const;
+
+  // Effective number of row-bands for a contouring request: the per-request override if set,
+  // otherwise the configured default, always clamped to [1, number of cores].
+  int effective_threads(const std::optional<int> &theOverride) const;
 };
 
 }  // namespace Contour
@@ -623,6 +629,25 @@ void Engine::Impl::init()
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Effective number of row-bands for a contouring request
+ *
+ * The per-request override (e.g. from a WMS layer) takes precedence over the
+ * configured default. The result is always clamped to [1, number of cores] so
+ * contouring never uses more threads than there are cores.
+ */
+// ----------------------------------------------------------------------
+
+int Engine::Impl::effective_threads(const std::optional<int> &theOverride) const
+{
+  int requested = theOverride.value_or(itsConfig->getThreads());
+  if (requested <= 1)
+    return 1;
+  unsigned int cores = std::max(1U, std::thread::hardware_concurrency());
+  return std::min(requested, static_cast<int>(cores));
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Get cache usage report
  */
 // ----------------------------------------------------------------------
@@ -675,6 +700,7 @@ GeometryPtr Engine::Impl::internal_isoline(const Trax::Grid &data,
   contourer.interpolation(interpolation);
   contourer.strict(false);
   contourer.validate(false);
+  contourer.threads(effective_threads(std::nullopt));
 
   auto result = contourer.isolines(data, limits);
   return Trax::to_geos_geom(result[0], itsGeomFactory);
@@ -724,6 +750,7 @@ GeometryPtr Engine::Impl::internal_isoband(const Trax::Grid &data,
   contourer.closed_range(true);
   contourer.strict(false);
   contourer.validate(false);
+  contourer.threads(effective_threads(std::nullopt));
   auto result = contourer.isobands(data, limits);
 
   return Trax::to_geos_geom(result[0], itsGeomFactory);
@@ -1067,6 +1094,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     contourer.validate(theOptions.validate);
     contourer.desliver(theOptions.desliver);
     contourer.subdivide(theOptions.subdivide);
+    contourer.threads(effective_threads(theOptions.threads));
 
     Trax::GeometryCollections results;
 

@@ -34,6 +34,9 @@ Config::Config(const std::string& theFileName)
     if (!itsConfig.exists("cache.max_contours"))
       throw Fmi::Exception(BCP, "cache.max_contours not set in '" + theFileName + "'");
     itsConfig.lookupValue("cache.max_contours", itsMaxContourCacheSize);
+
+    // Optional default contouring parallelism (capped to cores by the engine).
+    itsConfig.lookupValue("contour.threads", itsThreads);
   }
   catch (...)
   {

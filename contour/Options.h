@@ -89,6 +89,10 @@ struct Options
   // diamond-like artifacts from peak-in-zeros patterns (e.g. lone radar pixels).
   int subdivide = 0;
 
+  // Per-request override for the number of row-bands used in parallel contouring. When set it
+  // overrides the contour-engine default; the effective value is capped to the number of cores.
+  std::optional<int> threads;
+
  private:
   bool hasTransformation() const;
 

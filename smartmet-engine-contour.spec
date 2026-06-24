@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.5.5
-Release: 2%{?dist}.fmi
+Version: 26.6.24
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-contour
@@ -111,6 +111,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Jun 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.24-1.fmi
+- Added contour.threads configuration and a per-request thread override for band-parallel contouring
+
 * Tue May  5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.5.5-2.fmi
 - Fixed RPM dependencies
 
