@@ -116,6 +116,31 @@ class Engine::Impl
                                      const Fmi::CoordinateMatrix &theCoordinates,
                                      const Fmi::SpatialReference &theOutputCRS) const;
 
+  // Cached masks of the cells to be contoured. The capacity of this cache is
+  // measured in bytes, since the size of a mask depends on the grid size.
+
+  using ValidCellsPtr = std::shared_ptr<const Fmi::BoolMatrix>;
+
+  struct ValidCellsSizeFunction
+  {
+    static std::size_t getSize(const ValidCellsPtr &theMask)
+    {
+      if (!theMask)
+        return 1;
+      return sizeof(Fmi::BoolMatrix) + 8 * ((theMask->size() + 63) / 64);
+    }
+  };
+
+  using ValidCellsCache = Fmi::Cache::Cache<std::size_t, ValidCellsPtr, ValidCellsSizeFunction>;
+  mutable ValidCellsCache itsValidCellsCache;
+
+  ValidCellsPtr get_valid_cells(std::size_t theCoordinatesHash,
+                                const Fmi::SpatialReference &theOutputCRS,
+                                const Fmi::CoordinateMatrix &theCoordinates,
+                                const Fmi::CoordinateAnalysis &theAnalysis,
+                                const Fmi::Box &theClipBox,
+                                bool all_valid) const;
+
   GeometryPtr internal_isoline(const Trax::Grid &data,
                                double isovalue,
                                Trax::InterpolationType interpolation) const;
@@ -288,6 +313,18 @@ bool overlaps(double vmin, double vmax, double v1, double v2, double v3, double 
 // ----------------------------------------------------------------------
 /*!
  * \brief Mark cells which overlap the given bounding box
+ *
+ * Tiled requests reject the vast majority of the grid, so instead of testing
+ * every cell we first calculate the Y-range of each coordinate row and skip
+ * whole cell rows which cannot reach the bounding box. The result is identical
+ * to testing each cell separately: if all Y-coordinates of both rows bounding
+ * the cell row are below ymin (or above ymax), so are the four corners of every
+ * cell on that row, and overlaps() would return false for each of them.
+ *
+ * Rows containing missing Y-coordinates are given an infinite range so that
+ * they are never rejected, since a NaN corner marks the cell as overlapping.
+ * Missing X-coordinates require no special treatment, since the X- and Y-tests
+ * are independent of each other.
  */
 // ----------------------------------------------------------------------
 
@@ -304,7 +341,42 @@ Fmi::BoolMatrix mark_overlapping_cells(const Fmi::CoordinateMatrix &theCoordinat
 
   Fmi::BoolMatrix ret(nx - 1, ny - 1, false);
 
+  // Y-range of each coordinate row
+
+  const auto inf = std::numeric_limits<double>::infinity();
+
+  std::vector<double> row_ymin(ny, -inf);
+  std::vector<double> row_ymax(ny, inf);
+
+  for (auto j = 0UL; j < ny; j++)
+  {
+    auto lo = inf;
+    auto hi = -inf;
+
+    for (auto i = 0UL; i < nx; i++)
+    {
+      const auto y = theCoordinates.y(i, j);
+      if (std::isnan(y))
+      {
+        lo = -inf;  // never reject a row with missing coordinates
+        hi = inf;
+        break;
+      }
+      lo = std::min(lo, y);
+      hi = std::max(hi, y);
+    }
+
+    row_ymin[j] = lo;
+    row_ymax[j] = hi;
+  }
+
   for (auto j = 0UL; j < ny - 1; j++)
+  {
+    // Skip the whole cell row if it cannot overlap the bounding box
+    if (std::max(row_ymax[j], row_ymax[j + 1]) < ymin ||
+        std::min(row_ymin[j], row_ymin[j + 1]) > ymax)
+      continue;
+
     for (auto i = 0UL; i < nx - 1; i++)
     {
       if (overlaps(xmin,
@@ -323,6 +395,7 @@ Fmi::BoolMatrix mark_overlapping_cells(const Fmi::CoordinateMatrix &theCoordinat
         ret.set(i, j, true);
       }
     }
+  }
 
   return ret;
 }
@@ -620,6 +693,9 @@ void Engine::Impl::init()
 
     // Rough estimate: 50 producers times 10 projections = 500
     itsAnalysisCache.resize(1000);
+
+    // Capacity in bytes, since the size of a mask depends on the grid size
+    itsValidCellsCache.resize(itsConfig->getMaxValidCellsCacheSize());
   }
   catch (...)
   {
@@ -678,6 +754,7 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
 void Engine::Impl::clearCache()
 {
   itsContourCache.clear();
+  itsValidCellsCache.clear();
 }
 
 // ----------------------------------------------------------------------
@@ -791,6 +868,85 @@ std::shared_ptr<Fmi::CoordinateAnalysis> Engine::Impl::get_analysis(
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Return the mask of the cells to be contoured
+ *
+ * The mask combines the cells which are valid and have the correct winding
+ * rule with the cells overlapping the clipping box:
+ *
+ *    Needs flipping:
+ *         F   T
+ *       +-------
+ * CW  T | T   F      --> xor returns correct combination of CW cells even when flipped
+ *     F | F   T
+ *
+ * The mask depends only on the projected grid coordinates and on the clipping
+ * box: not on the data, the time step, the parameter or the contour limits.
+ * Since WMS requests are typically generated in a WMTS style tiled fashion,
+ * the very same tiles are contoured over and over again for different times,
+ * parameters and isoband limits. Caching the mask thus removes a full grid
+ * scan from all but the first request for each tile of each grid, which for
+ * large grids and small tiles dominates the cost of contouring a tile.
+ *
+ * Note: Contouring may be tiled in which case the clipping box marks which
+ *       cells overlap with the bounding box (expanded by clipping margin).
+ *       We combine the results here instead of optimizing the analysis by
+ *       skipping cells outside the tile, since the analysis is cached for
+ *       the full grid.
+ */
+// ----------------------------------------------------------------------
+
+Engine::Impl::ValidCellsPtr Engine::Impl::get_valid_cells(
+    std::size_t theCoordinatesHash,
+    const Fmi::SpatialReference &theOutputCRS,
+    const Fmi::CoordinateMatrix &theCoordinates,
+    const Fmi::CoordinateAnalysis &theAnalysis,
+    const Fmi::Box &theClipBox,
+    bool all_valid) const
+{
+  try
+  {
+    // The mask depends on the projected coordinates and on the clipping
+    // rectangle only. Note that Fmi::Box::hashValue() is not used, since it also
+    // includes the corner ordering of the box, which merely tells the direction
+    // of the Y-axis in pixel coordinates and is irrelevant here.
+
+    std::size_t hash = theCoordinatesHash;
+    Fmi::hash_combine(hash, theOutputCRS.hashValue());
+
+    if (all_valid)
+      Fmi::hash_combine(hash, Fmi::hash_value(std::string("all_valid")));
+    else
+    {
+      Fmi::hash_combine(hash, Fmi::hash_value(theClipBox.xmin()));
+      Fmi::hash_combine(hash, Fmi::hash_value(theClipBox.ymin()));
+      Fmi::hash_combine(hash, Fmi::hash_value(theClipBox.xmax()));
+      Fmi::hash_combine(hash, Fmi::hash_value(theClipBox.ymax()));
+    }
+
+    auto cached = itsValidCellsCache.find(hash);
+    if (cached)
+      return *cached;
+
+    auto valid_cells = theAnalysis.valid;
+    valid_cells &= (theAnalysis.clockwise ^ theAnalysis.needs_flipping);
+
+    if (!all_valid)
+      valid_cells &= mark_overlapping_cells(theCoordinates, theClipBox);
+
+    auto ret = std::make_shared<const Fmi::BoolMatrix>(std::move(valid_cells));
+
+    itsValidCellsCache.insert(hash, ret);
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Calculate cache keys for the contours to be calculated
  */
 // ----------------------------------------------------------------------
@@ -877,7 +1033,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
   const double large = 1E10;
   Fmi::Box clipbox(-large, -large, large, large, 1, 1);
 
-  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, clipbox, false, theOptions);
+  // All cells overlap a clipbox this large, so we skip testing them one by one
+  return contour(theDataHash, theOutputCRS, theMatrix, theCoordinates, clipbox, true, theOptions);
 #endif
 }
 
@@ -982,30 +1139,15 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     auto analysis = get_analysis(coordinates_hash, *coordinates, theOutputCRS);
 
-    /*
-     * Finally we determine which grid cells are valid and have the correct winding rule
-     * while taking into account potential flipping.
-     *
-     *    Needs flipping:
-     *         F   T
-     *       +-------
-     * CW  T | T   F      --> xor returns correct combination of CW cells even when flipped
-     *     F | F   T
-     *
-     * Note: Fmi::analysis could do this for us, and the result would be cached. This
-     *       is very fast though.
-     *
-     * Note: Contouring may be tiled in which case 'theValidCells' marks which cell overlap
-     *       with the bouding box (expanded by clipping margin). We combine the results
-     *       here instead of optimizing the analysis by skipping cells outside the tile
-     *       since the analysis is cached for the full grid and hence there are no real
-     *       speed gains to be obtained for WMS services.
-     */
+    // Finally we determine which grid cells are to be contoured. The mask
+    // depends on the coordinates and the clipping box only, hence it is cached
+    // for the benefit of tiled requests. The shared pointer must be kept alive
+    // for as long as the grids below refer to the mask.
 
-    auto valid_cells = analysis->valid;
-    valid_cells &= (analysis->clockwise ^ analysis->needs_flipping);
-    if (!all_valid)
-      valid_cells &= mark_overlapping_cells(*coordinates, theClipBox);
+    auto valid_cells_ptr = get_valid_cells(
+        coordinates_hash, theOutputCRS, *coordinates, *analysis, theClipBox, all_valid);
+
+    const auto &valid_cells = *valid_cells_ptr;
 
     // Process the data for contouring. We wish to avoid unnecessary copying of
     // the data, hence we use the existence of an alternative unique_ptr
@@ -1357,6 +1499,7 @@ Fmi::Cache::CacheStatistics Engine::Impl::getCacheStats() const
 
   ret.insert(std::make_pair("Contour::contour_cache", itsContourCache.statistics()));
   ret.insert(std::make_pair("Contour::analysis_cache", itsAnalysisCache.statistics()));
+  ret.insert(std::make_pair("Contour::valid_cells_cache", itsValidCellsCache.statistics()));
 
   return ret;
 }

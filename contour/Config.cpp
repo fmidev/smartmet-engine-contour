@@ -35,6 +35,11 @@ Config::Config(const std::string& theFileName)
       throw Fmi::Exception(BCP, "cache.max_contours not set in '" + theFileName + "'");
     itsConfig.lookupValue("cache.max_contours", itsMaxContourCacheSize);
 
+    // Optional size of the cache for the masks of contoured cells
+    itsConfig.lookupValue("cache.max_valid_cells_mbytes", itsMaxValidCellsCacheMBytes);
+    if (itsMaxValidCellsCacheMBytes < 0)
+      throw Fmi::Exception(BCP, "cache.max_valid_cells_mbytes must be nonnegative");
+
     // Optional default contouring parallelism (capped to cores by the engine).
     itsConfig.lookupValue("contour.threads", itsThreads);
   }

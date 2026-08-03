@@ -47,7 +47,19 @@ The engine's own 2D Savitzky-Golay implementation was moved into Trax for reuse.
 
 **GeosTools** — Utility for converting GEOS geometries to SVG path format with precision control.
 
-**Caching** (`Engine::Impl`) — Dual LRU cache: contour geometry cache and coordinate analysis cache. Hash-based keys. Cache size configured via libconfig (default 10,000 entries).
+**Caching** (`Engine::Impl`) — Three LRU caches with hash-based keys:
+- contour geometry cache, keyed by data + CRS + clip box + contour limits (`cache.max_contours`,
+  entries)
+- coordinate analysis cache, keyed by coordinates + CRS (fixed at 1000 entries)
+- valid-cells cache (`get_valid_cells`), keyed by coordinates + CRS + the clip rectangle. Holds the
+  mask of the cells to be contoured, which depends on neither the data nor the contour limits, and
+  is hence shared by all times, parameters and isobands of the same tile. Its capacity is measured
+  in bytes since the mask size follows the grid size (`cache.max_valid_cells_mbytes`, default 256;
+  divided over 16 shards, so a mask larger than 1/16 of it is never cached).
+
+Building the mask (`mark_overlapping_cells`) scans the whole grid, so for tiled WMS/WMTS requests
+the cache is what keeps the per-tile cost proportional to the tile instead of to the grid. Requests
+without a clip box pass `all_valid` and skip the scan entirely.
 
 ## Key dependencies
 

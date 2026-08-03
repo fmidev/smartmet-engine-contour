@@ -12,6 +12,7 @@
 #include <spine/Reactor.h>
 #include <timeseries/ParameterFactory.h>
 #include <libconfig.h++>
+#include <ogr_api.h>
 #include <ogr_geometry.h>
 #include <ogr_spatialref.h>
 
@@ -609,6 +610,263 @@ void pressure_all_at_once()
 
 // ----------------------------------------------------------------------
 
+// Area of a possibly empty or missing geometry
+
+// A tile to be contoured and the hash of the expected SVG representation of the
+// result. The expected values have been captured from the implementation which
+// tested every cell of the grid for an overlap with the clipping box without
+// caching the mask of the contoured cells.
+
+struct TileTest
+{
+  double x1;
+  double y1;
+  double x2;
+  double y2;
+  std::size_t expected;
+};
+
+// Contour the given tiles and compare the results with the expected ones. Also
+// verify that caching the mask of the contoured cells does not alter the result:
+// the mask is cached for each grid and clipping box, and is hence shared by
+// requests for different isobands of the same tile.
+
+void compare_tiled_contour(const std::string &theName,
+                           std::size_t theHash,
+                           const Fmi::SpatialReference &theCRS,
+                           const NFmiDataMatrix<float> &theMatrix,
+                           const Fmi::CoordinateMatrix &theCoordinates,
+                           const SmartMet::Engine::Contour::Options &theOptions,
+                           const SmartMet::Engine::Contour::Options &theOtherOptions,
+                           const std::vector<TileTest> &theTiles)
+{
+  using namespace SmartMet;
+  using Fmi::Box;
+
+  for (const auto &t : theTiles)
+  {
+    contour->clearCache();
+
+    Box tile(t.x1, t.y1, t.x2, t.y2, 100, 100);
+
+    auto geom =
+        contour->contour(theHash, theCRS, theMatrix, theCoordinates, tile, theOptions).at(0);
+
+    const auto svg = Fmi::OGR::exportToSvg(*geom, tile, 1);
+    const auto result = Fmi::hash_value(svg);
+
+    if (result != t.expected)
+      TEST_FAILED(theName + ": tile " + std::to_string(t.x1) + "," + std::to_string(t.y1) + "," +
+                  std::to_string(t.x2) + "," + std::to_string(t.y2) +
+                  "\n\tExpected hash: " + std::to_string(t.expected) +
+                  "\n\tObtained hash: " + std::to_string(result) + " for " + svg);
+
+    // The very same tile is contoured again for another isoband, which finds the
+    // mask of the contoured cells from the cache. The result must not change.
+
+    auto cold =
+        contour->contour(theHash, theCRS, theMatrix, theCoordinates, tile, theOtherOptions).at(0);
+    const auto cold_svg = Fmi::OGR::exportToSvg(*cold, tile, 1);
+
+    contour->clearCache();
+
+    auto warm =
+        contour->contour(theHash, theCRS, theMatrix, theCoordinates, tile, theOtherOptions).at(0);
+    const auto warm_svg = Fmi::OGR::exportToSvg(*warm, tile, 1);
+
+    if (cold_svg != warm_svg)
+      TEST_FAILED(theName + ": a cached cell mask changed the result\n\tExpected: " + warm_svg +
+                  "\n\tObtained: " + cold_svg);
+  }
+
+  // Every cell of the grid overlaps a clipping box this large, and hence the
+  // result must be identical to contouring without a clipping box at all.
+
+  const double large = 1E10;
+  Box everything(-large, -large, large, large, 100, 100);
+
+  contour->clearCache();
+  auto untiled = contour->contour(theHash, theCRS, theMatrix, theCoordinates, theOptions).at(0);
+  const auto untiled_svg = Fmi::OGR::exportToSvg(*untiled, everything, 5);
+
+  contour->clearCache();
+  auto clipped =
+      contour->contour(theHash, theCRS, theMatrix, theCoordinates, everything, theOptions).at(0);
+  const auto clipped_svg = Fmi::OGR::exportToSvg(*clipped, everything, 5);
+
+  if (untiled_svg != clipped_svg)
+    TEST_FAILED(theName +
+                ": contouring with a clipping box covering everything differs from contouring "
+                "without a clipping box\n\tExpected: " +
+                untiled_svg + "\n\tObtained: " + clipped_svg);
+}
+
+// Tiles covering the quadrants of the given box, plus a tile completely outside
+// of it so that no cell of the grid overlaps the clipping box.
+
+std::vector<TileTest> quadrant_tiles(
+    double x1, double y1, double x2, double y2, const std::vector<std::size_t> &theExpected)
+{
+  std::vector<TileTest> ret;
+
+  const auto xm = 0.5 * (x1 + x2);
+  const auto ym = 0.5 * (y1 + y2);
+  const auto w = x2 - x1;
+
+  ret.push_back({x1, y1, xm, ym, 0});
+  ret.push_back({xm, y1, x2, ym, 0});
+  ret.push_back({x1, ym, xm, y2, 0});
+  ret.push_back({xm, ym, x2, y2, 0});
+  ret.push_back({x1 + 10 * w, y1, x1 + 11 * w, ym, 0});  // outside the data
+
+  for (auto i = 0UL; i < ret.size() && i < theExpected.size(); i++)
+    ret[i].expected = theExpected[i];
+
+  return ret;
+}
+
+void tiles()
+{
+  using namespace SmartMet;
+
+  // 1. A regular grid contoured in its native projection
+
+  {
+    auto q = qengine->get("pal_skandinavia");
+    Fmi::DateTime t = Fmi::DateTime::from_string("2008-08-06 12:00");
+    Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
+    q->param(temperature.number());
+
+    std::size_t qhash = Engine::Querydata::hash_value(q);
+    auto crs = q->SpatialReference();
+    CoordinatesPtr coords = qengine->getWorldCoordinates(q);
+
+    std::vector<Engine::Contour::Range> limits{Engine::Contour::Range(10.0, 15.0)};
+    Engine::Contour::Options opt(temperature, t, limits);
+
+    std::vector<Engine::Contour::Range> other_limits{Engine::Contour::Range(15.0, 20.0)};
+    Engine::Contour::Options other_opt(temperature, t, other_limits);
+
+    auto valueshash = qhash;
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
+    auto matrix = qengine->getValues(q, valueshash, opt.time);
+
+    auto world1 = q->area().XYToWorldXY(q->area().BottomLeft());
+    auto world2 = q->area().XYToWorldXY(q->area().TopRight());
+
+    const std::vector<std::size_t> expected{1926903029129084511UL,
+                                            1987795063613586975UL,
+                                            17777160359691528594UL,
+                                            1260149825643717534UL,
+                                            6142509188972423790UL};  // empty result
+
+    auto tiles = quadrant_tiles(world1.X(), world1.Y(), world2.X(), world2.Y(), expected);
+
+    compare_tiled_contour("pal_skandinavia", qhash, crs, *matrix, *coords, opt, other_opt, tiles);
+  }
+
+  // 2. Global data reprojected to a stereographic projection. Coordinates
+  //    outside the projection are missing, and the cells of the grid are both
+  //    huge and invalid near the projection boundaries.
+
+  {
+    auto q = qengine->get("gfs");
+    q->firstTime();
+    Fmi::DateTime t = q->validTime();
+    Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
+    q->param(temperature.number());
+
+    std::size_t qhash = Engine::Querydata::hash_value(q);
+
+    auto pal = qengine->get("pal_skandinavia");
+    auto crs = pal->SpatialReference();
+    CoordinatesPtr coords = qengine->getWorldCoordinates(q, crs);
+
+    std::vector<Engine::Contour::Range> limits{Engine::Contour::Range(0.0, 5.0)};
+    Engine::Contour::Options opt(temperature, t, limits);
+
+    std::vector<Engine::Contour::Range> other_limits{Engine::Contour::Range(5.0, 10.0)};
+    Engine::Contour::Options other_opt(temperature, t, other_limits);
+
+    auto valueshash = qhash;
+    Fmi::hash_combine(valueshash, opt.data_hash_value());
+    auto matrix = qengine->getValues(q, valueshash, opt.time);
+
+    auto world1 = pal->area().XYToWorldXY(pal->area().BottomLeft());
+    auto world2 = pal->area().XYToWorldXY(pal->area().TopRight());
+
+    const std::vector<std::size_t> expected{15090222048163346963UL,
+                                            9836952456016350948UL,
+                                            15821242027694908769UL,
+                                            5165353953160476314UL,
+                                            6142509188972423790UL};  // empty result
+
+    auto tiles = quadrant_tiles(world1.X(), world1.Y(), world2.X(), world2.Y(), expected);
+
+    compare_tiled_contour(
+        "gfs in stereographic", qhash, crs, *matrix, *coords, opt, other_opt, tiles);
+  }
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
+// Contouring many isobands of a single tile of a reprojected global grid. Each
+// isoband misses the contour cache, but all of them share the mask of the cells
+// to be contoured, which is calculated only once for the tile.
+
+void tile_speed()
+{
+  using namespace SmartMet;
+  using Fmi::Box;
+
+  auto q = qengine->get("gfs");
+  q->firstTime();
+  Fmi::DateTime t = q->validTime();
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
+
+  std::size_t qhash = Engine::Querydata::hash_value(q);
+  auto pal = qengine->get("pal_skandinavia");
+  auto crs = pal->SpatialReference();
+  CoordinatesPtr coords = qengine->getWorldCoordinates(q, crs);
+
+  auto world1 = pal->area().XYToWorldXY(pal->area().BottomLeft());
+  auto world2 = pal->area().XYToWorldXY(pal->area().TopRight());
+
+  // A small tile in the middle of the requested area
+  const auto xm = 0.5 * (world1.X() + world2.X());
+  const auto ym = 0.5 * (world1.Y() + world2.Y());
+  const auto dx = 0.1 * (world2.X() - world1.X());
+  const auto dy = 0.1 * (world2.Y() - world1.Y());
+  Box tile(xm - dx, ym - dy, xm + dx, ym + dy, 256, 256);
+
+  std::vector<Engine::Contour::Range> dummy{Engine::Contour::Range(0.0, 1.0)};
+  Engine::Contour::Options dummy_opt(temperature, t, dummy);
+  auto valueshash = qhash;
+  Fmi::hash_combine(valueshash, dummy_opt.data_hash_value());
+  auto matrix = qengine->getValues(q, valueshash, dummy_opt.time);
+
+  std::cout << std::endl;
+  {
+    boost::timer::auto_cpu_timer timer(3, "\t50 isobands of one tile: %t sec CPU, %w sec real\n");
+
+    for (int i = 0; i < 50; i++)
+    {
+      // Distinct limits so that the contour cache always misses
+      std::vector<Engine::Contour::Range> limits{
+          Engine::Contour::Range(-50.0 + 2 * i, -49.0 + 2 * i)};
+      Engine::Contour::Options opt(temperature, t, limits);
+      contour->contour(qhash, crs, *matrix, *coords, tile, opt);
+    }
+  }
+
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
 void worldwrap()
 {
   using namespace SmartMet;
@@ -678,6 +936,10 @@ class tests : public tframe::tests
     TEST(crossection);
     contour->clearCache();
     TEST(worldwrap);
+    contour->clearCache();
+    TEST(tiles);
+    contour->clearCache();
+    TEST(tile_speed);
     contour->clearCache();
     TEST(pressure);
     contour->clearCache();

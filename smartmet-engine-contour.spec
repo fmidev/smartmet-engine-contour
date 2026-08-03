@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.6.24
+Version: 26.8.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -111,6 +111,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Mon Aug  3 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.8.3-1.fmi
+- Cache the mask of the contoured cells for tiled requests to speed up WMS contouring
+
 * Wed Jun 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.24-1.fmi
 - Added contour.threads configuration and a per-request thread override for band-parallel contouring
 
