@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.8.3
+Version: 26.9.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,7 +29,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 26.6.15
-BuildRequires: smartmet-library-macgyver-devel >= 26.6.15
+BuildRequires: smartmet-library-macgyver-devel >= 26.9.16
 BuildRequires: smartmet-library-trax-devel >= 26.6.23
 BuildRequires: smartmet-library-spine-devel >= 26.6.24
 BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
@@ -42,7 +42,7 @@ Requires: gdal312-libs
 Requires: geos313
 Requires: smartmet-library-gis >= 26.6.15
 Requires: smartmet-library-trax >= 26.6.23
-Requires: smartmet-library-macgyver >= 26.6.15
+Requires: smartmet-library-macgyver >= 26.9.16
 Requires: smartmet-library-newbase >= 26.6.24
 Requires: smartmet-library-spine >= 26.6.24
 Requires: smartmet-library-timeseries >= 26.5.5
@@ -111,6 +111,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-1.fmi
+- Repackaged due to Fmi::Cache::Cache locking changes
+
 * Mon Aug  3 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.8.3-1.fmi
 - Cache the mask of the contoured cells for tiled requests to speed up WMS contouring
 
