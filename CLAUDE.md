@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The contour engine (`smartmet-engine-contour`) generates isolines and isobands from gridded weather data on demand. It is loaded as a shared library by SmartMet Server and used primarily by the WMS plugin to render contoured weather maps.
 
+Full developer documentation: `docs/developer-guide.md`.
+
 ## Build commands
 
 ```bash
