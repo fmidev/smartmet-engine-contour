@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.9.23
+Version: 26.10.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,7 +29,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 26.9.23
-BuildRequires: smartmet-library-macgyver-devel >= 26.9.23
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
 BuildRequires: smartmet-library-trax-devel >= 26.6.26
 BuildRequires: smartmet-library-spine-devel >= 26.9.23
 BuildRequires: smartmet-library-timeseries-devel >= 26.9.16
@@ -42,7 +42,7 @@ Requires: gdal312-libs
 Requires: geos313
 Requires: smartmet-library-gis >= 26.9.23
 Requires: smartmet-library-trax >= 26.6.26
-Requires: smartmet-library-macgyver >= 26.9.23
+Requires: smartmet-library-macgyver >= 26.10.2
 Requires: smartmet-library-newbase >= 26.9.23
 Requires: smartmet-library-spine >= 26.9.23
 Requires: smartmet-library-timeseries >= 26.9.16
@@ -111,6 +111,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
+- Rebuilt against macgyver 26.10.2 where Fmi::Cache::Cache uses CLOCK eviction instead of LRU.
+  CLOCK is faster than LRU since a cache hit only takes a shared lock (ABI change)
+
 * Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
 - Repackaged due to base library ABI changes
 
