@@ -416,6 +416,47 @@ void crossection()
 
 // ----------------------------------------------------------------------
 
+void crossection_pressure_levels()
+{
+  // Pressure levels decrease upwards, hence the cross section code must flip the vertical
+  // coordinates. A band containing all temperatures must span all the pressure levels.
+
+  using namespace SmartMet;
+
+  auto q = qengine->get("ecmwf_skandinavia_painepinta");
+  Fmi::DateTime t = Fmi::DateTime::from_string("2008-09-09 12:00");
+  Spine::Parameter temperature = TimeSeries::ParameterFactory::instance().parse("Temperature");
+  q->param(temperature.number());
+
+  double minlevel = 1e9;
+  double maxlevel = -1e9;
+  for (q->resetLevel(); q->nextLevel();)
+  {
+    minlevel = std::min(minlevel, static_cast<double>(q->levelValue()));
+    maxlevel = std::max(maxlevel, static_cast<double>(q->levelValue()));
+  }
+
+  std::vector<Engine::Contour::Range> limits;
+  limits.push_back(Engine::Contour::Range(-100, 100));
+  Engine::Contour::Options opt(temperature, t, limits);
+  std::shared_ptr<NFmiFastQueryInfo> qInfo = q->info();
+
+  // Helsinki - Oulu
+  auto geom = *(contour->crossection(*qInfo, opt, 24.94, 60.17, 25.47, 65.01, 10).begin());
+  if (!geom || geom->IsEmpty())
+    TEST_FAILED("Cross section is empty");
+
+  OGREnvelope env;
+  geom->getEnvelope(&env);
+  if (std::abs(env.MinY - minlevel) > 1e-6 || std::abs(env.MaxY - maxlevel) > 1e-6)
+    TEST_FAILED("Cross section should span levels " + std::to_string(minlevel) + "..." +
+                std::to_string(maxlevel) + ", got " + std::to_string(env.MinY) + "..." +
+                std::to_string(env.MaxY));
+  TEST_PASSED();
+}
+
+// ----------------------------------------------------------------------
+
 void speed()
 {
   using namespace SmartMet;
@@ -934,6 +975,8 @@ class tests : public tframe::tests
     TEST(trax_smoother);
     contour->clearCache();
     TEST(crossection);
+    contour->clearCache();
+    TEST(crossection_pressure_levels);
     contour->clearCache();
     TEST(worldwrap);
     contour->clearCache();
