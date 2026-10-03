@@ -1442,7 +1442,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
           auto pt1 = coords(i, j1);
           auto pt2 = coords(i, j2);
           coords.set(i, j1, pt2.first, pt2.second);
-          coords.set(i, j2, pt1.first, pt2.second);
+          coords.set(i, j2, pt1.first, pt1.second);
           ++j1;
           --j2;
         }
