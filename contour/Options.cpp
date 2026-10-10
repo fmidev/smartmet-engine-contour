@@ -84,8 +84,8 @@ void Options::transform()
   double a = (multiplier ? *multiplier : 1.0);
   double b = (offset ? *offset : 0.0);
 
-  for (auto i = 0UL; i < isovalues.size(); i++)
-    isovalues[i] = isovalues[i] / a - b;  // reverse transform
+  for (double& isovalue : isovalues)
+    isovalue = isovalue / a - b;  // reverse transform
 
   for (auto& range : limits)
   {
