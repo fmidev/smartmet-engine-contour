@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.10.10
+Version: 26.10.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -28,11 +28,11 @@ BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 26.9.23
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
+BuildRequires: smartmet-library-gis-devel >= 26.10.11
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.11
 BuildRequires: smartmet-library-trax-devel >= 26.6.26
-BuildRequires: smartmet-library-spine-devel >= 26.9.23
-BuildRequires: smartmet-library-timeseries-devel >= 26.9.16
+BuildRequires: smartmet-library-spine-devel >= 26.10.11
+BuildRequires: smartmet-library-timeseries-devel >= 26.10.11
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -40,12 +40,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal312-libs
 Requires: geos313
-Requires: smartmet-library-gis >= 26.9.23
+Requires: smartmet-library-gis >= 26.10.11
 Requires: smartmet-library-trax >= 26.6.26
-Requires: smartmet-library-macgyver >= 26.10.2
-Requires: smartmet-library-newbase >= 26.9.23
-Requires: smartmet-library-spine >= 26.9.23
-Requires: smartmet-library-timeseries >= 26.9.16
+Requires: smartmet-library-macgyver >= 26.10.11
+Requires: smartmet-library-newbase >= 26.10.11
+Requires: smartmet-library-spine >= 26.10.11
+Requires: smartmet-library-timeseries >= 26.10.11
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -111,7 +111,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Sat Oct 10 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.10-1.fmi
+* Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
 - Use range-based for loops where clang-tidy suggests it, no functional changes
 
 * Sat Oct  3 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
