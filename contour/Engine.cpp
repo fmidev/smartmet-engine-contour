@@ -625,6 +625,8 @@ namespace Contour
  */
 // ----------------------------------------------------------------------
 
+namespace
+{
 OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theSR)
 {
   try
@@ -643,7 +645,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
 
     auto *cwkb = reinterpret_cast<unsigned char *>(const_cast<char *>(wkb.c_str()));
 
-    OGRGeometry *ogeom;
+    OGRGeometry* ogeom = nullptr;
     OGRErr err = OGRGeometryFactory::createFromWkb(cwkb, theSR, &ogeom);
 
     if (err != OGRERR_NONE)
@@ -666,6 +668,7 @@ OGRGeometryPtr geos_to_ogr(const GeometryPtr &theGeom, OGRSpatialReference *theS
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
@@ -951,6 +954,8 @@ Engine::Impl::ValidCellsPtr Engine::Impl::get_valid_cells(
  */
 // ----------------------------------------------------------------------
 
+namespace
+{
 std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
                                                 const Fmi::SpatialReference &theOutputCRS,
                                                 const Options &theOptions)
@@ -1006,6 +1011,7 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
 
   return hash_values;
 }
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
