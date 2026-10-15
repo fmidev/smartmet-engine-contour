@@ -65,7 +65,7 @@ class ShiftedGrid : public BaseGrid
   const Fmi::CoordinateMatrix& itsCoords;
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
-  std::array<long, 4> itsBBox;
+  std::array<long, 4> itsBBox{};
 
   const std::size_t itsNX;     // coordinates width
   const std::size_t itsWidth;  // data width

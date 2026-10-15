@@ -735,7 +735,7 @@ CacheReportingStruct Engine::Impl::getCacheSizes()
 {
   try
   {
-    CacheReportingStruct ret;
+    CacheReportingStruct ret{};
 
     ret.contour_cache_max_size = itsContourCache.maxSize();
     ret.contour_cache_size = itsContourCache.size();

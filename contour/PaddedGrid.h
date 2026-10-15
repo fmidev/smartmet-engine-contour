@@ -65,7 +65,7 @@ class PaddedGrid : public BaseGrid
   const std::size_t itsWidth;  // data width
   const std::size_t itsHeight;
 
-  std::array<long, 4> itsBBox;  // limits for cell iteration
+  std::array<long, 4> itsBBox{};  // limits for cell iteration
 
   double itsMaxCoord = 1e10;
 

@@ -55,7 +55,7 @@ class NormalGrid : public BaseGrid
   const std::size_t itsWidth;  // cordinates width
   const std::size_t itsHeight;
 
-  std::array<long, 4> itsBBox;  // limits for cell iteration
+  std::array<long, 4> itsBBox{};  // limits for cell iteration
 
 };  // class NormalGrid
 }  // namespace Contour

@@ -114,6 +114,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Oct 14 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.14-1.fmi
 - Fixed mechanical clang-tidy findings (internal linkage, unused parameters, initialization, redundant code), no functional changes
 - Requires 26.10.13 versions of newbase, spine due to their ABI changes
+- Fixed clang-tidy correctness findings (member initialization, rule of five, printf formats, dead stores)
 
 * Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
 - Use range-based for loops where clang-tidy suggests it, no functional changes

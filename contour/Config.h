@@ -38,7 +38,7 @@ class Config
 
  private:
   libconfig::Config itsConfig;
-  int itsMaxContourCacheSize;
+  int itsMaxContourCacheSize = 0;
   int itsMaxValidCellsCacheMBytes = 256;
   int itsThreads = 0;
 };
