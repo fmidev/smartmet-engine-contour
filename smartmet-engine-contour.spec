@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.10.14
+Version: 26.10.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -28,11 +28,11 @@ BuildRequires: geos313-devel
 BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
-BuildRequires: smartmet-library-gis-devel >= 26.10.11
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.11
-BuildRequires: smartmet-library-trax-devel >= 26.6.26
-BuildRequires: smartmet-library-spine-devel >= 26.10.13
-BuildRequires: smartmet-library-timeseries-devel >= 26.10.11
+BuildRequires: smartmet-library-gis-devel >= 26.10.15
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.15
+BuildRequires: smartmet-library-trax-devel >= 26.10.15
+BuildRequires: smartmet-library-spine-devel >= 26.10.15
+BuildRequires: smartmet-library-timeseries-devel >= 26.10.15
 BuildRequires: sparsehash-devel
 BuildRequires: zlib-devel
 Requires: %{smartmet_boost}-iostreams
@@ -40,12 +40,12 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal312-libs
 Requires: geos313
-Requires: smartmet-library-gis >= 26.10.11
-Requires: smartmet-library-trax >= 26.6.26
-Requires: smartmet-library-macgyver >= 26.10.11
-Requires: smartmet-library-newbase >= 26.10.13
-Requires: smartmet-library-spine >= 26.10.13
-Requires: smartmet-library-timeseries >= 26.10.11
+Requires: smartmet-library-gis >= 26.10.15
+Requires: smartmet-library-trax >= 26.10.15
+Requires: smartmet-library-macgyver >= 26.10.15
+Requires: smartmet-library-newbase >= 26.10.15
+Requires: smartmet-library-spine >= 26.10.15
+Requires: smartmet-library-timeseries >= 26.10.15
 Requires: libconfig17
 
 Provides: %{SPECNAME}
@@ -82,7 +82,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME} = %{version}-%{release}
-Requires: smartmet-library-trax-devel >= 26.6.26
+Requires: smartmet-library-trax-devel >= 26.10.15
 Obsoletes: smartmet-brainstorm-contour-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -111,9 +111,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
-* Wed Oct 14 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.14-1.fmi
+* Thu Oct 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.15-1.fmi
 - Fixed mechanical clang-tidy findings (internal linkage, unused parameters, initialization, redundant code), no functional changes
-- Requires 26.10.13 versions of newbase, spine due to their ABI changes
+- Requires 26.10.15 versions of newbase, spine due to their ABI changes
 - Fixed clang-tidy correctness findings (member initialization, rule of five, printf formats, dead stores)
 
 * Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
