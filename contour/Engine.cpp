@@ -613,6 +613,108 @@ std::pair<std::vector<NFmiPoint>, std::vector<double>> get_isocircle_points(
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Reject the options which are meaningless for cross-sections
+ */
+// ----------------------------------------------------------------------
+
+void check_crossection_options(const Engine::Contour::Options &theOptions)
+{
+  if (theOptions.level)
+    throw Fmi::Exception(BCP, "Using the level option is meaningless for cross-sections");
+  if (theOptions.filter_size)
+    throw Fmi::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
+  if (theOptions.filter_degree)
+    throw Fmi::Exception(BCP, "Using the filter_degree option is meaningless for cross-sections");
+  if (theOptions.smoother && theOptions.smoother->active())
+    throw Fmi::Exception(BCP, "Using the smoother option is meaningless for cross-sections");
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Read the cross-section values and their (distance,height) coordinates
+ *
+ * The level values are used as heights unless a height parameter is given.
+ * Returns true if some heights are valid.
+ */
+// ----------------------------------------------------------------------
+
+bool read_crossection_values(NFmiFastQueryInfo &theQInfo,
+                             const Fmi::DateTime &theTime,
+                             bool hasZParameter,
+                             unsigned long zparam,
+                             unsigned long param,
+                             const std::vector<NFmiPoint> &coordinates,
+                             const std::vector<double> &distances,
+                             NFmiDataMatrix<float> &values,
+                             Fmi::CoordinateMatrix &coords)
+{
+  bool has_some_valid_levelvalues = false;
+
+  std::size_t j = 0;
+  for (theQInfo.ResetLevel(); theQInfo.NextLevel(); ++j)
+  {
+    float levelvalue = theQInfo.Level()->LevelValue();
+    for (std::size_t i = 0; i < coordinates.size(); i++)
+    {
+      const int max_minutes = 360;
+
+      auto value = theQInfo.InterpolatedValue(coordinates[i], theTime, max_minutes);
+      if (value == kFloatMissing)
+        value = std::numeric_limits<float>::quiet_NaN();
+
+      values[i][j] = value;
+
+      if (hasZParameter)
+      {
+        theQInfo.ParamIndex(zparam);
+        levelvalue = theQInfo.InterpolatedValue(coordinates[i], theTime, max_minutes);
+        theQInfo.ParamIndex(param);
+        // TODO: Handle missing values (how??)
+      }
+
+      if (levelvalue == kFloatMissing)
+        levelvalue = std::numeric_limits<float>::quiet_NaN();
+
+      if (!std::isnan(levelvalue))
+        has_some_valid_levelvalues = true;
+
+      coords.set(i, j, distances[i], levelvalue);
+    }
+  }
+
+  return has_some_valid_levelvalues;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Reverse the order of the levels
+ */
+// ----------------------------------------------------------------------
+
+void flip_levels(NFmiDataMatrix<float> &values,
+                 Fmi::CoordinateMatrix &coords,
+                 std::size_t nx,
+                 std::size_t ny)
+{
+  for (std::size_t i = 0; i < nx; i++)
+  {
+    std::size_t j1 = 0;
+    std::size_t j2 = ny - 1;
+    while (j1 < j2)
+    {
+      std::swap(values[i][j1], values[i][j2]);
+      auto pt1 = coords(i, j1);
+      auto pt2 = coords(i, j2);
+      coords.set(i, j1, pt2.first, pt2.second);
+      coords.set(i, j2, pt1.first, pt1.second);
+      ++j1;
+      --j2;
+    }
+  }
+}
+
 }  // namespace
 
 namespace Engine
@@ -1333,14 +1435,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
   {
     // Trivial option checks
 
-    if (theOptions.level)
-      throw Fmi::Exception(BCP, "Using the level option is meaningless for cross-sections");
-    if (theOptions.filter_size)
-      throw Fmi::Exception(BCP, "Using the filter_size option is meaningless for cross-sections");
-    if (theOptions.filter_degree)
-      throw Fmi::Exception(BCP, "Using the filter_degree option is meaningless for cross-sections");
-    if (theOptions.smoother && theOptions.smoother->active())
-      throw Fmi::Exception(BCP, "Using the smoother option is meaningless for cross-sections");
+    check_crossection_options(theOptions);
 
     // Verify height parameter is available
 
@@ -1396,39 +1491,15 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     NFmiDataMatrix<float> values(nx, ny, std::numeric_limits<float>::quiet_NaN());
     Fmi::CoordinateMatrix coords(nx, ny);
 
-    bool has_some_valid_levelvalues = false;
-
-    std::size_t j = 0;
-    for (theQInfo.ResetLevel(); theQInfo.NextLevel(); ++j)
-    {
-      float levelvalue = theQInfo.Level()->LevelValue();
-      for (std::size_t i = 0; i < coordinates.size(); i++)
-      {
-        const int max_minutes = 360;
-
-        auto value = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
-        if (value == kFloatMissing)
-          value = std::numeric_limits<float>::quiet_NaN();
-
-        values[i][j] = value;
-
-        if (theZParameter)
-        {
-          theQInfo.ParamIndex(zparam);
-          levelvalue = theQInfo.InterpolatedValue(coordinates[i], theOptions.time, max_minutes);
-          theQInfo.ParamIndex(param);
-          // TODO: Handle missing values (how??)
-        }
-
-        if (levelvalue == kFloatMissing)
-          levelvalue = std::numeric_limits<float>::quiet_NaN();
-
-        if (!std::isnan(levelvalue))
-          has_some_valid_levelvalues = true;
-
-        coords.set(i, j, distances[i], levelvalue);
-      }
-    }
+    bool has_some_valid_levelvalues = read_crossection_values(theQInfo,
+                                                              theOptions.time,
+                                                              theZParameter.has_value(),
+                                                              zparam,
+                                                              param,
+                                                              coordinates,
+                                                              distances,
+                                                              values,
+                                                              coords);
 
     if (!has_some_valid_levelvalues)
       throw std::runtime_error("The heights for the cross-section are missing");
@@ -1437,23 +1508,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
     // level or model level data.
 
     if (coords(0, 1) < coords(0, 0))
-    {
-      for (std::size_t i = 0; i < nx; i++)
-      {
-        std::size_t j1 = 0;
-        std::size_t j2 = ny - 1;
-        while (j1 < j2)
-        {
-          std::swap(values[i][j1], values[i][j2]);
-          auto pt1 = coords(i, j1);
-          auto pt2 = coords(i, j2);
-          coords.set(i, j1, pt2.first, pt2.second);
-          coords.set(i, j2, pt1.first, pt1.second);
-          ++j1;
-          --j2;
-        }
-      }
-    }
+      flip_levels(values, coords, nx, ny);
 
     // Don't bother analyzing the grid for cross sections, the Z coordinates
     // should always be fine.
