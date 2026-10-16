@@ -1113,6 +1113,95 @@ std::vector<std::size_t> get_contour_cache_keys(std::size_t theDataHash,
 
   return hash_values;
 }
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Build the helper data structure for contouring
+ *
+ * The processed copy of the data is used if there is one.
+ */
+// ----------------------------------------------------------------------
+
+std::shared_ptr<BaseGrid> make_contouring_grid(const NFmiDataMatrix<float> &theMatrix,
+                                               NFmiDataMatrix<float> *alt_values,
+                                               const Fmi::CoordinateMatrix &theCoordinates,
+                                               const Fmi::BoolMatrix &theValidCells,
+                                               std::size_t theShift)
+{
+  // We're not really modifying the data, only alt_values is
+  auto &values =
+      (alt_values != nullptr ? *alt_values : const_cast<NFmiDataMatrix<float> &>(theMatrix));
+
+  if (theShift == 0)
+    return std::make_shared<PaddedGrid>(values, theCoordinates, theValidCells);
+  return std::make_shared<ShiftedGrid>(values, theCoordinates, theValidCells, theShift);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Smooth the grid if requested
+ *
+ * Neither path mutates the data: Trax::smooth returns a new grid that shares
+ * the geometry of the input grid but holds smoothed values.
+ */
+// ----------------------------------------------------------------------
+
+std::shared_ptr<const Trax::Grid> smooth_grid(const std::shared_ptr<BaseGrid> &data,
+                                              const Options &theOptions)
+{
+  if (theOptions.smoother && theOptions.smoother->active())
+  {
+    return Trax::smooth(data, *theOptions.smoother);
+  }
+  if (theOptions.filter_size || theOptions.filter_degree)
+  {
+    Trax::SmoothOptions sg;
+    sg.method = Trax::SmoothMethod::SavitzkyGolay;
+    sg.radius = static_cast<int>(theOptions.filter_size ? *theOptions.filter_size : 1);
+    sg.degree = static_cast<int>(theOptions.filter_degree ? *theOptions.filter_degree : 1);
+    return Trax::smooth(data, sg);
+  }
+  return data;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Collect the isoband limits of the contours to be calculated
+ */
+// ----------------------------------------------------------------------
+
+Trax::IsobandLimits make_isoband_limits(const std::vector<std::size_t> &theContours,
+                                        const std::vector<Range> &theLimits)
+{
+  Trax::IsobandLimits isobands;
+  for (auto i : theContours)
+  {
+    // Change optional settings to corresponding contours. If either limit is set,
+    // the other is +-inf if not set. If neither limit is set, we're contouring
+    // missing values which for Trax is NaN...NaN. Thus if the user really wants
+    // to contour all valid values, input -Inf...Inf must be given instead of
+    // optional values.
+    double lo = -std::numeric_limits<double>::infinity();
+    double hi = +std::numeric_limits<double>::infinity();
+    const auto &limits = theLimits[i];
+
+    if (!limits.lolimit && !limits.hilimit)
+    {
+      lo = std::numeric_limits<double>::quiet_NaN();
+      hi = lo;
+    }
+    else
+    {
+      if (limits.lolimit)
+        lo = *limits.lolimit;
+      if (limits.hilimit)
+        hi = *limits.hilimit;
+    }
+
+    isobands.add(lo, hi);
+  }
+  return isobands;
+}
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -1283,32 +1372,9 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
       coordinates = alt_coordinates.get();
     }
 
-    // Helper data structure for contouring. To be updated to std::unique_ptr with C++17
-    std::shared_ptr<BaseGrid> data;
-
-    if (analysis->shift == 0)
-    {
-      if (alt_values)
-        data = std::make_shared<PaddedGrid>(*alt_values, *coordinates, valid_cells);
-      else
-      {
-        // We're not really modifying the data, only alt_values is
-        auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
-        data = std::make_shared<PaddedGrid>(tmp, *coordinates, valid_cells);
-      }
-    }
-    else
-    {
-      if (alt_values)
-        data =
-            std::make_shared<ShiftedGrid>(*alt_values, *coordinates, valid_cells, analysis->shift);
-      else
-      {
-        // We're not really modifying the data, only alt_values is
-        auto &tmp = const_cast<NFmiDataMatrix<float> &>(theMatrix);
-        data = std::make_shared<ShiftedGrid>(tmp, *coordinates, valid_cells, analysis->shift);
-      }
-    }
+    // Helper data structure for contouring
+    auto data = make_contouring_grid(
+        theMatrix, alt_values.get(), *coordinates, valid_cells, analysis->shift);
 
     // Smoothing is delayed until this point. Two independent paths are
     // supported; the grid handed to the contourer is the smoothed one. Neither
@@ -1322,20 +1388,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     //     SavitzkyGolay method (filter_size is its window half-width, clamped
     //     to 1..6; filter_degree its polynomial degree, clamped to 1..5).
 
-    std::shared_ptr<const Trax::Grid> contour_input = data;
-
-    if (theOptions.smoother && theOptions.smoother->active())
-    {
-      contour_input = Trax::smooth(data, *theOptions.smoother);
-    }
-    else if (theOptions.filter_size || theOptions.filter_degree)
-    {
-      Trax::SmoothOptions sg;
-      sg.method = Trax::SmoothMethod::SavitzkyGolay;
-      sg.radius = static_cast<int>(theOptions.filter_size ? *theOptions.filter_size : 1);
-      sg.degree = static_cast<int>(theOptions.filter_degree ? *theOptions.filter_degree : 1);
-      contour_input = Trax::smooth(data, sg);
-    }
+    std::shared_ptr<const Trax::Grid> contour_input = smooth_grid(data, theOptions);
 
     Trax::Contour contourer;
     contourer.interpolation(theOptions.interpolation);
@@ -1360,34 +1413,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     else
     {
       // Calculate isobands
-      Trax::IsobandLimits isobands;
-      for (auto i : todo_contours)
-      {
-        // Change optional settings to corresponding contours. If either limit is set,
-        // the other is +-inf if not set. If neither limit is set, we're contouring
-        // missing values which for Trax is NaN...NaN. Thus if the user really wants
-        // to contour all valid values, input -Inf...Inf must be given instead of
-        // optional values.
-        double lo = -std::numeric_limits<double>::infinity();
-        double hi = +std::numeric_limits<double>::infinity();
-        const auto &limits = theOptions.limits[i];
-
-        if (!limits.lolimit && !limits.hilimit)
-        {
-          lo = std::numeric_limits<double>::quiet_NaN();
-          hi = lo;
-        }
-        else
-        {
-          if (limits.lolimit)
-            lo = *limits.lolimit;
-          if (limits.hilimit)
-            hi = *limits.hilimit;
-        }
-
-        isobands.add(lo, hi);
-      }
-
+      auto isobands = make_isoband_limits(todo_contours, theOptions.limits);
       results = contourer.isobands(*contour_input, isobands);
     }
 
