@@ -106,8 +106,11 @@ cache size is never cached.
 
 ## 6. Configuration
 
-`cache.max_contours`, `cache.max_valid_cells_mbytes`, and `contour.threads` (default for
-`Options::threads`).
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `cache.max_contours` | required | Size of the contour cache in entries. |
+| `cache.max_valid_cells_mbytes` | 256 | Size of the valid-cells cache in MB, not negative. |
+| `contour.threads` | 0 | Default for `Options::threads`. Values below 2 contour in one thread, and the thread count is never more than the number of cores. Cross-sections always use this default. |
 
 ## 7. Compatibility
 

@@ -49,7 +49,7 @@ The engine's own 2D Savitzky-Golay implementation was moved into Trax for reuse.
 
 **GeosTools** — Utility for converting GEOS geometries to SVG path format with precision control.
 
-**Caching** (`Engine::Impl`) — Three LRU caches with hash-based keys:
+**Caching** (`Engine::Impl`) — Three `Fmi::Cache::Cache` caches (CLOCK eviction, an approximation of LRU) with hash-based keys:
 - contour geometry cache, keyed by data + CRS + clip box + contour limits (`cache.max_contours`,
   entries)
 - coordinate analysis cache, keyed by coordinates + CRS (fixed at 1000 entries)
