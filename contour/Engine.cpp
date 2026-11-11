@@ -1443,7 +1443,7 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Produce a cross section contur
+ * \brief Produce a cross section contour
  */
 // ----------------------------------------------------------------------
 

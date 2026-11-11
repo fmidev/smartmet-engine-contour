@@ -52,7 +52,7 @@ class NormalGrid : public BaseGrid
   const Fmi::BoolMatrix& itsValidCells;
   NFmiDataMatrix<float>& itsMatrix;
   const std::size_t itsNX;     // data width
-  const std::size_t itsWidth;  // cordinates width
+  const std::size_t itsWidth;  // coordinates width
   const std::size_t itsHeight;
 
   std::array<long, 4> itsBBox{};  // limits for cell iteration
