@@ -1,4 +1,3 @@
-#include "../contour/ShiftedGrid.h"
 #include "ShiftedGrid.h"
 #include <gis/CoordinateMatrix.h>
 #include <gis/CoordinateMatrixAnalysis.h>

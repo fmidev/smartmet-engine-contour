@@ -1,4 +1,3 @@
-#include "../contour/GeosTools.h"
 #include "GeosTools.h"
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKTReader.h>

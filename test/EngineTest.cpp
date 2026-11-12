@@ -1,4 +1,3 @@
-#include "../contour/Engine.h"
 #include "../contour/Options.h"
 #include "Engine.h"
 #include <boost/timer/timer.hpp>

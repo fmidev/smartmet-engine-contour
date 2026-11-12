@@ -1,4 +1,3 @@
-#include "../contour/PaddedGrid.h"
 #include "PaddedGrid.h"
 #include <gis/CoordinateMatrix.h>
 #include <gis/CoordinateMatrixAnalysis.h>
