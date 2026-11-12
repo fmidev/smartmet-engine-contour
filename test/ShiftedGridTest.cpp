@@ -1,11 +1,17 @@
+#include "../contour/ShiftedGrid.h"
 #include "ShiftedGrid.h"
 #include <gis/CoordinateMatrix.h>
 #include <gis/CoordinateMatrixAnalysis.h>
 #include <newbase/NFmiDataMatrix.h>
+#include <newbase/NFmiGlobals.h>
 #include <regression/tframe.h>
 #include <trax/Contour.h>
+#include <trax/GeometryCollection.h>
 #include <trax/IsobandLimits.h>
-#include <limits>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 using namespace std;
 

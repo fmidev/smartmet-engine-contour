@@ -6,19 +6,31 @@
 
 #pragma once
 
-#include "Options.h"
-#include <gis/Box.h>
-#include <gis/CoordinateMatrix.h>
 #include <gis/SpatialReference.h>
 #include <gis/Types.h>
-#include <newbase/NFmiFastQueryInfo.h>
-#include <newbase/NFmiParameterName.h>
+#include <macgyver/CacheStats.h>
 #include <spine/SmartMetEngine.h>
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <vector>
 
-class OGRGeometry;
-class OGRSpatialReference;
+class NFmiFastQueryInfo;
+namespace Fmi
+{
+class Box;
+class CoordinateMatrix;
+}  // namespace Fmi
+namespace SmartMet::Engine::Contour
+{
+struct Options;
+}  // namespace SmartMet::Engine::Contour
+namespace SmartMet::Spine
+{
+class Parameter;
+}  // namespace SmartMet::Spine
+template <class T>
+class NFmiDataMatrix;
 
 namespace SmartMet
 {
@@ -84,6 +96,7 @@ class Engine : public Spine::SmartMetEngine
  private:
   // Hide caches etc behind an implementation
   class Impl;
+
   std::shared_ptr<Impl> itsImpl;
 
   Fmi::Cache::CacheStatistics getCacheStats() const override;

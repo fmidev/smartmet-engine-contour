@@ -3,10 +3,10 @@
 #include "BaseGrid.h"
 #include <gis/BoolMatrix.h>
 #include <gis/CoordinateMatrix.h>
-#include <macgyver/Exception.h>
 #include <newbase/NFmiDataMatrix.h>
-#include <newbase/NFmiPoint.h>
-#include <limits>
+#include <array>
+#include <cstddef>
+#include <vector>
 
 // Note: The values may be one column narrower than the coordinates if the data needs a wraparound
 // to fill the globe. In this case the last coordinate is the projected metric coordinate with

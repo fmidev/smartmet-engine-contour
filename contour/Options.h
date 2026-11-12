@@ -18,6 +18,7 @@
 #include <spine/Parameter.h>
 #include <trax/InterpolationType.h>
 #include <trax/SmoothOptions.h>
+#include <cstddef>
 #include <optional>
 #include <vector>
 

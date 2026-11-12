@@ -7,6 +7,8 @@
 #include "Options.h"
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
+#include <string>
+#include <utility>
 
 namespace SmartMet
 {

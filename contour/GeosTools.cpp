@@ -18,9 +18,9 @@
 #include <geos/geom/PrecisionModel.h>
 #include <geos/version.h>
 #include <macgyver/Exception.h>
+#include <cstddef>
 #include <iomanip>
 #include <sstream>
-#include <stdexcept>
 
 #define GEOS_VERSION_ID (100 * GEOS_VERSION_MAJOR + GEOS_VERSION_MINOR)
 

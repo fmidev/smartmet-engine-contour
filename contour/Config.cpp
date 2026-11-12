@@ -2,7 +2,6 @@
 #include <macgyver/Exception.h>
 #include <spine/ConfigTools.h>
 #include <filesystem>
-#include <stdexcept>
 
 namespace SmartMet
 {

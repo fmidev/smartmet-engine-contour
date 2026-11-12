@@ -7,38 +7,57 @@
 #include "Engine.h"
 #include "BaseGrid.h"
 #include "Config.h"
-#include "GeosTools.h"
 #include "Options.h"
 #include "PaddedGrid.h"
 #include "ShiftedGrid.h"
-#include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKBWriter.h>
-#include <geos/version.h>
+#include <gis/BBox.h>
+#include <gis/BoolMatrix.h>
+#include <gis/Box.h>
+#include <gis/CoordinateMatrix.h>
 #include <gis/CoordinateMatrixAnalysis.h>
 #include <gis/EPSGInfo.h>
 #include <gis/OGR.h>
 #include <macgyver/Cache.h>
+#include <macgyver/DateTime.h>
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
+#include <newbase/NFmiDataMatrix.h>
+#include <newbase/NFmiFastQueryInfo.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiLevel.h>
+#include <newbase/NFmiLocation.h>
+#include <newbase/NFmiPoint.h>
+#include <spine/Parameter.h>
 #include <trax/Contour.h>
+#include <trax/GeometryCollection.h>
 #include <trax/Geos.h>
 #include <trax/IsobandLimits.h>
 #include <trax/IsolineValues.h>
 #include <trax/OGR.h>
+#include <trax/SmoothOptions.h>
 #include <trax/Smoother.h>
 #include <algorithm>
 #include <cmath>
-#include <cpl_conv.h>  // For configuring GDAL
 #include <future>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <ogr_core.h>
 #include <ogr_geometry.h>
-#include <ogr_spatialref.h>
 #include <optional>
+#include <sstream>
+#include <stdexcept>
 #include <thread>
+#include <utility>
+
+namespace Trax
+{
+class Grid;
+enum class InterpolationType : std::uint8_t;
+}  // namespace Trax
 
 using GeometryPtr = std::shared_ptr<geos::geom::Geometry>;
 

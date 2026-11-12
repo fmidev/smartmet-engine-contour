@@ -1,11 +1,18 @@
+#include "../contour/PaddedGrid.h"
 #include "PaddedGrid.h"
 #include <gis/CoordinateMatrix.h>
 #include <gis/CoordinateMatrixAnalysis.h>
 #include <newbase/NFmiDataMatrix.h>
+#include <newbase/NFmiGlobals.h>
 #include <regression/tframe.h>
 #include <trax/Contour.h>
+#include <trax/GeometryCollection.h>
 #include <trax/IsobandLimits.h>
+#include <iostream>
 #include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 using namespace std;
 

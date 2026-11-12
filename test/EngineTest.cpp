@@ -1,20 +1,40 @@
+#include "../contour/Engine.h"
+#include "../contour/Options.h"
 #include "Engine.h"
-#include <boost/lexical_cast.hpp>
 #include <boost/timer/timer.hpp>
 #include <engines/querydata/Engine.h>
+#include <engines/querydata/Q.h>
 #include <gis/Box.h>
 #include <gis/OGR.h>
+#include <gis/SpatialReference.h>
 #include <macgyver/DateTime.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
+#include <newbase/NFmiArea.h>
+#include <newbase/NFmiMetTime.h>
+#include <newbase/NFmiPoint.h>
 #include <regression/tframe.h>
 #include <spine/Options.h>
+#include <spine/Parameter.h>
 #include <spine/Reactor.h>
 #include <timeseries/ParameterFactory.h>
-#include <libconfig.h++>
-#include <ogr_api.h>
+#include <trax/SmoothOptions.h>
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <memory>
 #include <ogr_geometry.h>
-#include <ogr_spatialref.h>
+#include <optional>
+#include <string>
+#include <vector>
+
+class NFmiFastQueryInfo;
+namespace Fmi
+{
+class CoordinateMatrix;
+}  // namespace Fmi
+template <class T>
+class NFmiDataMatrix;
 
 using namespace std;
 

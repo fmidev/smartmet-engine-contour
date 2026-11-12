@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <libconfig.h++>
+#include <string>
 
 namespace SmartMet
 {

@@ -1,4 +1,7 @@
 #include "NormalGrid.h"
+#include <fmt/format.h>
+#include <gis/CoordinateMatrix.h>
+#include <macgyver/Exception.h>
 
 namespace SmartMet
 {

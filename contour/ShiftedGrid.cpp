@@ -1,5 +1,7 @@
 #include "ShiftedGrid.h"
 #include <fmt/format.h>
+#include <macgyver/Exception.h>
+#include <string>
 
 // Note: The values may be one column narrower than the coordinates if the data needs a wraparound
 // to fill the globe. In this case the last coordinate is the projected metric coordinate with

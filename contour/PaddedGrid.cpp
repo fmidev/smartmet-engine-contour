@@ -1,4 +1,10 @@
 #include "PaddedGrid.h"
+#include <fmt/format.h>
+#include <gis/BoolMatrix.h>
+#include <gis/CoordinateMatrix.h>
+#include <macgyver/Exception.h>
+#include <algorithm>
+#include <limits>
 
 namespace SmartMet
 {
