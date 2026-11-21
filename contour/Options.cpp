@@ -87,14 +87,17 @@ void Options::transform()
   double b = (offset ? *offset : 0.0);
 
   for (double& isovalue : isovalues)
-    isovalue = isovalue / a - b;  // reverse transform
+    isovalue = (isovalue - b) / a;  // reverse of value * a + b
 
   for (auto& range : limits)
   {
     if (range.lolimit)
-      range.lolimit = *range.lolimit / a - b;
+      range.lolimit = (*range.lolimit - b) / a;
     if (range.hilimit)
-      range.hilimit = *range.hilimit / a - b;
+      range.hilimit = (*range.hilimit - b) / a;
+    // A negative multiplier reverses the order of the limits
+    if (a < 0)
+      std::swap(range.lolimit, range.hilimit);
   }
 }
 
