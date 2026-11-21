@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet contour engine
 Name: %{SPECNAME}
-Version: 26.11.13
+Version: 26.11.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -111,6 +111,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}
 
 %changelog
+* Sat Nov 21 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.21-1.fmi
+- Fixed the contour limits of a unit conversion with both a multiplier and an offset (for
+  example Celsius to Fahrenheit): the limits were converted with limit/a-b instead of
+  (limit-b)/a, which moved the isolines and isobands. Products tuned around the old
+  behaviour need their limits corrected
+- A negative multiplier now swaps the limits of an isoband
+
 * Fri Nov 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.13-1.fmi
 - Include cleanup: headers include what they use and prefer forward declarations,
   unnecessary includes removed. No functional changes, but code using these headers may
