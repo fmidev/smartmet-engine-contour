@@ -20,6 +20,7 @@
 #include <gis/EPSGInfo.h>
 #include <gis/OGR.h>
 #include <macgyver/Cache.h>
+#include <macgyver/Cancellation.h>
 #include <macgyver/DateTime.h>
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
@@ -396,6 +397,8 @@ Fmi::BoolMatrix mark_overlapping_cells(const Fmi::CoordinateMatrix &theCoordinat
         std::min(row_ymin[j], row_ymin[j + 1]) > ymax)
       continue;
 
+    Fmi::check_cancelled();
+
     for (auto i = 0UL; i < nx - 1; i++)
     {
       if (overlaps(xmin,
@@ -674,6 +677,8 @@ bool read_crossection_values(NFmiFastQueryInfo &theQInfo,
   std::size_t j = 0;
   for (theQInfo.ResetLevel(); theQInfo.NextLevel(); ++j)
   {
+    Fmi::check_cancelled();
+
     float levelvalue = theQInfo.Level()->LevelValue();
     for (std::size_t i = 0; i < coordinates.size(); i++)
     {
@@ -1319,6 +1324,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     std::vector<std::size_t> todo_contours;
 
+    Fmi::check_cancelled();
+
     for (auto i = 0UL; i < nresults; i++)
     {
       auto hash = contour_cache_keys[i];
@@ -1354,6 +1361,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // the cache, or do the analysis and cache it.
 
     auto analysis = get_analysis(coordinates_hash, *coordinates, theOutputCRS);
+
+    Fmi::check_cancelled();
 
     // Finally we determine which grid cells are to be contoured. The mask
     // depends on the coordinates and the clipping box only, hence it is cached
@@ -1420,6 +1429,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
 
     Trax::GeometryCollections results;
 
+    Fmi::check_cancelled();
+
     if (!theOptions.isovalues.empty())
     {
       // Calculate isolines
@@ -1439,6 +1450,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::contour(std::size_t theDataHash,
     // Update results and cache
     for (auto i = 0UL; i < todo_contours.size(); i++)
     {
+      Fmi::check_cancelled();
+
       OGRGeometryPtr tmp(Trax::to_ogr_geom(results[i]).release());
 
       if (theOutputCRS.get() != nullptr)
@@ -1569,6 +1582,8 @@ std::vector<OGRGeometryPtr> Engine::Impl::crossection(
 
     for (auto icontour = 0UL; icontour < nresults; icontour++)
     {
+      Fmi::check_cancelled();
+
       // Is it an isovalue request?
       bool isovaluerequest = (icontour < theOptions.isovalues.size());
 
