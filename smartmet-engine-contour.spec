@@ -29,7 +29,7 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: libconfig17-devel
 BuildRequires: smartmet-library-gis-devel >= 26.10.16
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.16
+BuildRequires: smartmet-library-macgyver-devel >= 26.11.26
 BuildRequires: smartmet-library-trax-devel >= 26.10.16
 BuildRequires: smartmet-library-spine-devel >= 26.10.16
 BuildRequires: smartmet-library-timeseries-devel >= 26.10.16
@@ -42,7 +42,7 @@ Requires: gdal312-libs
 Requires: geos313
 Requires: smartmet-library-gis >= 26.10.17
 Requires: smartmet-library-trax >= 26.10.17
-Requires: smartmet-library-macgyver >= 26.10.17
+Requires: smartmet-library-macgyver >= 26.11.26
 Requires: smartmet-library-newbase >= 26.10.17
 Requires: smartmet-library-spine >= 26.10.17
 Requires: smartmet-library-timeseries >= 26.10.16
@@ -66,7 +66,8 @@ Obsoletes: smartmet-brainstorm-contour-debuginfo < 16.11.1
 #TestRequires: smartmet-engine-querydata-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-library-spine-devel
-#TestRequires: smartmet-library-timeseries
+#TestRequires: smartmet-library-spine-devel
+#TestRequires: smartmet-library-macgyver >= 26.11.26
 #TestRequires: smartmet-library-timeseries-devel
 #TestRequires: smartmet-library-trax
 #TestRequires: smartmet-library-trax-devel
